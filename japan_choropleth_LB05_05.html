@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>LB05_05 野菜・海藻：都道府県別コロプレス</title>
+<style>
+  body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", "Meiryo", sans-serif; margin: 0; padding: 1rem; background:#fafafa; color:#222; }
+  h1 { font-size: 1.2rem; margin:.25rem 0 .75rem; }
+  #card { background:#fff; border-radius:16px; box-shadow:0 6px 20px rgba(0,0,0,.08); padding:1rem; }
+  #map { width: 100%; height: auto; }
+  .legend { font-size: 12px; margin-top:.5rem; display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; }
+  .legend-scale { height: 12px; width: 240px; border-radius:6px; background:linear-gradient(to right,#f7fbff,#08306b); }
+  .legend-axis { display:flex; justify-content:space-between; font-variant-numeric: tabular-nums; width:240px; }
+  .toolbar { display:flex; gap:.5rem; align-items:center; flex-wrap:wrap; margin-bottom:.5rem; }
+  select, input[type="number"] { border:1px solid #ddd; border-radius:10px; padding:.35rem .5rem; background:#fcfcfc; }
+  .pill { display:inline-flex; gap:.35rem; align-items:center; background:#f1f5f9; color:#0f172a; padding:.3rem .5rem; border-radius:999px; font-size:12px; }
+  .tooltip { position:absolute; pointer-events:none; background:rgba(0,0,0,.78); color:#fff; padding:.35rem .5rem; font-size:12px; border-radius:8px; transform: translate(-50%, calc(-100% - 10px)); white-space:nowrap; }
+  .foot { font-size:12px; color:#555; margin-top:.5rem; }
+</style>
+</head>
+<body>
+  <h1>LB05_05 野菜・海藻：都道府県別コロプレス（D3.js v7）</h1>
+  <div class="toolbar">
+    <label>カラースキーム
+      <select id="scheme">
+        <option value="Blues" selected>Blues（青）</option>
+        <option value="Reds">Reds（赤）</option>
+        <option value="Greens">Greens（緑）</option>
+        <option value="Purples">Purples（紫）</option>
+        <option value="Oranges">Oranges（橙）</option>
+        <option value="Viridis">Viridis（連続）</option>
+        <option value="Magma">Magma（連続）</option>
+        <option value="Plasma">Plasma（連続）</option>
+        <option value="Cividis">Cividis（連続）</option>
+      </select>
+    </label>
+    <label>段階数
+      <input id="steps" type="number" min="3" max="9" value="7">
+    </label>
+    <span class="pill">データ列: LB05_05 野菜・海藻</span>
+  </div>
+  <div id="card">
+    <svg id="map" viewBox="0 0 1100 1100" preserveAspectRatio="xMidYMid meet"></svg>
+    <div class="legend">
+      <span class="pill">値の高低</span>
+      <div class="legend-scale" id="legendScale"></div>
+      <div class="legend-axis"><span id="legendMin">0</span><span id="legendMid">—</span><span id="legendMax">0</span></div>
+    </div>
+    <div class="foot">境界データ: dataofjapan/land（japan.geojson）を取得。シート: <b>Sheet1</b> ・ 都道府県列: <b>2022-2024年_都道府県</b> ・ 値列: <b>LB05_05　野菜・海藻</b></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script>
+  const PREF_VALUES = {
+    "三重県": 95687, "京都府": 125687, "佐賀県": 98363, "兵庫県": 116512, "北海道": 105586, "千葉県": 119873, "和歌山県": 92402, "埼玉県": 123274, "大分県": 94636, "大阪府": 110546, "奈良県": 115767, "宮城県": 117275, "宮崎県": 97021, "富山県": 123352, "山口県": 94992, "山形県": 122701, "山梨県": 106399, "岐阜県": 108278, "岡山県": 95920, "岩手県": 118186, "島根県": 103768, "広島県": 98085, "徳島県": 97141, "愛媛県": 93999, "愛知県": 114325, "新潟県": 128044, "東京都": 128002, "栃木県": 110293, "沖縄県": 100109, "滋賀県": 112873, "熊本県": 99123, "石川県": 112176, "神奈川県": 125196, "福井県": 106030, "福岡県": 102860, "福島県": 115871, "秋田県": 123432, "群馬県": 108028, "茨城県": 102493, "長崎県": 106214, "長野県": 113955, "青森県": 114122, "静岡県": 118162, "香川県": 92311, "高知県": 91226, "鳥取県": 96833, "鹿児島県": 97247
+  };
+
+  const NAME_KEYS = ["name_ja","nam_ja","N03_001","name","pref","nam","県名","都道府県"];
+
+  (async function() {
+    const svg = d3.select("#map");
+    const g = svg.append("g");
+    const tooltip = d3.select("body").append("div").attr("class","tooltip").style("opacity",0);
+
+    const discreteSchemes = {
+      Blues: d3.schemeBlues,
+      Reds: d3.schemeReds,
+      Greens: d3.schemeGreens,
+      Purples: d3.schemePurples,
+      Oranges: d3.schemeOranges
+    };
+    const continuousInterpolators = {
+      Viridis: d3.interpolateViridis,
+      Magma: d3.interpolateMagma,
+      Plasma: d3.interpolatePlasma,
+      Cividis: d3.interpolateCividis
+    };
+
+    const schemeSel = document.getElementById("scheme");
+    const stepsInput = document.getElementById("steps");
+    const legendScale = document.getElementById("legendScale");
+    const legendMin = document.getElementById("legendMin");
+    const legendMid = document.getElementById("legendMid");
+    const legendMax = document.getElementById("legendMax");
+
+    // Fetch GeoJSON
+    const url = "https://raw.githubusercontent.com/dataofjapan/land/master/japan.geojson";
+    let geo;
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("GeoJSON fetch failed");
+      geo = await res.json();
+    } catch(e) {
+      alert("境界データの取得に失敗しました。ネットワークをご確認ください。\n"+e);
+      return;
+    }
+
+    function pickName(props) {
+      for (const k of NAME_KEYS) {
+        if (props && Object.prototype.hasOwnProperty.call(props,k) && props[k]) return props[k];
+      }
+      for (const [k,v] of Object.entries(props||{})) if (typeof v==="string" && v) return v;
+      return "(不明)";
+    }
+
+    const projection = d3.geoMercator().fitSize([1100,1100], geo);
+    const path = d3.geoPath(projection);
+
+    const features = geo.type==="FeatureCollection" ? geo.features : [];
+    const values = Object.values(PREF_VALUES).filter(v => Number.isFinite(v));
+    const vmin = d3.min(values), vmax = d3.max(values);
+
+    const paths = g.selectAll("path")
+      .data(features)
+      .enter().append("path")
+      .attr("d", path)
+      .attr("fill", "#e2e8f0")
+      .attr("stroke", "#334155")
+      .attr("stroke-width", 0.6)
+      .attr("vector-effect","non-scaling-stroke")
+      .on("mousemove", (event, d) => {
+        const nm = pickName(d.properties);
+        const v = PREF_VALUES[nm];
+        tooltip.style("opacity",1).style("left", event.pageX+"px").style("top",(event.pageY-12)+"px")
+          .html(`${nm}<br><b>${(v!=null && !Number.isNaN(v)) ? v : "—"}`);
+      })
+      .on("mouseleave", () => tooltip.style("opacity",0));
+
+    const zoom = d3.zoom().scaleExtent([1,8]).on("zoom", (ev)=> g.attr("transform", ev.transform));
+    svg.call(zoom);
+
+    function updateLegend([mn,mx], interpolator, isContinuous) {
+      legendMin.textContent = mn.toLocaleString();
+      legendMax.textContent = mx.toLocaleString();
+      legendMid.textContent = ((mn+mx)/2).toLocaleString();
+      if (isContinuous) {
+        const stops = 100;
+        const cvs = document.createElement("canvas");
+        cvs.width = stops; cvs.height = 1;
+        const ctx = cvs.getContext("2d");
+        for (let i=0;i<stops;i++) {
+          ctx.fillStyle = d3.rgb(interpolator(i/(stops-1))).formatHex();
+          ctx.fillRect(i,0,1,1);
+        }
+        legendScale.style.backgroundImage = `url(${cvs.toDataURL()})`;
+        legendScale.style.backgroundSize = "100% 100%";
+      } else {
+        const k = Math.max(3, Math.min(9, +stepsInput.value || 7));
+        const scheme = discreteSchemes[schemeSel.value] ?? d3.schemeBlues;
+        const palette = (scheme[k] || scheme[scheme.length-1]);
+        const parts = palette.map((c,i,arr)=>{
+          const s=(i/arr.length)*100, e=((i+1)/arr.length)*100;
+          return `${c} ${s}%, ${c} ${e}%`;
+        }).join(", ");
+        legendScale.style.backgroundImage = `linear-gradient(to right, ${parts})`;
+      }
+    }
+
+    function recolor() {
+      const domain = [vmin, vmax];
+      const scheme = schemeSel.value;
+      if (Object.hasOwn(continuousInterpolators, scheme)) {
+        const interp = continuousInterpolators[scheme];
+        const scale = d3.scaleSequential(interp).domain(domain);
+        paths.transition().duration(400).attr("fill", d => {
+          const v = PREF_VALUES[pickName(d.properties)];
+          return Number.isFinite(v) ? scale(v) : "#e2e8f0";
+        });
+        updateLegend(domain, interp, true);
+      } else {
+        const k = Math.max(3, Math.min(9, +stepsInput.value || 7));
+        const schemeArr = (discreteSchemes[scheme] ?? d3.schemeBlues);
+        const palette = (schemeArr[k] || schemeArr[schemeArr.length-1]);
+        const scale = d3.scaleQuantize().domain(domain).range(palette);
+        paths.transition().duration(400).attr("fill", d => {
+          const v = PREF_VALUES[pickName(d.properties)];
+          return Number.isFinite(v) ? scale(v) : "#e2e8f0";
+        });
+        updateLegend(domain, null, false);
+      }
+    }
+
+    recolor();
+    schemeSel.addEventListener("change", recolor);
+    stepsInput.addEventListener("input", recolor);
+  })();
+  </script>
+</body>
+</html>
