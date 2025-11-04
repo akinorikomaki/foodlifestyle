@@ -1871,11 +1871,40 @@
     // カスタムメニュー構成を保存する変数
     let customMenuComposition = null;
     
+    // 簡単入力の値を保存する変数
+    let savedSimpleInputValues = {};
+    
     // 食品の入力モードを切り替える関数
     // 簡単入力モード ⇔ 詳細入力モードの切り替え
     let foodEntryMode = 'simple'; // 'simple' or 'detailed'
     
     function switchFoodEntryMode(mode) {
+      // 簡単入力から詳細入力に切り替える場合、簡単入力の値を保存
+      if (foodEntryMode === 'simple' && mode === 'detailed') {
+        // すべての簡単入力フィールドの値を保存
+        const simpleInputs = document.querySelectorAll('#simple-food-input input[type="number"]');
+        simpleInputs.forEach(input => {
+          savedSimpleInputValues[input.id] = input.value;
+        });
+      }
+      
+      // 詳細入力から簡単入力に戻る場合、保存された値を復元して再計算
+      if (foodEntryMode === 'detailed' && mode === 'simple') {
+        // 保存された値を復元
+        if (Object.keys(savedSimpleInputValues).length > 0) {
+          for (const [id, value] of Object.entries(savedSimpleInputValues)) {
+            const input = document.getElementById(id);
+            if (input) {
+              input.value = value;
+            }
+          }
+          // 値を復元したので、再計算を実行
+          setTimeout(() => {
+            calculateFromSimpleInput();
+          }, 100);
+        }
+      }
+      
       foodEntryMode = mode;
       const simpleDiv = document.getElementById('simple-food-input');
       const detailedDiv = document.getElementById('detailed-food-input');
@@ -2084,9 +2113,17 @@
       
       console.log('一日の野菜摂取量:', dailyVegetablesGrams.toFixed(0), 'g');
       
-      // 食品入力モードをkgに設定（値はリセットしない）
+      // 詳細入力フィールドに設定された値をkg入力モードの保存値として記録
+      for (const [ingredient, monthlyKg] of Object.entries(monthlyTotals)) {
+        const input = document.getElementById(ingredient);
+        if (input) {
+          savedFoodValues.kg[input.id] = monthlyKg.toFixed(1);
+        }
+      }
+      
+      // 食品入力モードをkgに設定
       if (typeof foodInputMode === 'undefined' || foodInputMode !== 'kg') {
-        switchFoodInputMode('kg', true); // true = 値をリセットしない
+        switchFoodInputMode('kg', true); // true = 値をリセットしない（既に設定済み）
       }
       
       // カーボン計算を実行
@@ -2112,7 +2149,22 @@
       // alert(message);
     }
     
-        function switchFoodInputMode(mode, skipValueReset = false) {
+        // 各モードの値を保存するオブジェクト
+    let savedFoodValues = {
+      kg: {},
+      money: {}
+    };
+    
+    function switchFoodInputMode(mode, skipValueReset = false) {
+      // 現在のモードの値を保存
+      if (foodInputMode) {
+        const currentMode = foodInputMode;
+        const foodInputs = document.querySelectorAll('.food-input');
+        foodInputs.forEach(input => {
+          savedFoodValues[currentMode][input.id] = input.value;
+        });
+      }
+      
       foodInputMode = mode;
       
       // トグルボタンのスタイルを更新
@@ -2139,18 +2191,18 @@
       moneyUnits.forEach(el => el.style.display = mode === 'money' ? 'inline' : 'none');
       
       // 各入力フィールドの値とプレースホルダーを切り替え
-      // skipValueReset=trueの場合は値をリセットしない（簡単入力からの計算時）
       if (!skipValueReset) {
         const foodInputs = document.querySelectorAll('.food-input');
         foodInputs.forEach(input => {
           const kgDefault = input.getAttribute('data-kg-default');
           const moneyDefault = input.getAttribute('data-money-default');
           
+          // 保存された値があればそれを使用、なければデフォルト値
           if (mode === 'kg') {
-            input.value = kgDefault;
+            input.value = savedFoodValues.kg[input.id] || kgDefault;
             input.placeholder = `例: ${kgDefault}`;
           } else {
-            input.value = moneyDefault;
+            input.value = savedFoodValues.money[input.id] || moneyDefault;
             input.placeholder = `例: ${moneyDefault}`;
           }
         });
@@ -2169,7 +2221,7 @@
         });
       }
       
-      // 再計算（skipValueReset=trueの場合は既に計算されているのでスキップ）
+      // 再計算
       if (!skipValueReset) {
         calculateCarbon();
       }
