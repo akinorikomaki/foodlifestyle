@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>対象とする人口を調査（野菜を350g以上食べる人の割合）- インタラクティブ予測</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        h2 {
+            text-align: center;
+            color: #666;
+            font-weight: normal;
+            font-size: 16px;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .gender-selector {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .scenario-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .btn {
+            padding: 8px 16px;
+            border: 2px solid #ddd;
+            background: white;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .btn:hover {
+            background: #f0f0f0;
+        }
+        .btn.active {
+            border-color: #4472C4;
+            background: #4472C4;
+            color: white;
+        }
+        .btn.bau {
+            border-color: #70AD47;
+        }
+        .btn.bau.active {
+            background: #70AD47;
+            border-color: #70AD47;
+        }
+        .btn.enhanced {
+            border-color: #5B9BD5;
+        }
+        .btn.enhanced.active {
+            background: #5B9BD5;
+            border-color: #5B9BD5;
+        }
+        .btn.decelerated {
+            border-color: #C55A11;
+        }
+        .btn.decelerated.active {
+            background: #C55A11;
+            border-color: #C55A11;
+        }
+        .reset-btn {
+            padding: 8px 16px;
+            border: 2px solid #ED7D31;
+            background: white;
+            color: #ED7D31;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .reset-btn:hover {
+            background: #ED7D31;
+            color: white;
+        }
+        .instructions {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        .area-man {
+            fill: #7B9FD4;
+            fill-opacity: 0.3;
+        }
+        .area-woman {
+            fill: #F4B084;
+            fill-opacity: 0.3;
+        }
+        .line-man {
+            fill: none;
+            stroke: #4472C4;
+            stroke-width: 2;
+        }
+        .line-man-dashed {
+            fill: none;
+            stroke: #4472C4;
+            stroke-width: 2;
+            stroke-dasharray: 5, 5;
+        }
+        .line-woman {
+            fill: none;
+            stroke: #ED7D31;
+            stroke-width: 2;
+        }
+        .line-woman-dashed {
+            fill: none;
+            stroke: #ED7D31;
+            stroke-width: 2;
+            stroke-dasharray: 5, 5;
+        }
+        .forecast-line-bau {
+            fill: none;
+            stroke: #70AD47;
+            stroke-width: 2.5;
+            stroke-dasharray: 8, 4;
+        }
+        .forecast-line-enhanced {
+            fill: none;
+            stroke: #5B9BD5;
+            stroke-width: 2.5;
+            stroke-dasharray: 8, 4;
+        }
+        .forecast-line-decelerated {
+            fill: none;
+            stroke: #C55A11;
+            stroke-width: 2.5;
+            stroke-dasharray: 8, 4;
+        }
+        .average-line {
+            stroke: #70C494;
+            stroke-width: 2;
+            stroke-dasharray: 8, 4;
+            fill: none;
+        }
+        .dot-man {
+            fill: #4472C4;
+            stroke: white;
+            stroke-width: 2;
+        }
+        .dot-woman {
+            fill: #ED7D31;
+            stroke: white;
+            stroke-width: 2;
+        }
+        .draggable-point {
+            cursor: move;
+            stroke: white;
+            stroke-width: 2;
+        }
+        .draggable-point.bau {
+            fill: #70AD47;
+        }
+        .draggable-point.enhanced {
+            fill: #5B9BD5;
+        }
+        .draggable-point.decelerated {
+            fill: #C55A11;
+        }
+        .draggable-point:hover {
+            r: 8;
+            stroke-width: 3;
+        }
+        .axis {
+            font-size: 12px;
+        }
+        .grid line {
+            stroke: #e0e0e0;
+            stroke-opacity: 0.5;
+            shape-rendering: crispEdges;
+        }
+        .grid path {
+            stroke-width: 0;
+        }
+        .legend {
+            font-size: 13px;
+        }
+        .average-label {
+            font-size: 12px;
+            fill: white;
+        }
+        .tooltip {
+            position: absolute;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            border-radius: 4px;
+            pointer-events: none;
+            opacity: 0;
+            font-size: 12px;
+        }
+        .scenario-label {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>対象とする人口を調査（野菜を350g以上食べる人の割合）</h1>
+        <h2>野菜愛好家の割合 - インタラクティブ予測ツール</h2>
+        
+        <div class="instructions">
+            シナリオを選択し、予測線上のポイントをドラッグして未来の予測を描いてください
+        </div>
+        
+        <div class="controls">
+            <div class="gender-selector">
+                <span class="scenario-label">性別:</span>
+                <button class="btn active" id="gender-man">男性</button>
+                <button class="btn" id="gender-woman">女性</button>
+            </div>
+            
+            <div class="scenario-buttons">
+                <span class="scenario-label">シナリオ:</span>
+                <button class="btn bau active" id="scenario-bau">BAU (現状維持)</button>
+                <button class="btn enhanced" id="scenario-enhanced">強化シナリオ</button>
+                <button class="btn decelerated" id="scenario-decelerated">減速シナリオ</button>
+            </div>
+            
+            <button class="reset-btn" id="reset-btn">全てリセット</button>
+        </div>
+        
+        <div id="chart"></div>
+        <div class="tooltip"></div>
+    </div>
+
+    <script>
+        // データ
+        const historicalData = {
+            man: [
+                {year: 2014, value: 33.2},
+                {year: 2015, value: 33.7},
+                {year: 2016, value: 29.3},
+                {year: 2017, value: 32.3},
+                {year: 2018, value: 30.7},
+                {year: 2019, value: 30.1},
+                {year: 2022, value: 28.9},
+                {year: 2023, value: 25.2}
+            ],
+            woman: [
+                {year: 2014, value: 29.2},
+                {year: 2015, value: 31.4},
+                {year: 2016, value: 27.2},
+                {year: 2017, value: 29.0},
+                {year: 2018, value: 27.0},
+                {year: 2019, value: 26.5},
+                {year: 2022, value: 24.8},
+                {year: 2023, value: 21.9}
+            ]
+        };
+
+        // 予測データの初期値（2024年から）
+        const forecastYears = [2024, 2030, 2040, 2050, 2060, 2070, 2080];
+        
+        // 初期予測値を生成（線形トレンドで減少）
+        const generateInitialForecast = (lastValue, trend) => {
+            return forecastYears.map((year, i) => ({
+                year: year,
+                value: Math.max(5, lastValue + trend * (i + 1))
+            }));
+        };
+
+        // 各シナリオの予測データ
+        let forecastData = {
+            man: {
+                bau: generateInitialForecast(25.2, -0.5),
+                enhanced: generateInitialForecast(25.2, 1.0),
+                decelerated: generateInitialForecast(25.2, -1.5)
+            },
+            woman: {
+                bau: generateInitialForecast(21.9, -0.5),
+                enhanced: generateInitialForecast(21.9, 1.0),
+                decelerated: generateInitialForecast(21.9, -1.5)
+            }
+        };
+
+        // 現在の選択状態
+        let currentGender = 'man';
+        let currentScenario = 'bau';
+
+        // 平均値を計算
+        const allValues = [...historicalData.man.map(d => d.value), ...historicalData.woman.map(d => d.value)];
+        const average = allValues.reduce((a, b) => a + b, 0) / allValues.length;
+
+        // データを実線用と点線用に分割
+        const splitData = (dataset) => {
+            const solid1 = dataset.filter(d => d.year <= 2019);
+            const dashed = [
+                dataset.find(d => d.year === 2019),
+                dataset.find(d => d.year === 2022)
+            ].filter(d => d);
+            const solid2 = dataset.filter(d => d.year >= 2022);
+            return { solid1, dashed, solid2 };
+        };
+
+        const manSplit = splitData(historicalData.man);
+        const womanSplit = splitData(historicalData.woman);
+
+        // 設定
+        const margin = {top: 20, right: 80, bottom: 70, left: 60};
+        const width = 1300 - margin.left - margin.right;
+        const height = 550 - margin.top - margin.bottom;
+
+        // SVG作成
+        const svg = d3.select("#chart")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        // スケール
+        const xScale = d3.scaleLinear()
+            .domain([2014, 2080])
+            .range([0, width]);
+
+        const yScale = d3.scaleLinear()
+            .domain([0, 40])
+            .range([height, 0]);
+
+        // グリッド線
+        svg.append("g")
+            .attr("class", "grid")
+            .call(d3.axisLeft(yScale)
+                .tickSize(-width)
+                .tickFormat("")
+                .ticks(8));
+
+        // X軸
+        const xAxis = d3.axisBottom(xScale)
+            .tickFormat(d3.format("d"))
+            .ticks(14);
+        
+        svg.append("g")
+            .attr("class", "axis")
+            .attr("transform", `translate(0,${height})`)
+            .call(xAxis);
+
+        // Y軸
+        const yAxis = d3.axisLeft(yScale);
+        
+        svg.append("g")
+            .attr("class", "axis")
+            .call(yAxis);
+
+        // 線とエリアの描画関数
+        const line = d3.line()
+            .x(d => xScale(d.year))
+            .y(d => yScale(d.value))
+            .curve(d3.curveMonotoneX);
+
+        const area = d3.area()
+            .x(d => xScale(d.year))
+            .y0(height)
+            .y1(d => yScale(d.value))
+            .curve(d3.curveLinear);
+
+        // 平均線
+        svg.append("line")
+            .attr("class", "average-line")
+            .attr("x1", 0)
+            .attr("x2", width)
+            .attr("y1", yScale(average))
+            .attr("y2", yScale(average));
+
+        // 平均ラベル
+        const avgLabel = svg.append("g")
+            .attr("transform", `translate(${width - 100}, ${yScale(average)})`);
+
+        avgLabel.append("rect")
+            .attr("x", -5)
+            .attr("y", -12)
+            .attr("width", 80)
+            .attr("height", 20)
+            .attr("rx", 3)
+            .attr("fill", "#70C494");
+
+        avgLabel.append("text")
+            .attr("class", "average-label")
+            .attr("x", 35)
+            .attr("y", 0)
+            .attr("text-anchor", "middle")
+            .attr("dy", "0.35em")
+            .text(`全体平均: ${average.toFixed(1)}`);
+
+        // 履歴データの描画
+        function drawHistoricalData() {
+            // 男性のエリアと線
+            if (manSplit.solid1.length > 0) {
+                svg.append("path")
+                    .datum(manSplit.solid1)
+                    .attr("class", "area-man historical-man")
+                    .attr("d", area);
+
+                svg.append("path")
+                    .datum(manSplit.solid1)
+                    .attr("class", "line-man historical-man")
+                    .attr("d", line);
+            }
+
+            if (manSplit.dashed.length > 0) {
+                svg.append("path")
+                    .datum(manSplit.dashed)
+                    .attr("class", "line-man-dashed historical-man")
+                    .attr("d", line);
+            }
+
+            if (manSplit.solid2.length > 0) {
+                svg.append("path")
+                    .datum(manSplit.solid2)
+                    .attr("class", "area-man historical-man")
+                    .attr("d", area);
+
+                svg.append("path")
+                    .datum(manSplit.solid2)
+                    .attr("class", "line-man historical-man")
+                    .attr("d", line);
+            }
+
+            // 女性のエリアと線
+            if (womanSplit.solid1.length > 0) {
+                svg.append("path")
+                    .datum(womanSplit.solid1)
+                    .attr("class", "area-woman historical-woman")
+                    .attr("d", area);
+
+                svg.append("path")
+                    .datum(womanSplit.solid1)
+                    .attr("class", "line-woman historical-woman")
+                    .attr("d", line);
+            }
+
+            if (womanSplit.dashed.length > 0) {
+                svg.append("path")
+                    .datum(womanSplit.dashed)
+                    .attr("class", "line-woman-dashed historical-woman")
+                    .attr("d", line);
+            }
+
+            if (womanSplit.solid2.length > 0) {
+                svg.append("path")
+                    .datum(womanSplit.solid2)
+                    .attr("class", "area-woman historical-woman")
+                    .attr("d", area);
+
+                svg.append("path")
+                    .datum(womanSplit.solid2)
+                    .attr("class", "line-woman historical-woman")
+                    .attr("d", line);
+            }
+
+            // データポイント
+            svg.selectAll(".dot-man")
+                .data(historicalData.man)
+                .enter()
+                .append("circle")
+                .attr("class", "dot-man historical-man")
+                .attr("cx", d => xScale(d.year))
+                .attr("cy", d => yScale(d.value))
+                .attr("r", 3);
+
+            svg.selectAll(".dot-woman")
+                .data(historicalData.woman)
+                .enter()
+                .append("circle")
+                .attr("class", "dot-woman historical-woman")
+                .attr("cx", d => xScale(d.year))
+                .attr("cy", d => yScale(d.value))
+                .attr("r", 3);
+        }
+
+        drawHistoricalData();
+
+        // 予測線の描画グループを作成
+        const forecastGroup = svg.append("g").attr("class", "forecast-group");
+
+        // 履歴データの透明度を更新する関数
+        function updateHistoricalOpacity() {
+            if (currentGender === 'man') {
+                // 男性を選択時：男性は不透明、女性は薄く
+                svg.selectAll(".historical-man").style("opacity", 1);
+                svg.selectAll(".historical-woman").style("opacity", 0.15);
+            } else {
+                // 女性を選択時：女性は不透明、男性は薄く
+                svg.selectAll(".historical-man").style("opacity", 0.15);
+                svg.selectAll(".historical-woman").style("opacity", 1);
+            }
+        }
+
+        // 初期状態の透明度を設定
+        updateHistoricalOpacity();
+
+        // 予測線を更新する関数
+        function updateForecastLines() {
+            // 既存の予測線とポイントを削除
+            forecastGroup.selectAll("*").remove();
+
+            // 全てのシナリオの予測線を描画
+            ['bau', 'enhanced', 'decelerated'].forEach(scenario => {
+                ['man', 'woman'].forEach(gender => {
+                    const lastHistorical = historicalData[gender][historicalData[gender].length - 1];
+                    const forecastDataPoints = [lastHistorical, ...forecastData[gender][scenario]];
+                    
+                    forecastGroup.append("path")
+                        .datum(forecastDataPoints)
+                        .attr("class", `forecast-line-${scenario}`)
+                        .attr("d", line)
+                        .style("opacity", (currentGender === gender && currentScenario === scenario) ? 1 : 0.2);
+                });
+            });
+
+            // 現在選択されているシナリオのドラッグ可能ポイントを描画
+            const currentForecastData = forecastData[currentGender][currentScenario];
+            
+            const drag = d3.drag()
+                .on("drag", function(event, d) {
+                    const newY = Math.max(0, Math.min(height, event.y));
+                    d.value = Math.max(0, Math.min(40, yScale.invert(newY)));
+                    
+                    d3.select(this)
+                        .attr("cy", yScale(d.value));
+                    
+                    updateForecastLines();
+                });
+
+            forecastGroup.selectAll(".draggable-point")
+                .data(currentForecastData)
+                .enter()
+                .append("circle")
+                .attr("class", `draggable-point ${currentScenario}`)
+                .attr("cx", d => xScale(d.year))
+                .attr("cy", d => yScale(d.value))
+                .attr("r", 6)
+                .call(drag)
+                .on("mouseover", function(event, d) {
+                    d3.select(".tooltip")
+                        .style("opacity", 1)
+                        .html(`${currentGender === 'man' ? '男性' : '女性'}<br>年: ${d.year}<br>予測値: ${d.value.toFixed(1)}%<br>(ドラッグして調整)`)
+                        .style("left", (event.pageX + 10) + "px")
+                        .style("top", (event.pageY - 28) + "px");
+                })
+                .on("mouseout", function() {
+                    d3.select(".tooltip").style("opacity", 0);
+                });
+        }
+
+        updateForecastLines();
+
+        // 凡例
+        const legend = svg.append("g")
+            .attr("class", "legend")
+            .attr("transform", `translate(20, ${height + 40})`);
+
+        let legendX = 0;
+
+        // 男性の凡例
+        legend.append("line")
+            .attr("x1", legendX)
+            .attr("x2", legendX + 30)
+            .attr("y1", 0)
+            .attr("y2", 0)
+            .attr("stroke", "#4472C4")
+            .attr("stroke-width", 2);
+
+        legend.append("text")
+            .attr("x", legendX + 35)
+            .attr("y", 0)
+            .attr("dy", "0.35em")
+            .text("男性");
+
+        legendX += 100;
+
+        // 女性の凡例
+        legend.append("line")
+            .attr("x1", legendX)
+            .attr("x2", legendX + 30)
+            .attr("y1", 0)
+            .attr("y2", 0)
+            .attr("stroke", "#ED7D31")
+            .attr("stroke-width", 2);
+
+        legend.append("text")
+            .attr("x", legendX + 35)
+            .attr("y", 0)
+            .attr("dy", "0.35em")
+            .text("女性");
+
+        legendX += 150;
+
+        // シナリオの凡例
+        const scenarios = [
+            {key: 'bau', label: 'BAU', color: '#70AD47'},
+            {key: 'enhanced', label: '強化', color: '#5B9BD5'},
+            {key: 'decelerated', label: '減速', color: '#C55A11'}
+        ];
+
+        scenarios.forEach(scenario => {
+            legend.append("line")
+                .attr("x1", legendX)
+                .attr("x2", legendX + 30)
+                .attr("y1", 0)
+                .attr("y2", 0)
+                .attr("stroke", scenario.color)
+                .attr("stroke-width", 2.5)
+                .attr("stroke-dasharray", "8, 4");
+
+            legend.append("text")
+                .attr("x", legendX + 35)
+                .attr("y", 0)
+                .attr("dy", "0.35em")
+                .text(scenario.label);
+
+            legendX += 120;
+        });
+
+        // ボタンのイベントハンドラ
+        d3.select("#gender-man").on("click", function() {
+            currentGender = 'man';
+            d3.selectAll(".gender-selector .btn").classed("active", false);
+            d3.select(this).classed("active", true);
+            updateHistoricalOpacity();
+            updateForecastLines();
+        });
+
+        d3.select("#gender-woman").on("click", function() {
+            currentGender = 'woman';
+            d3.selectAll(".gender-selector .btn").classed("active", false);
+            d3.select(this).classed("active", true);
+            updateHistoricalOpacity();
+            updateForecastLines();
+        });
+
+        d3.select("#scenario-bau").on("click", function() {
+            currentScenario = 'bau';
+            d3.selectAll(".scenario-buttons .btn").classed("active", false);
+            d3.select(this).classed("active", true);
+            updateForecastLines();
+        });
+
+        d3.select("#scenario-enhanced").on("click", function() {
+            currentScenario = 'enhanced';
+            d3.selectAll(".scenario-buttons .btn").classed("active", false);
+            d3.select(this).classed("active", true);
+            updateForecastLines();
+        });
+
+        d3.select("#scenario-decelerated").on("click", function() {
+            currentScenario = 'decelerated';
+            d3.selectAll(".scenario-buttons .btn").classed("active", false);
+            d3.select(this).classed("active", true);
+            updateForecastLines();
+        });
+
+        d3.select("#reset-btn").on("click", function() {
+            forecastData = {
+                man: {
+                    bau: generateInitialForecast(25.2, -0.5),
+                    enhanced: generateInitialForecast(25.2, 1.0),
+                    decelerated: generateInitialForecast(25.2, -1.5)
+                },
+                woman: {
+                    bau: generateInitialForecast(21.9, -0.5),
+                    enhanced: generateInitialForecast(21.9, 1.0),
+                    decelerated: generateInitialForecast(21.9, -1.5)
+                }
+            };
+            updateForecastLines();
+        });
+    </script>
+</body>
+</html>
