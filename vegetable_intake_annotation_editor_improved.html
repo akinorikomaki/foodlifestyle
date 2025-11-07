@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>対象とする人口を調査（野菜を350g以上食べる人の割合）- インタラクティブ予測</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        h2 {
+            text-align: center;
+            color: #666;
+            font-weight: normal;
+            font-size: 16px;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .gender-selector {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .scenario-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .save-load-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .btn {
+            padding: 8px 16px;
+            border: 2px solid #ddd;
+            background: white;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .btn:hover {
+            background: #f0f0f0;
+        }
+        .btn.active {
+            border-color: #4472C4;
+            background: #4472C4;
+            color: white;
+        }
+        .btn.bau {
+            border-color: #70AD47;
+        }
+        .btn.bau.active {
+            background: #70AD47;
+            border-color: #70AD47;
+        }
+        .btn.enhanced {
+            border-color: #5B9BD5;
+        }
+        .btn.enhanced.active {
+            background: #5B9BD5;
+            border-color: #5B9BD5;
+        }
+        .btn.decelerated {
+            border-color: #C55A11;
+        }
+        .btn.decelerated.active {
+            background: #C55A11;
+            border-color: #C55A11;
+        }
+        .reset-btn {
+            padding: 8px 16px;
+            border: 2px solid #ED7D31;
+            background: white;
+            color: #ED7D31;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .reset-btn:hover {
+            background: #ED7D31;
+            color: white;
+        }
+        .save-btn {
+            padding: 8px 16px;
+            border: 2px solid #70AD47;
+            background: white;
+            color: #70AD47;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .save-btn:hover {
+            background: #70AD47;
+            color: white;
+        }
+        .load-btn {
+            padding: 8px 16px;
+            border: 2px solid #5B9BD5;
+            background: white;
+            color: #5B9BD5;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .load-btn:hover {
+            background: #5B9BD5;
+            color: white;
+        }
+        .annotation-btn {
+            padding: 8px 16px;
+            border: 2px solid #9B59B6;
+            background: white;
+            color: #9B59B6;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .annotation-btn:hover {
+            background: #9B59B6;
+            color: white;
+        }
+        .file-input {
+            display: none;
+        }
+        .instructions {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        #chart {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .area-man {
+            fill: #7B9FD4;
+            fill-opacity: 0.3;
+        }
+        .area-woman {
+            fill: #F4B084;
+            fill-opacity: 0.3;
+        }
+        .line-man {
+            fill: none;
+            stroke: #4472C4;
+            stroke-width: 2;
+        }
+        .line-man-dashed {
+            fill: none;
+            stroke: #4472C4;
+            stroke-width: 2;
+            stroke-dasharray: 5, 5;
+        }
+        .line-woman {
+            fill: none;
+            stroke: #ED7D31;
+            stroke-width: 2;
+        }
+        .line-woman-dashed {
+            fill: none;
+            stroke: #ED7D31;
+            stroke-width: 2;
+            stroke-dasharray: 5, 5;
+        }
+        .forecast-line-bau {
+            fill: none;
+            stroke: #70AD47;
+            stroke-width: 2.5;
+            stroke-dasharray: 8, 4;
+        }
+        .forecast-line-enhanced {
+            fill: none;
+            stroke: #5B9BD5;
+            stroke-width: 2.5;
+            stroke-dasharray: 8, 4;
+        }
+        .forecast-line-decelerated {
+            fill: none;
+            stroke: #C55A11;
+            stroke-width: 2.5;
+            stroke-dasharray: 8, 4;
+        }
+        .dot-man {
+            fill: #4472C4;
+            stroke: white;
+            stroke-width: 2;
+        }
+        .dot-woman {
+            fill: #ED7D31;
+            stroke: white;
+            stroke-width: 2;
+        }
+        .draggable-point {
+            cursor: move;
+            stroke: white;
+            stroke-width: 2;
+        }
+        .draggable-point.bau {
+            fill: #70AD47;
+        }
+        .draggable-point.enhanced {
+            fill: #5B9BD5;
+        }
+        .draggable-point.decelerated {
+            fill: #C55A11;
+        }
+        .draggable-point:hover {
+            r: 8;
+            stroke-width: 3;
+        }
+        .axis {
+            font-size: 12px;
+        }
+        .grid line {
+            stroke: #e0e0e0;
+            stroke-opacity: 0.5;
+            shape-rendering: crispEdges;
+        }
+        .axis line {
+            stroke: #666;
+        }
+        .axis path {
+            stroke: #666;
+        }
+        .legend-item {
+            cursor: pointer;
+        }
+        .legend-text {
+            font-size: 12px;
+        }
+        .annotation-group {
+            cursor: pointer;
+        }
+        .annotation-line {
+            stroke: #9B59B6;
+            stroke-width: 1.5;
+            stroke-dasharray: 3, 3;
+        }
+        .annotation-label-bg {
+            fill: white;
+            fill-opacity: 0.9;
+            stroke: #9B59B6;
+            stroke-width: 1;
+        }
+        .annotation-label-text {
+            fill: #9B59B6;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .annotation-comment-bg {
+            fill: white;
+            fill-opacity: 0.95;
+            stroke: #9B59B6;
+            stroke-width: 1;
+        }
+        .annotation-comment-text {
+            fill: #333;
+            font-size: 10px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 500px;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .modal-header h3 {
+            margin: 0;
+            color: #333;
+        }
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover,
+        .close:focus {
+            color: #000;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .modal-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .modal-btn.cancel {
+            background: #ddd;
+            color: #333;
+        }
+        .modal-btn.cancel:hover {
+            background: #ccc;
+        }
+        .modal-btn.delete {
+            background: #ED7D31;
+            color: white;
+        }
+        .modal-btn.delete:hover {
+            background: #d66a25;
+        }
+        .modal-btn.save {
+            background: #9B59B6;
+            color: white;
+        }
+        .modal-btn.save:hover {
+            background: #8E44AD;
+        }
+        .message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 4px;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            z-index: 2000;
+            display: none;
+            animation: slideIn 0.3s ease-out;
+        }
+        .message.success {
+            border-left: 4px solid #70AD47;
+            color: #70AD47;
+        }
+        .message.error {
+            border-left: 4px solid #ED7D31;
+            color: #ED7D31;
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>対象とする人口を調査（野菜を350g以上食べる人の割合）</h1>
+        <h2>インタラクティブ予測エディタ - シナリオ別アノテーション対応版</h2>
+        
+        <div class="instructions">
+            ドラッグして予測値を調整 | クリックしてアノテーションを追加
+        </div>
+        
+        <div class="controls">
+            <div class="gender-selector">
+                <button id="gender-man" class="btn active">男性</button>
+                <button id="gender-woman" class="btn">女性</button>
+            </div>
+            
+            <div class="scenario-buttons">
+                <button id="scenario-bau" class="btn bau active">BAU</button>
+                <button id="scenario-enhanced" class="btn enhanced">Enhanced</button>
+                <button id="scenario-decelerated" class="btn decelerated">Decelerated</button>
+            </div>
+            
+            <div class="save-load-controls">
+                <button id="reset-btn" class="reset-btn">リセット</button>
+                <button id="save-btn" class="save-btn">保存</button>
+                <button id="load-btn" class="load-btn">読込</button>
+                <button id="add-annotation-btn" class="annotation-btn">アノテーション追加</button>
+            </div>
+        </div>
+        
+        <input type="file" id="file-input" class="file-input" accept=".json">
+        
+        <div id="chart"></div>
+    </div>
+
+    <div id="annotation-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">アノテーション追加</h3>
+                <span class="close">&times;</span>
+            </div>
+            
+            <div class="form-group">
+                <label for="ann-year">年 (2010-2080):</label>
+                <input type="number" id="ann-year" min="2010" max="2080" value="2020">
+            </div>
+            
+            <div class="form-group">
+                <label for="ann-target">対象 (性別):</label>
+                <select id="ann-target">
+                    <option value="both">両方</option>
+                    <option value="man">男性のみ</option>
+                    <option value="woman">女性のみ</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="ann-scenario">シナリオ:</label>
+                <select id="ann-scenario">
+                    <option value="all">全シナリオ</option>
+                    <option value="bau">BAU</option>
+                    <option value="enhanced">Enhanced</option>
+                    <option value="decelerated">Decelerated</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="ann-label">ラベル:</label>
+                <input type="text" id="ann-label" placeholder="例: 減少傾向の加速">
+            </div>
+            
+            <div class="form-group">
+                <label for="ann-comment">コメント:</label>
+                <textarea id="ann-comment" placeholder="例: 食生活の多様化と外食の増加"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="ann-position">ラベル位置:</label>
+                <select id="ann-position">
+                    <option value="top-right">右上</option>
+                    <option value="top-left">左上</option>
+                    <option value="bottom-right">右下</option>
+                    <option value="bottom-left">左下</option>
+                </select>
+            </div>
+            
+            <div class="modal-buttons">
+                <button id="modal-cancel-btn" class="modal-btn cancel">キャンセル</button>
+                <button id="modal-delete-btn" class="modal-btn delete" style="display: none;">削除</button>
+                <button id="modal-save-btn" class="modal-btn save">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="message" class="message"></div>
+
+    <script>
+        // データ定義
+        const historicalData = {
+            man: [
+                {year: 2010, value: 28.4},
+                {year: 2011, value: 28.6},
+                {year: 2012, value: 28.0},
+                {year: 2013, value: 28.0},
+                {year: 2014, value: 27.9},
+                {year: 2015, value: 27.3},
+                {year: 2016, value: 27.4},
+                {year: 2017, value: 26.7},
+                {year: 2018, value: 26.5},
+                {year: 2019, value: 25.2}
+            ],
+            woman: [
+                {year: 2010, value: 25.0},
+                {year: 2011, value: 24.6},
+                {year: 2012, value: 25.1},
+                {year: 2013, value: 25.6},
+                {year: 2014, value: 25.5},
+                {year: 2015, value: 24.7},
+                {year: 2016, value: 24.5},
+                {year: 2017, value: 23.7},
+                {year: 2018, value: 23.3},
+                {year: 2019, value: 21.9}
+            ]
+        };
+
+        // 初期予測値生成関数
+        function generateInitialForecastKeys(startValue, changeRate) {
+            const years = [2020, 2025, 2030, 2035, 2040, 2045, 2050, 2055, 2060, 2065, 2070, 2075, 2080];
+            return years.map((year, i) => ({
+                year: year,
+                value: Math.max(0, Math.min(100, startValue + (changeRate * (i + 1))))
+            }));
+        }
+
+        // キーポイントから全年度の予測データを生成
+        function interpolateForecast(keyPoints) {
+            const result = [];
+            for (let i = 0; i < keyPoints.length - 1; i++) {
+                const start = keyPoints[i];
+                const end = keyPoints[i + 1];
+                const yearDiff = end.year - start.year;
+                const valueDiff = end.value - start.value;
+                
+                for (let year = start.year; year < end.year; year++) {
+                    const t = (year - start.year) / yearDiff;
+                    result.push({
+                        year: year,
+                        value: start.value + valueDiff * t
+                    });
+                }
+            }
+            result.push(keyPoints[keyPoints.length - 1]);
+            return result;
+        }
+
+        // 状態管理
+        let currentGender = 'man';
+        let currentScenario = 'bau';
+        let forecastKeyPoints = {
+            man: {
+                bau: generateInitialForecastKeys(25.2, -0.1),
+                enhanced: generateInitialForecastKeys(25.2, 0.4),
+                decelerated: generateInitialForecastKeys(25.2, -0.3)
+            },
+            woman: {
+                bau: generateInitialForecastKeys(21.9, -0.1),
+                enhanced: generateInitialForecastKeys(21.9, 0.4),
+                decelerated: generateInitialForecastKeys(21.9, -0.3)
+            }
+        };
+
+        let annotations = [
+            {
+                id: 1,
+                year: 2014,
+                target: 'both',
+                scenario: 'all',
+                label: "減少傾向の加速",
+                comment: "食生活の多様化と\n外食の増加",
+                position: "top-right"
+            }
+        ];
+        let nextAnnotationId = 2;
+
+        // グラフ設定
+        const margin = {top: 60, right: 180, bottom: 60, left: 80};
+        const width = 1600 - margin.left - margin.right;
+        const height = 600 - margin.top - margin.bottom;
+
+        const svg = d3.select("#chart")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        // スケール設定
+        const xScale = d3.scaleLinear()
+            .domain([2010, 2080])
+            .range([0, width]);
+
+        const yScale = d3.scaleLinear()
+            .domain([0, 40])
+            .range([height, 0]);
+
+        // グリッド
+        svg.append("g")
+            .attr("class", "grid")
+            .attr("transform", `translate(0,${height})`)
+            .call(d3.axisBottom(xScale)
+                .tickSize(-height)
+                .tickFormat("")
+                .ticks(14));
+
+        svg.append("g")
+            .attr("class", "grid")
+            .call(d3.axisLeft(yScale)
+                .tickSize(-width)
+                .tickFormat("")
+                .ticks(8));
+
+        // 軸
+        svg.append("g")
+            .attr("class", "axis")
+            .attr("transform", `translate(0,${height})`)
+            .call(d3.axisBottom(xScale).tickFormat(d3.format("d")).ticks(14));
+
+        svg.append("g")
+            .attr("class", "axis")
+            .call(d3.axisLeft(yScale).ticks(8));
+
+        // 軸ラベル
+        svg.append("text")
+            .attr("transform", `translate(${width/2},${height + 45})`)
+            .style("text-anchor", "middle")
+            .style("font-size", "14px")
+            .text("年");
+
+        svg.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", -60)
+            .attr("x", -height/2)
+            .style("text-anchor", "middle")
+            .style("font-size", "14px")
+            .text("野菜を350g以上食べる人の割合 (%)");
+
+        // エリア・ライン生成関数
+        const areaMan = d3.area()
+            .x(d => xScale(d.year))
+            .y0(height)
+            .y1(d => yScale(d.value))
+            .curve(d3.curveMonotoneX);
+
+        const areaWoman = d3.area()
+            .x(d => xScale(d.year))
+            .y0(height)
+            .y1(d => yScale(d.value))
+            .curve(d3.curveMonotoneX);
+
+        const lineMan = d3.line()
+            .x(d => xScale(d.year))
+            .y(d => yScale(d.value))
+            .curve(d3.curveMonotoneX);
+
+        const lineWoman = d3.line()
+            .x(d => xScale(d.year))
+            .y(d => yScale(d.value))
+            .curve(d3.curveMonotoneX);
+
+        // 歴史データ描画
+        svg.append("path")
+            .datum(historicalData.man)
+            .attr("class", "area-man")
+            .attr("d", areaMan);
+
+        svg.append("path")
+            .datum(historicalData.woman)
+            .attr("class", "area-woman")
+            .attr("d", areaWoman);
+
+        svg.append("path")
+            .datum(historicalData.man.slice(0, -1))
+            .attr("class", "line-man")
+            .attr("d", lineMan);
+
+        svg.append("path")
+            .datum(historicalData.man.slice(-2))
+            .attr("class", "line-man-dashed")
+            .attr("d", lineMan);
+
+        svg.append("path")
+            .datum(historicalData.woman.slice(0, -1))
+            .attr("class", "line-woman")
+            .attr("d", lineWoman);
+
+        svg.append("path")
+            .datum(historicalData.woman.slice(-2))
+            .attr("class", "line-woman-dashed")
+            .attr("d", lineWoman);
+
+        // 歴史データのドット
+        svg.selectAll(".dot-man")
+            .data(historicalData.man)
+            .enter()
+            .append("circle")
+            .attr("class", "dot-man")
+            .attr("cx", d => xScale(d.year))
+            .attr("cy", d => yScale(d.value))
+            .attr("r", 4);
+
+        svg.selectAll(".dot-woman")
+            .data(historicalData.woman)
+            .enter()
+            .append("circle")
+            .attr("class", "dot-woman")
+            .attr("cx", d => xScale(d.year))
+            .attr("cy", d => yScale(d.value))
+            .attr("r", 4);
+
+        // 予測ライングループ
+        const forecastLinesGroup = svg.append("g").attr("class", "forecast-lines");
+        const draggablePointsGroup = svg.append("g").attr("class", "draggable-points");
+
+        // 予測ライン更新関数
+        function updateForecastLines() {
+            const scenarios = ['bau', 'enhanced', 'decelerated'];
+            const genders = ['man', 'woman'];
+
+            forecastLinesGroup.selectAll("*").remove();
+            draggablePointsGroup.selectAll("*").remove();
+
+            scenarios.forEach(scenario => {
+                genders.forEach(gender => {
+                    const keys = forecastKeyPoints[gender][scenario];
+                    const fullData = interpolateForecast(keys);
+                    const lineFunc = gender === 'man' ? lineMan : lineWoman;
+                    
+                    const isVisible = scenario === currentScenario && 
+                                    (currentGender === gender || currentGender === 'both');
+
+                    forecastLinesGroup.append("path")
+                        .datum(fullData)
+                        .attr("class", `forecast-line-${scenario}`)
+                        .attr("d", lineFunc)
+                        .style("opacity", isVisible ? 1 : 0.15);
+                });
+            });
+
+            // ドラッグ可能なポイントを追加
+            const currentKeys = forecastKeyPoints[currentGender][currentScenario];
+            
+            const drag = d3.drag()
+                .on("drag", function(event, d) {
+                    const newY = Math.max(0, Math.min(height, event.y));
+                    const newValue = yScale.invert(newY);
+                    d.value = Math.max(0, Math.min(100, newValue));
+                    
+                    d3.select(this)
+                        .attr("cy", yScale(d.value));
+                    
+                    updateForecastLines();
+                });
+
+            draggablePointsGroup.selectAll(".draggable-point")
+                .data(currentKeys)
+                .enter()
+                .append("circle")
+                .attr("class", `draggable-point ${currentScenario}`)
+                .attr("cx", d => xScale(d.year))
+                .attr("cy", d => yScale(d.value))
+                .attr("r", 6)
+                .call(drag);
+        }
+
+        // 歴史データの透明度更新
+        function updateHistoricalOpacity() {
+            const manOpacity = (currentGender === 'man' || currentGender === 'both') ? 1 : 0.3;
+            const womanOpacity = (currentGender === 'woman' || currentGender === 'both') ? 1 : 0.3;
+
+            svg.selectAll(".area-man, .line-man, .line-man-dashed, .dot-man")
+                .transition()
+                .duration(300)
+                .style("opacity", manOpacity);
+
+            svg.selectAll(".area-woman, .line-woman, .line-woman-dashed, .dot-woman")
+                .transition()
+                .duration(300)
+                .style("opacity", womanOpacity);
+        }
+
+        // アノテーション描画
+        const annotationsGroup = svg.append("g").attr("class", "annotations");
+
+        function drawAnnotations() {
+            annotationsGroup.selectAll("*").remove();
+
+            // 現在のシナリオと性別に基づいてアノテーションをフィルタリング
+            const filteredAnnotations = annotations.filter(ann => {
+                const scenarioMatch = ann.scenario === 'all' || ann.scenario === currentScenario;
+                const targetMatch = ann.target === 'both' || 
+                                  ann.target === currentGender ||
+                                  currentGender === 'both';
+                return scenarioMatch && targetMatch;
+            });
+
+            filteredAnnotations.forEach(ann => {
+                const x = xScale(ann.year);
+                const y = yScale(20);
+
+                const group = annotationsGroup.append("g")
+                    .attr("class", "annotation-group")
+                    .on("click", () => editAnnotation(ann.id));
+
+                // 縦線
+                group.append("line")
+                    .attr("class", "annotation-line")
+                    .attr("x1", x)
+                    .attr("y1", 0)
+                    .attr("x2", x)
+                    .attr("y2", height);
+
+                // ラベル
+                const labelPadding = 5;
+                const labelX = ann.position.includes('right') ? x + 10 : x - 10;
+                const labelY = ann.position.includes('top') ? 20 : height - 60;
+
+                const labelText = group.append("text")
+                    .attr("class", "annotation-label-text")
+                    .attr("x", labelX)
+                    .attr("y", labelY)
+                    .attr("text-anchor", ann.position.includes('right') ? "start" : "end")
+                    .text(ann.label);
+
+                const labelBBox = labelText.node().getBBox();
+                group.insert("rect", "text")
+                    .attr("class", "annotation-label-bg")
+                    .attr("x", labelBBox.x - labelPadding)
+                    .attr("y", labelBBox.y - labelPadding)
+                    .attr("width", labelBBox.width + labelPadding * 2)
+                    .attr("height", labelBBox.height + labelPadding * 2)
+                    .attr("rx", 3);
+
+                // コメント
+                const commentLines = ann.comment.split('\n');
+                const commentY = labelY + 20;
+                const commentGroup = group.append("g");
+
+                commentLines.forEach((line, i) => {
+                    commentGroup.append("text")
+                        .attr("class", "annotation-comment-text")
+                        .attr("x", labelX)
+                        .attr("y", commentY + i * 12)
+                        .attr("text-anchor", ann.position.includes('right') ? "start" : "end")
+                        .text(line);
+                });
+
+                const commentBBox = commentGroup.node().getBBox();
+                commentGroup.insert("rect", "text")
+                    .attr("class", "annotation-comment-bg")
+                    .attr("x", commentBBox.x - labelPadding)
+                    .attr("y", commentBBox.y - labelPadding)
+                    .attr("width", commentBBox.width + labelPadding * 2)
+                    .attr("height", commentBBox.height + labelPadding * 2)
+                    .attr("rx", 3);
+            });
+        }
+
+        // 凡例
+        const legend = svg.append("g")
+            .attr("class", "legend")
+            .attr("transform", `translate(${width + 20}, 0)`);
+
+        const legendData = [
+            {label: "男性（実績）", color: "#4472C4", y: 0},
+            {label: "女性（実績）", color: "#ED7D31", y: 25},
+            {label: "BAU", color: "#70AD47", y: 60},
+            {label: "Enhanced", color: "#5B9BD5", y: 85},
+            {label: "Decelerated", color: "#C55A11", y: 110}
+        ];
+
+        legendData.forEach(item => {
+            const g = legend.append("g")
+                .attr("class", "legend-item")
+                .attr("transform", `translate(0, ${item.y})`);
+
+            g.append("line")
+                .attr("x1", 0)
+                .attr("x2", 30)
+                .attr("y1", 0)
+                .attr("y2", 0)
+                .attr("stroke", item.color)
+                .attr("stroke-width", 2)
+                .style("stroke-dasharray", item.y >= 60 ? "8,4" : "0");
+
+            g.append("text")
+                .attr("class", "legend-text")
+                .attr("x", 35)
+                .attr("y", 4)
+                .text(item.label);
+        });
+
+        // メッセージ表示
+        function showMessage(text, type) {
+            const message = d3.select("#message");
+            message.text(text)
+                .attr("class", `message ${type}`)
+                .style("display", "block");
+            
+            setTimeout(() => {
+                message.style("display", "none");
+            }, 3000);
+        }
+
+        // モーダル関連
+        const modal = document.getElementById('annotation-modal');
+        let currentEditingAnnotationId = null;
+
+        function showModal() {
+            modal.style.display = 'block';
+        }
+
+        function hideModal() {
+            modal.style.display = 'none';
+            currentEditingAnnotationId = null;
+            document.getElementById('modal-title').textContent = 'アノテーション追加';
+            document.getElementById('modal-delete-btn').style.display = 'none';
+            document.getElementById('ann-year').value = 2020;
+            document.getElementById('ann-target').value = 'both';
+            document.getElementById('ann-scenario').value = 'all';
+            document.getElementById('ann-label').value = '';
+            document.getElementById('ann-comment').value = '';
+            document.getElementById('ann-position').value = 'top-right';
+        }
+
+        document.querySelector('.close').onclick = hideModal;
+
+        d3.select("#add-annotation-btn").on("click", function() {
+            currentEditingAnnotationId = null;
+            showModal();
+        });
+
+        function editAnnotation(id) {
+            const ann = annotations.find(a => a.id === id);
+            if (ann) {
+                currentEditingAnnotationId = id;
+                document.getElementById('modal-title').textContent = 'アノテーション編集';
+                document.getElementById('modal-delete-btn').style.display = 'inline-block';
+                document.getElementById('ann-year').value = ann.year;
+                document.getElementById('ann-target').value = ann.target;
+                document.getElementById('ann-scenario').value = ann.scenario || 'all';
+                document.getElementById('ann-label').value = ann.label;
+                document.getElementById('ann-comment').value = ann.comment;
+                document.getElementById('ann-position').value = ann.position;
+                showModal();
+            }
+        }
+
+        function deleteAnnotation(id) {
+            const index = annotations.findIndex(a => a.id === id);
+            if (index !== -1) {
+                annotations.splice(index, 1);
+                drawAnnotations();
+                showMessage('アノテーションを削除しました', 'success');
+            }
+        }
+
+        // モーダルのボタン
+        document.getElementById('modal-cancel-btn').onclick = hideModal;
+        
+        document.getElementById('modal-delete-btn').onclick = function() {
+            if (currentEditingAnnotationId) {
+                deleteAnnotation(currentEditingAnnotationId);
+                hideModal();
+            }
+        };
+        
+        document.getElementById('modal-save-btn').onclick = function() {
+            const year = parseInt(document.getElementById('ann-year').value);
+            const target = document.getElementById('ann-target').value;
+            const scenario = document.getElementById('ann-scenario').value;
+            const label = document.getElementById('ann-label').value.trim();
+            const comment = document.getElementById('ann-comment').value.trim();
+            const position = document.getElementById('ann-position').value;
+            
+            if (!year || !label || !comment) {
+                showMessage('すべての項目を入力してください', 'error');
+                return;
+            }
+            
+            if (year < 2010 || year > 2080) {
+                showMessage('年は2010〜2080の範囲で指定してください', 'error');
+                return;
+            }
+            
+            if (currentEditingAnnotationId) {
+                const ann = annotations.find(a => a.id === currentEditingAnnotationId);
+                if (ann) {
+                    ann.year = year;
+                    ann.target = target;
+                    ann.scenario = scenario;
+                    ann.label = label;
+                    ann.comment = comment;
+                    ann.position = position;
+                    showMessage('アノテーションを更新しました', 'success');
+                }
+            } else {
+                annotations.push({
+                    id: nextAnnotationId++,
+                    year: year,
+                    target: target,
+                    scenario: scenario,
+                    label: label,
+                    comment: comment,
+                    position: position
+                });
+                showMessage('アノテーションを追加しました', 'success');
+            }
+            
+            drawAnnotations();
+            hideModal();
+        };
+
+        // モーダルの外側をクリックしたら閉じる
+        window.onclick = function(event) {
+            if (event.target === modal) {
+                hideModal();
+            }
+        };
+
+        // データ保存機能
+        function saveData() {
+            const dataToSave = {
+                version: "3.0",
+                timestamp: new Date().toISOString(),
+                currentGender: currentGender,
+                currentScenario: currentScenario,
+                forecastKeyPoints: forecastKeyPoints,
+                annotations: annotations,
+                nextAnnotationId: nextAnnotationId
+            };
+
+            const dataStr = JSON.stringify(dataToSave, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `vegetable_forecast_${new Date().getTime()}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            showMessage('データを保存しました！', 'success');
+        }
+
+        // データ読み込み機能
+        function loadData(fileContent) {
+            try {
+                const loadedData = JSON.parse(fileContent);
+                
+                // 新形式と旧形式の両方に対応
+                if (loadedData.forecastKeyPoints) {
+                    forecastKeyPoints = loadedData.forecastKeyPoints;
+                } else if (loadedData.forecastData) {
+                    // 旧形式の場合、キーポイントを抽出
+                    const extractKeyPoints = (data) => {
+                        const years = [2020, 2025, 2030, 2035, 2040, 2045, 2050, 2055, 2060, 2065, 2070, 2075, 2080];
+                        return data.filter(d => years.includes(d.year));
+                    };
+                    
+                    forecastKeyPoints = {
+                        man: {
+                            bau: extractKeyPoints(loadedData.forecastData.man.bau),
+                            enhanced: extractKeyPoints(loadedData.forecastData.man.enhanced),
+                            decelerated: extractKeyPoints(loadedData.forecastData.man.decelerated)
+                        },
+                        woman: {
+                            bau: extractKeyPoints(loadedData.forecastData.woman.bau),
+                            enhanced: extractKeyPoints(loadedData.forecastData.woman.enhanced),
+                            decelerated: extractKeyPoints(loadedData.forecastData.woman.decelerated)
+                        }
+                    };
+                } else {
+                    throw new Error('無効なデータ形式です');
+                }
+
+                if (loadedData.annotations) {
+                    // 旧形式のアノテーション（scenarioフィールドがない）に対応
+                    annotations = loadedData.annotations.map(ann => ({
+                        ...ann,
+                        scenario: ann.scenario || 'all'
+                    }));
+                }
+                
+                if (loadedData.nextAnnotationId) {
+                    nextAnnotationId = loadedData.nextAnnotationId;
+                }
+                
+                currentGender = loadedData.currentGender || 'man';
+                currentScenario = loadedData.currentScenario || 'bau';
+
+                // UIを更新
+                d3.selectAll(".gender-selector .btn").classed("active", false);
+                d3.select(`#gender-${currentGender}`).classed("active", true);
+                
+                d3.selectAll(".scenario-buttons .btn").classed("active", false);
+                d3.select(`#scenario-${currentScenario}`).classed("active", true);
+
+                // グラフを更新
+                updateHistoricalOpacity();
+                updateForecastLines();
+                drawAnnotations();
+
+                showMessage('データを読み込みました！', 'success');
+            } catch (error) {
+                showMessage('データの読み込みに失敗しました: ' + error.message, 'error');
+            }
+        }
+
+        // ボタンのイベントハンドラ
+        d3.select("#gender-man").on("click", function() {
+            currentGender = 'man';
+            d3.selectAll(".gender-selector .btn").classed("active", false);
+            d3.select(this).classed("active", true);
+            updateHistoricalOpacity();
+            updateForecastLines();
+            drawAnnotations();
+        });
+
+        d3.select("#gender-woman").on("click", function() {
+            currentGender = 'woman';
+            d3.selectAll(".gender-selector .btn").classed("active", false);
+            d3.select(this).classed("active", true);
+            updateHistoricalOpacity();
+            updateForecastLines();
+            drawAnnotations();
+        });
+
+        d3.select("#scenario-bau").on("click", function() {
+            currentScenario = 'bau';
+            d3.selectAll(".scenario-buttons .btn").classed("active", false);
+            d3.select(this).classed("active", true);
+            updateForecastLines();
+            drawAnnotations();
+        });
+
+        d3.select("#scenario-enhanced").on("click", function() {
+            currentScenario = 'enhanced';
+            d3.selectAll(".scenario-buttons .btn").classed("active", false);
+            d3.select(this).classed("active", true);
+            updateForecastLines();
+            drawAnnotations();
+        });
+
+        d3.select("#scenario-decelerated").on("click", function() {
+            currentScenario = 'decelerated';
+            d3.selectAll(".scenario-buttons .btn").classed("active", false);
+            d3.select(this).classed("active", true);
+            updateForecastLines();
+            drawAnnotations();
+        });
+
+        d3.select("#reset-btn").on("click", function() {
+            if (confirm('すべてのデータをリセットしますか？')) {
+                forecastKeyPoints = {
+                    man: {
+                        bau: generateInitialForecastKeys(25.2, -0.1),
+                        enhanced: generateInitialForecastKeys(25.2, 0.4),
+                        decelerated: generateInitialForecastKeys(25.2, -0.3)
+                    },
+                    woman: {
+                        bau: generateInitialForecastKeys(21.9, -0.1),
+                        enhanced: generateInitialForecastKeys(21.9, 0.4),
+                        decelerated: generateInitialForecastKeys(21.9, -0.3)
+                    }
+                };
+                annotations = [
+                    {
+                        id: 1,
+                        year: 2014,
+                        target: 'both',
+                        scenario: 'all',
+                        label: "減少傾向の加速",
+                        comment: "食生活の多様化と\n外食の増加",
+                        position: "top-right"
+                    }
+                ];
+                nextAnnotationId = 2;
+                updateForecastLines();
+                drawAnnotations();
+                showMessage('データをリセットしました', 'success');
+            }
+        });
+
+        // 保存ボタン
+        d3.select("#save-btn").on("click", saveData);
+
+        // 読み込みボタン
+        d3.select("#load-btn").on("click", function() {
+            document.getElementById('file-input').click();
+        });
+
+        // ファイル選択
+        document.getElementById('file-input').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    loadData(e.target.result);
+                };
+                reader.readAsText(file);
+                event.target.value = '';
+            }
+        });
+
+        // 初期描画
+        updateForecastLines();
+        updateHistoricalOpacity();
+        drawAnnotations();
+    </script>
+</body>
+</html>
