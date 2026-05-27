@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>価格感度：生鮮野菜 消費者物価指数（CPI）と可処分所得</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .header {
+            background-color: #4a4a4a;
+            color: white;
+            padding: 20px;
+            margin: -30px -30px 30px -30px;
+            border-radius: 8px 8px 0 0;
+            text-align: center;
+        }
+        h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: normal;
+            letter-spacing: 1px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 16px;
+            margin: 20px 0;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .save-load-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: 2px solid #ddd;
+            background: white;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .btn:hover {
+            background: #f0f0f0;
+        }
+        .save-btn {
+            padding: 10px 20px;
+            border: 2px solid #70AD47;
+            background: white;
+            color: #70AD47;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .save-btn:hover {
+            background: #70AD47;
+            color: white;
+        }
+        .load-btn {
+            padding: 10px 20px;
+            border: 2px solid #5B9BD5;
+            background: white;
+            color: #5B9BD5;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .load-btn:hover {
+            background: #5B9BD5;
+            color: white;
+        }
+        .reset-btn {
+            padding: 10px 20px;
+            border: 2px solid #ED7D31;
+            background: white;
+            color: #ED7D31;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .reset-btn:hover {
+            background: #ED7D31;
+            color: white;
+        }
+        .annotation-btn {
+            padding: 10px 20px;
+            border: 2px solid #9B59B6;
+            background: white;
+            color: #9B59B6;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .annotation-btn:hover {
+            background: #9B59B6;
+            color: white;
+        }
+        .file-input {
+            display: none;
+        }
+        .instructions {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        #chart {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .line-historical {
+            fill: none;
+            stroke: #999999;
+            stroke-width: 3;
+        }
+        .line-forecast {
+            fill: none;
+            stroke: #999999;
+            stroke-width: 3;
+            stroke-dasharray: 8, 4;
+        }
+        .dot-historical {
+            fill: #999999;
+            stroke: white;
+            stroke-width: 2;
+        }
+        .draggable-point {
+            fill: #999999;
+            stroke: white;
+            stroke-width: 3;
+            cursor: move;
+        }
+        .draggable-point:hover {
+            r: 8;
+            stroke-width: 4;
+        }
+        .data-label {
+            font-size: 13px;
+            font-weight: normal;
+            fill: #666;
+            text-anchor: middle;
+        }
+        .axis {
+            font-size: 12px;
+        }
+        .grid line {
+            stroke: #e0e0e0;
+            stroke-opacity: 0.7;
+            shape-rendering: crispEdges;
+        }
+        .grid path {
+            stroke-width: 0;
+        }
+        .tooltip {
+            position: absolute;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            border-radius: 4px;
+            pointer-events: none;
+            opacity: 0;
+            font-size: 13px;
+        }
+        .message {
+            text-align: center;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .legend-note {
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            margin-top: 10px;
+        }
+        .annotation {
+            font-size: 11px;
+            fill: #d9534f;
+            font-weight: bold;
+        }
+        .annotation-line {
+            stroke: #d9534f;
+            stroke-width: 1.5;
+            stroke-dasharray: 3, 3;
+        }
+        .annotation-box {
+            fill: #fff4f4;
+            stroke: #d9534f;
+            stroke-width: 1;
+            rx: 4;
+            ry: 4;
+        }
+        .annotation-group-item {
+            cursor: pointer;
+        }
+        .annotation-group-item:hover .annotation-box {
+            fill: #ffe6e6;
+            stroke-width: 2;
+        }
+        
+        /* モーダル */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 8px;
+            width: 500px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+        }
+        .modal-header {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+            font-weight: bold;
+        }
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+        .modal-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .modal-btn-primary {
+            background-color: #9B59B6;
+            color: white;
+        }
+        .modal-btn-primary:hover {
+            background-color: #8E44AD;
+        }
+        .modal-btn-danger {
+            background-color: #E74C3C;
+            color: white;
+        }
+        .modal-btn-danger:hover {
+            background-color: #C0392B;
+        }
+        .modal-btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+        }
+        .modal-btn-secondary:hover {
+            background-color: #7f8c8d;
+        }
+        
+        /* アノテーション管理パネル */
+        .annotation-panel {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+        .annotation-panel h3 {
+            margin: 0 0 15px 0;
+            color: #333;
+            font-size: 18px;
+        }
+        .annotation-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .annotation-item {
+            background-color: white;
+            padding: 12px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .annotation-item-info {
+            flex: 1;
+        }
+        .annotation-item-year {
+            font-weight: bold;
+            color: #9B59B6;
+        }
+        .annotation-item-label {
+            color: #333;
+            margin: 5px 0;
+        }
+        .annotation-item-comment {
+            color: #666;
+            font-size: 12px;
+        }
+        .annotation-item-buttons {
+            display: flex;
+            gap: 5px;
+        }
+        .annotation-item-btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+        .annotation-item-btn-edit {
+            background-color: #5B9BD5;
+            color: white;
+        }
+        .annotation-item-btn-edit:hover {
+            background-color: #4A8BC2;
+        }
+        .annotation-item-btn-delete {
+            background-color: #E74C3C;
+            color: white;
+        }
+        .annotation-item-btn-delete:hover {
+            background-color: #C0392B;
+        }
+        .no-annotations {
+            text-align: center;
+            color: #999;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>価格感度：生鮮野菜 消費者物価指数（CPI）と可処分所得</h1>
+        </div>
+        
+        <div class="subtitle">
+            Price Sensitivity指数（2019=100）
+        </div>
+        
+        <div class="instructions">
+            2025年以降の予測ポイントをドラッグして将来の推移を描いてください
+        </div>
+        
+        <div class="controls">
+            <div class="save-load-controls">
+                <button class="annotation-btn" id="add-annotation-btn">📝 アノテーション追加</button>
+                <button class="save-btn" id="save-btn">📥 データを保存</button>
+                <button class="load-btn" id="load-btn">📤 データを読み込み</button>
+                <input type="file" id="file-input" class="file-input" accept=".json,.txt">
+                <button class="reset-btn" id="reset-btn">リセット</button>
+            </div>
+        </div>
+
+        <div id="message-container"></div>
+        
+        <div id="chart"></div>
+        <div class="tooltip"></div>
+        
+        <div class="legend-note">
+            —— 実績値　- - - - 予測値（ドラッグ可能）　📌 アノテーション（クリックで編集）
+        </div>
+
+        <!-- アノテーション管理パネル -->
+        <div class="annotation-panel">
+            <h3>📌 アノテーション一覧</h3>
+            <div id="annotation-list" class="annotation-list">
+                <div class="no-annotations">アノテーションがありません</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- アノテーション編集モーダル -->
+    <div id="annotation-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">アノテーションの編集</div>
+            <div class="form-group">
+                <label>年（西暦）</label>
+                <input type="number" id="ann-year" min="2019" max="2050" placeholder="例: 2021">
+            </div>
+            <div class="form-group">
+                <label>タイトル</label>
+                <input type="text" id="ann-label" placeholder="例: 価格高騰のピーク">
+            </div>
+            <div class="form-group">
+                <label>コメント（複数行可）</label>
+                <textarea id="ann-comment" placeholder="例: 野菜価格の急騰により&#10;価格感度が最高水準に"></textarea>
+            </div>
+            <div class="form-group">
+                <label>吹き出しの位置</label>
+                <select id="ann-position">
+                    <option value="top-right">右上</option>
+                    <option value="top-left">左上</option>
+                    <option value="bottom-right">右下</option>
+                    <option value="bottom-left">左下</option>
+                </select>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-secondary" id="modal-cancel-btn">キャンセル</button>
+                <button class="modal-btn modal-btn-danger" id="modal-delete-btn" style="display: none;">削除</button>
+                <button class="modal-btn modal-btn-primary" id="modal-save-btn">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 履歴データ（2019〜2024）
+        const historicalData = [
+            {year: 2019, value: 100},
+            {year: 2020, value: 100.4},
+            {year: 2021, value: 119.6},
+            {year: 2022, value: 114.6},
+            {year: 2023, value: 99.6},
+            {year: 2024, value: 88.1}
+        ];
+
+        // アノテーション（コメント）の初期データ
+        let annotations = [
+            {
+                id: 1,
+                year: 2021,
+                label: "最も買いやすい時期",
+                comment: "価格指数が最高水準＝\n消費者の購買負担が最も軽い",
+                position: "top-right"
+            },
+            {
+                id: 2,
+                year: 2024,
+                label: "価格高騰のピーク",
+                comment: "野菜価格の高騰により\n購買負担が最高水準に",
+                position: "bottom-right"
+            }
+        ];
+        
+        let nextAnnotationId = 3;
+        let currentEditingAnnotationId = null;
+
+        // 予測データの初期値を生成（2025年以降、2080年まで）
+        // キーポイントのみを保存し、間の値は線形補間で計算
+        function generateInitialForecast() {
+            const lastValue = historicalData[historicalData.length - 1].value;
+            const keyPoints = [];
+            for (let i = 2025; i <= 2050; i += 5) {
+                keyPoints.push({
+                    year: i,
+                    value: Math.max(0, lastValue + (i - 2024) * (-0.5))
+                });
+            }
+            return keyPoints;
+        }
+
+        // 線形補間して全ての年のデータを生成
+        function interpolateForecast(keyPoints) {
+            const allPoints = [];
+            for (let i = 0; i < keyPoints.length - 1; i++) {
+                const start = keyPoints[i];
+                const end = keyPoints[i + 1];
+                const yearDiff = end.year - start.year;
+                const valueDiff = end.value - start.value;
+                
+                for (let year = start.year; year < end.year; year++) {
+                    const progress = (year - start.year) / yearDiff;
+                    allPoints.push({
+                        year: year,
+                        value: start.value + valueDiff * progress
+                    });
+                }
+            }
+            // 最後のポイントを追加
+            allPoints.push(keyPoints[keyPoints.length - 1]);
+            return allPoints;
+        }
+
+        let forecastKeyPoints = generateInitialForecast();
+        let forecastData = interpolateForecast(forecastKeyPoints);
+
+        // グラフの設定
+        const margin = {top: 40, right: 80, bottom: 80, left: 70};
+        const width = 1500 - margin.left - margin.right;
+        const height = 600 - margin.top - margin.bottom;
+
+        const svg = d3.select("#chart")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        // スケールの設定
+        const xScale = d3.scaleLinear()
+            .domain([2019, 2050])
+            .range([0, width]);
+
+        const yScale = d3.scaleLinear()
+            .domain([0, 140])
+            .range([height, 0]);
+
+        // グリッド線
+        svg.append("g")
+            .attr("class", "grid")
+            .attr("transform", `translate(0,${height})`)
+            .call(d3.axisBottom(xScale)
+                .tickSize(-height)
+                .tickFormat("")
+                .ticks(20));
+
+        svg.append("g")
+            .attr("class", "grid")
+            .call(d3.axisLeft(yScale)
+                .tickSize(-width)
+                .tickFormat("")
+                .ticks(14));
+
+        // X軸 - 西暦表記（5年ごと）
+        const xAxis = svg.append("g")
+            .attr("class", "axis")
+            .attr("transform", `translate(0,${height})`);
+
+        const xTickValues = [];
+        for (let year = 2020; year <= 2050; year += 5) {
+            xTickValues.push(year);
+        }
+
+        xAxis.call(d3.axisBottom(xScale)
+            .tickValues(xTickValues)
+            .tickFormat(d => `${d}年`))
+            .selectAll("text")
+            .style("text-anchor", "middle");
+
+        // Y軸
+        svg.append("g")
+            .attr("class", "axis")
+            .call(d3.axisLeft(yScale).ticks(14));
+
+        // Y軸ラベル
+        svg.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 0 - margin.left)
+            .attr("x", 0 - (height / 2))
+            .attr("dy", "1em")
+            .style("text-anchor", "middle")
+            .style("font-size", "14px")
+            .style("fill", "#666")
+            .text("指数");
+
+        // 線のジェネレーター
+        const line = d3.line()
+            .x(d => xScale(d.year))
+            .y(d => yScale(d.value));
+
+        // 履歴データの描画
+        const historicalGroup = svg.append("g").attr("class", "historical-group");
+
+        historicalGroup.append("path")
+            .datum(historicalData)
+            .attr("class", "line-historical")
+            .attr("d", line);
+
+        historicalGroup.selectAll(".dot-historical")
+            .data(historicalData)
+            .enter()
+            .append("circle")
+            .attr("class", "dot-historical")
+            .attr("cx", d => xScale(d.year))
+            .attr("cy", d => yScale(d.value))
+            .attr("r", 5);
+
+        // データラベル（履歴データ）
+        historicalGroup.selectAll(".data-label")
+            .data(historicalData)
+            .enter()
+            .append("text")
+            .attr("class", "data-label")
+            .attr("x", d => xScale(d.year))
+            .attr("y", d => yScale(d.value) - 12)
+            .text(d => d.value);
+
+        // アノテーショングループの作成
+        const annotationGroup = svg.append("g").attr("class", "annotation-group");
+
+        // アノテーションの描画
+        function drawAnnotations() {
+            annotationGroup.selectAll("*").remove();
+            
+            annotations.forEach(ann => {
+                const dataPoint = historicalData.find(d => d.year === ann.year) || 
+                                 forecastData.find(d => d.year === ann.year);
+                
+                if (!dataPoint) return;
+                
+                const x = xScale(ann.year);
+                const y = yScale(dataPoint.value);
+                
+                let offsetX = 40;
+                let offsetY = -60;
+                
+                switch(ann.position) {
+                    case 'top-right':
+                        offsetX = 40;
+                        offsetY = -60;
+                        break;
+                    case 'top-left':
+                        offsetX = -120;
+                        offsetY = -60;
+                        break;
+                    case 'bottom-right':
+                        offsetX = 40;
+                        offsetY = 40;
+                        break;
+                    case 'bottom-left':
+                        offsetX = -120;
+                        offsetY = 40;
+                        break;
+                }
+                
+                const annGroup = annotationGroup.append("g")
+                    .attr("class", "annotation-group-item")
+                    .attr("data-id", ann.id)
+                    .style("cursor", "pointer")
+                    .on("click", function() {
+                        editAnnotation(ann.id);
+                    });
+                
+                annGroup.append("line")
+                    .attr("class", "annotation-line")
+                    .attr("x1", x)
+                    .attr("y1", y)
+                    .attr("x2", x + offsetX * 0.6)
+                    .attr("y2", y + offsetY * 0.6);
+                
+                const lines = ann.comment.split('\n');
+                const boxWidth = 120;
+                const boxHeight = 35 + (lines.length - 1) * 15;
+                
+                annGroup.append("rect")
+                    .attr("class", "annotation-box")
+                    .attr("x", x + offsetX - boxWidth / 2)
+                    .attr("y", y + offsetY - boxHeight / 2)
+                    .attr("width", boxWidth)
+                    .attr("height", boxHeight);
+                
+                annGroup.append("text")
+                    .attr("class", "annotation")
+                    .attr("x", x + offsetX)
+                    .attr("y", y + offsetY - boxHeight / 2 + 15)
+                    .attr("text-anchor", "middle")
+                    .style("font-weight", "bold")
+                    .style("font-size", "12px")
+                    .text(ann.label);
+                
+                lines.forEach((line, i) => {
+                    annGroup.append("text")
+                        .attr("class", "annotation")
+                        .attr("x", x + offsetX)
+                        .attr("y", y + offsetY - boxHeight / 2 + 30 + i * 15)
+                        .attr("text-anchor", "middle")
+                        .style("font-weight", "normal")
+                        .style("font-size", "10px")
+                        .text(line);
+                });
+            });
+        }
+
+        drawAnnotations();
+
+        // アノテーションリストの更新
+        function updateAnnotationList() {
+            const listContainer = document.getElementById('annotation-list');
+            
+            if (annotations.length === 0) {
+                listContainer.innerHTML = '<div class="no-annotations">アノテーションがありません</div>';
+                return;
+            }
+            
+            listContainer.innerHTML = '';
+            
+            annotations.forEach(ann => {
+                const item = document.createElement('div');
+                item.className = 'annotation-item';
+                
+                const info = document.createElement('div');
+                info.className = 'annotation-item-info';
+                
+                const year = document.createElement('div');
+                year.className = 'annotation-item-year';
+                year.textContent = `${ann.year}年`;
+                
+                const label = document.createElement('div');
+                label.className = 'annotation-item-label';
+                label.textContent = ann.label;
+                
+                const comment = document.createElement('div');
+                comment.className = 'annotation-item-comment';
+                comment.textContent = ann.comment.replace(/\n/g, ' / ');
+                
+                info.appendChild(year);
+                info.appendChild(label);
+                info.appendChild(comment);
+                
+                const buttons = document.createElement('div');
+                buttons.className = 'annotation-item-buttons';
+                
+                const editBtn = document.createElement('button');
+                editBtn.className = 'annotation-item-btn annotation-item-btn-edit';
+                editBtn.textContent = '編集';
+                editBtn.onclick = () => editAnnotation(ann.id);
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'annotation-item-btn annotation-item-btn-delete';
+                deleteBtn.textContent = '削除';
+                deleteBtn.onclick = () => deleteAnnotation(ann.id);
+                
+                buttons.appendChild(editBtn);
+                buttons.appendChild(deleteBtn);
+                
+                item.appendChild(info);
+                item.appendChild(buttons);
+                
+                listContainer.appendChild(item);
+            });
+        }
+
+        updateAnnotationList();
+
+        // 予測線の描画グループ
+        const forecastGroup = svg.append("g").attr("class", "forecast-group");
+
+        // 予測線を更新する関数
+        function updateForecastLines() {
+            forecastGroup.selectAll("*").remove();
+
+            // キーポイントから全データを補間
+            forecastData = interpolateForecast(forecastKeyPoints);
+
+            const lastHistorical = historicalData[historicalData.length - 1];
+            const combinedData = [lastHistorical, ...forecastData];
+
+            forecastGroup.append("path")
+                .datum(combinedData)
+                .attr("class", "line-forecast")
+                .attr("d", line);
+
+            let startY = 0;
+            let hasMoved = false;
+            const drag = d3.drag()
+                .on("start", function(event, d) {
+                    const coords = d3.pointer(event, svg.node());
+                    startY = coords[1];
+                    hasMoved = false;
+                    d3.select("body").style("overflow", "hidden");
+                })
+                .on("drag", function(event, d) {
+                    const coords = d3.pointer(event, svg.node());
+                    const mouseY = coords[1];
+                    
+                    if (Math.abs(mouseY - startY) > 5) {
+                        hasMoved = true;
+                    }
+                    
+                    if (hasMoved) {
+                        const newY = Math.max(0, Math.min(height, mouseY));
+                        const newValue = yScale.invert(newY);
+                        d.value = Math.max(0, Math.min(140, newValue));
+                        
+                        d3.select(this)
+                            .attr("cy", yScale(d.value));
+                        
+                        d3.select(this.nextSibling)
+                            .attr("y", yScale(d.value) - 12)
+                            .text(d.value.toFixed(1));
+                        
+                        updateForecastLines();
+                        drawAnnotations();
+                    }
+                })
+                .on("end", function(event, d) {
+                    startY = 0;
+                    hasMoved = false;
+                    d3.select("body").style("overflow", "auto");
+                });
+
+            forecastKeyPoints.forEach((d, i) => {
+                const pointGroup = forecastGroup.append("g");
+                
+                pointGroup.append("circle")
+                    .datum(d)
+                    .attr("class", "draggable-point")
+                    .attr("cx", xScale(d.year))
+                    .attr("cy", yScale(d.value))
+                    .attr("r", 6)
+                    .call(drag)
+                    .on("mouseover", function(event, d) {
+                        d3.select(".tooltip")
+                            .style("opacity", 1)
+                            .html(`${d.year}年<br>指数: ${d.value.toFixed(1)}<br>(ドラッグして調整)`)
+                            .style("left", (event.pageX + 10) + "px")
+                            .style("top", (event.pageY - 28) + "px");
+                    })
+                    .on("mouseout", function() {
+                        d3.select(".tooltip").style("opacity", 0);
+                    });
+
+                pointGroup.append("text")
+                    .attr("class", "data-label")
+                    .attr("x", xScale(d.year))
+                    .attr("y", yScale(d.value) - 12)
+                    .text(d.value.toFixed(1));
+            });
+        }
+
+        updateForecastLines();
+
+        // メッセージ表示関数
+        function showMessage(text, type = 'success') {
+            const messageContainer = document.getElementById('message-container');
+            messageContainer.innerHTML = `<div class="message ${type}">${text}</div>`;
+            setTimeout(() => {
+                messageContainer.innerHTML = '';
+            }, 3000);
+        }
+
+        // モーダルの表示/非表示
+        const modal = document.getElementById('annotation-modal');
+        
+        function showModal() {
+            modal.style.display = 'block';
+        }
+        
+        function hideModal() {
+            modal.style.display = 'none';
+            currentEditingAnnotationId = null;
+            clearModalForm();
+        }
+        
+        function clearModalForm() {
+            document.getElementById('ann-year').value = '';
+            document.getElementById('ann-label').value = '';
+            document.getElementById('ann-comment').value = '';
+            document.getElementById('ann-position').value = 'top-right';
+        }
+
+        // アノテーション追加
+        document.getElementById('add-annotation-btn').onclick = function() {
+            currentEditingAnnotationId = null;
+            clearModalForm();
+            document.getElementById('modal-delete-btn').style.display = 'none';
+            document.getElementById('modal-save-btn').textContent = '追加';
+            showModal();
+        };
+
+        // アノテーション編集
+        function editAnnotation(id) {
+            const ann = annotations.find(a => a.id === id);
+            if (!ann) return;
+            
+            currentEditingAnnotationId = id;
+            document.getElementById('ann-year').value = ann.year;
+            document.getElementById('ann-label').value = ann.label;
+            document.getElementById('ann-comment').value = ann.comment;
+            document.getElementById('ann-position').value = ann.position;
+            document.getElementById('modal-delete-btn').style.display = 'inline-block';
+            document.getElementById('modal-save-btn').textContent = '保存';
+            showModal();
+        }
+
+        // アノテーション削除
+        function deleteAnnotation(id) {
+            if (confirm('このアノテーションを削除しますか？')) {
+                annotations = annotations.filter(a => a.id !== id);
+                drawAnnotations();
+                updateAnnotationList();
+                showMessage('アノテーションを削除しました', 'success');
+            }
+        }
+
+        // モーダルのボタン
+        document.getElementById('modal-cancel-btn').onclick = hideModal;
+        
+        document.getElementById('modal-delete-btn').onclick = function() {
+            if (currentEditingAnnotationId) {
+                deleteAnnotation(currentEditingAnnotationId);
+                hideModal();
+            }
+        };
+        
+        document.getElementById('modal-save-btn').onclick = function() {
+            const year = parseInt(document.getElementById('ann-year').value);
+            const label = document.getElementById('ann-label').value.trim();
+            const comment = document.getElementById('ann-comment').value.trim();
+            const position = document.getElementById('ann-position').value;
+            
+            if (!year || !label || !comment) {
+                showMessage('すべての項目を入力してください', 'error');
+                return;
+            }
+            
+            if (year < 2019 || year > 2050) {
+                showMessage('年は2019〜2050の範囲で指定してください', 'error');
+                return;
+            }
+            
+            if (currentEditingAnnotationId) {
+                const ann = annotations.find(a => a.id === currentEditingAnnotationId);
+                if (ann) {
+                    ann.year = year;
+                    ann.label = label;
+                    ann.comment = comment;
+                    ann.position = position;
+                    showMessage('アノテーションを更新しました', 'success');
+                }
+            } else {
+                annotations.push({
+                    id: nextAnnotationId++,
+                    year: year,
+                    label: label,
+                    comment: comment,
+                    position: position
+                });
+                showMessage('アノテーションを追加しました', 'success');
+            }
+            
+            drawAnnotations();
+            updateAnnotationList();
+            hideModal();
+        };
+
+        // モーダルの外側をクリックしたら閉じる
+        window.onclick = function(event) {
+            if (event.target === modal) {
+                hideModal();
+            }
+        };
+
+        // データ保存機能
+        function saveData() {
+            const dataToSave = {
+                version: "2.0",
+                timestamp: new Date().toISOString(),
+                type: "price_sensitivity_cpi",
+                forecastKeyPoints: forecastKeyPoints,
+                annotations: annotations,
+                nextAnnotationId: nextAnnotationId
+            };
+
+            const dataStr = JSON.stringify(dataToSave, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `price_sensitivity_forecast_${new Date().getTime()}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            showMessage('データを保存しました！', 'success');
+        }
+
+        // データ読み込み機能
+        function loadData(fileContent) {
+            try {
+                const loadedData = JSON.parse(fileContent);
+                
+                // 新形式（forecastKeyPoints）と旧形式（forecastData）の両方に対応
+                if (loadedData.forecastKeyPoints) {
+                    forecastKeyPoints = loadedData.forecastKeyPoints;
+                } else if (loadedData.forecastData) {
+                    // 旧形式の場合、5年ごとのデータを抽出
+                    forecastKeyPoints = loadedData.forecastData.filter(d => (d.year - 2025) % 5 === 0);
+                } else {
+                    throw new Error('無効なデータ形式です');
+                }
+                
+                if (loadedData.annotations) {
+                    annotations = loadedData.annotations;
+                }
+                
+                if (loadedData.nextAnnotationId) {
+                    nextAnnotationId = loadedData.nextAnnotationId;
+                }
+                
+                updateForecastLines();
+                drawAnnotations();
+                updateAnnotationList();
+
+                showMessage('データを読み込みました！', 'success');
+            } catch (error) {
+                showMessage('データの読み込みに失敗しました: ' + error.message, 'error');
+            }
+        }
+
+        // ボタンのイベントハンドラ
+        d3.select("#reset-btn").on("click", function() {
+            if (confirm('予測データとアノテーションを初期状態にリセットしますか？')) {
+                forecastKeyPoints = generateInitialForecast();
+                annotations = [
+                    {
+                        id: 1,
+                        year: 2021,
+                        label: "最も買いやすい時期",
+                        comment: "価格指数が最高水準＝\n消費者の購買負担が最も軽い",
+                        position: "top-right"
+                    },
+                    {
+                        id: 2,
+                        year: 2024,
+                        label: "価格高騰のピーク",
+                        comment: "野菜価格の高騰により\n購買負担が最高水準に",
+                        position: "bottom-right"
+                    }
+                ];
+                nextAnnotationId = 3;
+                updateForecastLines();
+                drawAnnotations();
+                updateAnnotationList();
+                showMessage('データをリセットしました', 'success');
+            }
+        });
+
+        d3.select("#save-btn").on("click", saveData);
+
+        d3.select("#load-btn").on("click", function() {
+            document.getElementById('file-input').click();
+        });
+
+        document.getElementById('file-input').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    loadData(e.target.result);
+                };
+                reader.readAsText(file);
+                event.target.value = '';
+            }
+        });
+    </script>
+</body>
+</html>
