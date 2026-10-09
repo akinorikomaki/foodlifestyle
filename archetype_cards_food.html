@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>型カード：野菜のデータで見るくり返しのパターン</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F4F5FB; --ink:#23263A; --ink-2:#4A4E66; --ink-3:#6B7088; --rule:#E2E4F0;
+  --plus:#D0336B; --minus:#1E88C8; --prob:#C2412D; --probbg:#FFE9E5; --data:#E8790C; --databg:#FFF1DC;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:'M PLUS Rounded 1c','Hiragino Maru Gothic ProN','Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,sans-serif;line-height:1.55}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 20px 48px}
+header h1{font-size:clamp(22px,3.2vw,30px);font-weight:800;margin:0 0 6px;letter-spacing:.02em}
+header p{margin:0;color:var(--ink-2);font-size:14.5px;max-width:46em}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:18px 0 22px}
+.btn{font:inherit;font-size:14px;font-weight:700;border:2px solid var(--rule);border-bottom-width:4px;background:#fff;color:var(--ink);
+  border-radius:12px;padding:7px 14px;cursor:pointer}
+.btn:hover{border-color:#B9BCD3}
+.btn[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn:focus-visible,.card:focus-visible{outline:3px solid #1C6FD1;outline-offset:3px}
+.bar .note{font-size:13px;color:var(--ink-3)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(360px,100%),1fr));gap:22px}
+.card{position:relative;height:700px;perspective:1600px;cursor:pointer;border-radius:20px;outline:none}
+.inner{position:absolute;inset:0;transition:transform .7s cubic-bezier(.3,.1,.2,1);transform-style:preserve-3d}
+.card.flipped .inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:#fff;
+  border:2px solid var(--rule);border-bottom-width:5px;border-radius:20px;overflow:hidden;display:flex;flex-direction:column}
+.back{transform:rotateY(180deg)}
+.card:hover .face{border-color:var(--c)}
+
+/* 表 */
+.front .top{background:var(--c);color:#fff;padding:20px 20px 16px;text-align:center}
+.front .nm{font-size:27px;font-weight:800;letter-spacing:.04em;line-height:1.25}
+.front .tag{font-size:14px;opacity:.92;margin-top:4px}
+.front .en{font-size:12.5px;font-weight:700;opacity:.8;margin-top:2px}
+.front .q{display:none;font-size:46px;font-weight:800;line-height:1.1}
+.front .body{padding:14px 18px 0;flex:1;display:flex;flex-direction:column;gap:8px}
+.lbl{font-size:12px;font-weight:800;color:var(--ink-3)}
+.front .ttl{font-size:15.5px;font-weight:800;line-height:1.4}
+.chart{width:100%;height:auto;display:block}
+.legend{display:flex;flex-direction:column;gap:5px}
+.legend span{display:flex;align-items:center;gap:6px}
+.legend i{flex:none;width:18px;height:0;border-top:4px solid var(--sc);border-radius:2px}
+.legend i.dash{border-top-style:dashed;border-top-width:3px}
+.read{font-size:13px;color:var(--ink);background:#F7F7FC;border-radius:12px;padding:8px 11px;line-height:1.55}
+.shape{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-3);margin-top:auto}
+.shape svg{width:84px;height:auto;flex:none}
+.foot{display:flex;justify-content:space-between;align-items:center;padding:10px 18px 12px;font-size:12px;color:var(--ink-3)}
+.foot b{color:var(--c);font-size:13px}
+
+/* 裏 */
+.back .hd{padding:14px 18px 8px;display:flex;justify-content:space-between;align-items:baseline;gap:8px;border-bottom:2px solid var(--rule)}
+.back .hd b{font-size:18px;color:var(--c)}
+.back .hd small{font-size:11.5px;color:var(--ink-3);font-weight:700}
+.back .body{padding:10px 16px 0;flex:1;display:flex;flex-direction:column;gap:8px;overflow:auto}
+.prob{font-size:13.5px;font-weight:800;color:var(--prob);background:var(--probbg);border-radius:10px;padding:6px 11px}
+.cldbox{position:relative}
+.cld{width:100%;height:auto;display:block;background:#FAFAFE;border-radius:12px}
+.zoom{position:absolute;right:6px;bottom:6px;font:inherit;font-size:11.5px;font-weight:700;border:1.5px solid var(--rule);background:#fff;color:var(--ink-2);border-radius:8px;padding:2px 8px;cursor:pointer}
+.zoom:hover{border-color:var(--c);color:var(--ink)}
+dialog{border:none;border-radius:20px;padding:18px 20px;width:min(860px,94vw);color:var(--ink)}
+dialog::backdrop{background:rgba(35,38,58,.55)}
+dialog h2{margin:0 0 4px;font-size:20px}
+dialog .prob{margin:6px 0 10px}
+dialog .cld{background:#FAFAFE}
+dialog .close{float:right}
+.key{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:11.5px;color:var(--ink-3)}
+.key em{font-style:normal;font-weight:800}
+.story{margin:0;padding:0;list-style:none;counter-reset:s;display:flex;flex-direction:column;gap:3px}
+.story li{counter-increment:s;font-size:13px;display:flex;gap:7px;align-items:baseline}
+.story li::before{content:counter(s);flex:none;width:19px;height:19px;border-radius:50%;background:var(--c);color:#fff;font-size:11px;font-weight:800;
+  display:inline-flex;align-items:center;justify-content:center;transform:translateY(3px)}
+.again{font-size:12px;color:var(--ink-3);padding-left:26px;margin-top:-4px}
+.hint{font-size:13px;background:#EEF8F4;color:#0F6F56;border-radius:10px;padding:7px 11px}
+.hint b{margin-right:4px}
+.src{font-size:11px;color:var(--ink-3);line-height:1.45}
+
+/* あてっこモード：表の名前をかくす */
+body.guess .front .nm,body.guess .front .tag,body.guess .front .en,body.guess .front .shape{display:none}
+body.guess .front .q{display:block}
+body.guess .front .top{background:#3A3E57}
+
+.front .top{position:relative;padding:22px 20px 16px 66px}
+.ico{position:absolute;left:14px;top:14px;width:46px;height:46px;padding:5px;border-radius:14px;background:rgba(255,255,255,.18)}
+.ico svg{width:100%;height:100%;display:block}
+body.guess .ico{display:none}
+.front .nm{font-size:29px}
+.front .tag{font-size:15px;font-weight:700}
+.front .ttl{font-size:17.5px;line-height:1.45;margin-top:2px}
+.gbox{border:2px dashed var(--rule);border-radius:14px;padding:9px 10px 4px;display:flex;flex-direction:column;gap:6px}
+.lg{display:flex;gap:8px;align-items:flex-start;font-size:13.5px;line-height:1.4}
+.lg i{margin-top:8px}
+.lg b{font-weight:800;color:var(--ink)}
+.lg em{font-style:normal;font-size:11px;font-weight:700;color:var(--ink-3);background:#EEF0F7;border-radius:6px;padding:1px 6px;margin-left:6px}
+.lg small{display:block;font-size:12px;color:var(--ink-3)}
+.gsrc{font-size:11px;color:var(--ink-3);text-align:right;margin:-4px 0 2px}
+.read{position:relative;font-size:14px;font-weight:500;background:color-mix(in srgb,var(--c) 10%,#fff);border-radius:16px;padding:10px 13px;margin-top:6px}
+.read::before{content:"";position:absolute;left:26px;top:-9px;border:9px solid transparent;border-top:0;border-bottom-color:color-mix(in srgb,var(--c) 10%,#fff)}
+.foot{justify-content:center}
+.pill{background:var(--c);color:#fff;font-weight:800;font-size:14px;border-radius:999px;padding:6px 18px;border-bottom:3px solid rgba(0,0,0,.18)}
+.prob{font-size:15px}
+.story li{font-size:14px}
+.hint{font-size:13.5px}
+.hint b{display:block;margin:0 0 1px}
+
+.sec{font-size:20px;font-weight:800;margin:30px 0 4px}
+.secp{margin:0 0 14px;font-size:13.5px;color:var(--ink-2);max-width:46em}
+.sec+.grid{margin-top:12px}
+@media (prefers-reduced-motion:reduce){
+  .inner{transition:none}
+}
+@media (max-width:420px){.card{height:720px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>めくって発見！ 野菜の「くり返しパターン」カード</h1>
+  <p>表は、本当のデータのグラフ。めくると、そのウラで回っている「しくみ」が見えるよ。</p>
+</header>
+<div class="bar">
+  <button class="btn" id="guess" aria-pressed="false">🙈 あてっこモード（名前をかくす）</button>
+  <button class="btn" id="reset">ぜんぶ表にもどす</button>
+  <span class="note">カードをクリックでめくれるよ</span>
+</div>
+<h2 class="sec">🇯🇵 日本の野菜のデータ</h2>
+<div class="grid" id="grid-jp"></div>
+<h2 class="sec">🌏 世界のデータ：健康的な食事を買うお金がない人</h2>
+<p class="secp">「健康的な食事」は、野菜・果物・豆・肉や魚などをバランスよく食べること。その値段が、生活に必要な残りのお金を引いた所得より高いと「買えない」と数えます。</p>
+<div class="grid" id="grid-world"></div>
+<dialog id="dlg"><button class="btn close" type="button" id="dlgx">閉じる</button><div id="dlgc"></div></dialog>
+</div>
+
+<script>
+// ===== フードシステムのデータ（TET設定 foodlifestyle-health より） =====
+const D={
+  y_f:{hi:'多い',lo:'少ない',name:'野菜をしっかり食べる女性',u:'%',what:'1日に野菜を350g以上食べる人の割合',src:'国民健康・栄養調査',h:[[2014,29.2],[2015,31.4],[2016,27.2],[2017,29.0],[2018,27.0],[2019,26.5],[2022,24.8],[2023,21.9],[2024,22.0]]},
+  y_m:{hi:'多い',lo:'少ない',name:'野菜をしっかり食べる男性',u:'%',what:'1日に野菜を350g以上食べる人の割合',src:'国民健康・栄養調査',h:[[2014,33.2],[2015,33.7],[2016,29.3],[2017,32.3],[2018,30.7],[2019,30.1],[2022,28.9],[2023,25.2],[2024,26.2]]},
+  x1:{hi:'多い',lo:'少ない',base:100,name:'国の呼びかけの多さ',u:'2019年＝100',what:'食育白書に「野菜・栄養・健康」が出てくる多さ',src:'食育白書',h:[[2015,80.2],[2016,83.1],[2017,97.7],[2018,116.4],[2019,100],[2020,92.3],[2021,105.6],[2022,113.2],[2023,92.2],[2024,92.8]]},
+  x2:{hi:'高い',lo:'低い',base:50,name:'野菜への関心',u:'2019年＝50',what:'ネットで野菜が調べられた多さ',src:'Googleトレンド',h:[[2019,50],[2020,70.8],[2021,78.1],[2022,79.1],[2023,76.8],[2024,69.8]]},
+  x3:{hi:'買いやすい',lo:'買いにくい',base:100,name:'野菜の買いやすさ',u:'2019年＝100',what:'お給料で、野菜をどれだけ買えるか',src:'家計調査・消費者物価指数',h:[[2015,87.4],[2016,83.6],[2017,88.1],[2018,87.9],[2019,100],[2020,99.9],[2021,101.6],[2022,98.1],[2023,91.4],[2024,87.7]]},
+  bra:{hi:'多い',lo:'少ない',name:'ブラジル',u:'%',what:'健康的な食事を買うお金がない人の割合（上ほど困る）',src:'世界銀行・FAO',h:[[2017,27.1],[2018,26.4],[2019,26.0],[2020,19.4],[2021,29.8],[2022,24.9],[2023,24.1],[2024,23.7]]},
+  eap:{hi:'多い',lo:'少ない',name:'東アジア・太平洋',u:'%',what:'健康的な食事を買うお金がない人の割合（上ほど困る）',src:'世界銀行・FAO',h:[[2017,29.3],[2018,26.7],[2019,24.7],[2020,26.1],[2021,21.0],[2022,20.5],[2023,19.2],[2024,17.8]]},
+  ssa:{hi:'多い',lo:'少ない',name:'サハラ以南アフリカ',u:'%',what:'健康的な食事を買うお金がない人の割合（上ほど困る）',src:'世界銀行・FAO',h:[[2017,70.6],[2018,69.6],[2019,69.6],[2020,71.0],[2021,70.8],[2022,70.5],[2023,71.0],[2024,71.3]]},
+  ltu:{hi:'多い',lo:'少ない',name:'リトアニア',u:'%',what:'健康的な食事を買うお金がない人の割合（上ほど困る）',src:'世界銀行・FAO',h:[[2017,21.3],[2018,16.7],[2019,13.1],[2020,8.8],[2021,8.9],[2022,8.9],[2023,8.9],[2024,8.2]]}
+};
+
+// ===== 型の定義（tet_tool の ARCH と同じ配置） =====
+const ARCH={
+ fixes:{roles:{P:[40,100],F:[290,100],U:[165,178]},
+  e:[['P','F','+'],['F','P','-'],['F','U','+',1],['U','P','+']],L:[['B',165,72,['P','F']],['R',165,128,['F','U','P']]]},
+ success:{roles:{Ae:[45,35],Ar:[45,170],Al:[165,100],Be:[285,35],Br:[285,170]},
+  e:[['Ar','Ae','+'],['Ae','Al','+'],['Al','Ar','+'],['Al','Br','-'],['Br','Be','+'],['Be','Al','-']],L:[['R',88,102,['Ar','Ae','Al']],['R',242,102,['Al','Br','Be']]]},
+ drift:{roles:{G:[50,30],A:[50,172],Gp:[168,100],Pr:[285,30],C:[285,172]},
+  e:[['G','Gp','+'],['Gp','Pr','+'],['Pr','G','-'],['A','Gp','-'],['Gp','C','+'],['C','A','+',1]],L:[['B',168,52,['G','Gp','Pr']],['B',168,150,['A','Gp','C']]]},
+ limits:{roles:{E:[35,110],S:[165,110],B:[295,110],C:[295,25]},
+  e:[['E','S','+'],['S','E','+'],['S','B','+'],['B','S','-'],['C','B','+']],L:[['R',100,110,['E','S']],['B',230,110,['S','B']]]},
+ under:{roles:{Eg:[35,55],D:[160,55],Lm:[290,55],N:[290,170],I:[160,170]},
+  e:[['Eg','D','+'],['D','Eg','+'],['D','Lm','+'],['Lm','D','-'],['Lm','N','+'],['N','I','+',1],['I','Lm','-']],L:[['R',97,55,['Eg','D']],['B',225,55,['D','Lm']],['B',245,125,['Lm','N','I']]]},
+ burden:{roles:{S:[165,100],Q:[165,20],E:[295,100],F:[165,180]},
+  e:[['S','Q','+'],['Q','S','-'],['Q','E','+'],['E','F','-'],['S','F','+'],['F','S','-',1]],L:[['B',118,60,['S','Q']],['R',225,100,['Q','E','F','S']],['B',118,140,['S','F']]]}
+};
+
+// ===== カードの中身 =====
+const CARDS=[
+ {id:'drift',c:'#7A4EAB',emo:'🎯',nm:'目標のなし崩し',en:'Drifting goals',tag:'目標が、だんだん下がっていく',
+  ttl:'野菜をしっかり食べる人が、へってきた',
+  series:[{k:'y_f'},{k:'y_m',dash:1}],shared:1,
+  read:'10年で、女性も男性も約7ポイントダウン。「350gなんて無理〜」って思ってない？',
+  prob:'野菜を食べる人が、少しずつへっていく',
+  names:{G:'目指す量\n（350g）',A:'野菜を食べる\n人の割合',Gp:'目標との差',Pr:'「無理」と\n思う気持ち',C:'野菜を\nふやす工夫'},
+  pr:['A'],data:['A'],
+  story:['350gに、なかなか届かない','「無理かも…」と思う','目標をこっそり下げる','工夫しなくなって、もっとへる'],
+  hint:'目標を下げる前に「なんで無理なの？」を考えよう'},
+ {id:'limits',c:'#14A37F',emo:'🚧',nm:'成功の限界',en:'Limits to success',tag:'伸びたあと、頭打ち',
+  ttl:'野菜への関心、2022年でストップ！',
+  series:[{k:'x2'}],
+  read:'ぐんぐん伸びたのに、2022年から下がり始めた。同じころ、野菜は買いにくくなっていた（「成長と投資不足」のカード）。ブレーキは値段かも？',
+  prob:'関心が、途中で伸びなくなる',
+  names:{E:'野菜を\n試す人',S:'野菜への\n関心',B:'「高い！」\nのブレーキ',C:'野菜の\n値上がり'},
+  pr:['S'],data:['S'],
+  story:['野菜を試す人がふえる','「いいね」が広がって、関心アップ','でも「高い！」と感じる','ブレーキがかかって、ストップ'],
+  hint:'もっとがんばるより、ブレーキ（値段・手間）を外そう'},
+ {id:'under',c:'#00879A',emo:'🏗️',nm:'成長と投資不足',en:'Growth and underinvestment',tag:'人気に、準備が追いつかない',
+  ttl:'野菜が買いやすかったのは、2021年まで',
+  series:[{k:'x3'}],
+  read:'そのあと野菜の値上がりがお給料の伸びを追いこして、2024年には2015年ごろと同じくらい買いにくく…。野菜を作る・運ぶしくみは、間に合ってた？',
+  prob:'買いたい人が、途中でへってしまう',
+  names:{Eg:'野菜を\nすすめる',D:'野菜を\n買いたい人',Lm:'野菜の不足\n（値上がり）',N:'「足りない」\nと気づく',I:'作る・運ぶ\nしくみづくり'},
+  pr:['D'],data:['Lm'],dataNote:'（買いやすさの反対）',
+  story:['野菜をすすめて、買いたい人がふえる','野菜が足りなくなり、値段が上がる','「足りない」と気づき、作る・運ぶしくみづくりを始める','でも間に合わず、高いままで人がはなれる'],
+  hint:'人気が出てきたら、先に作る・運ぶしくみを整えよう'},
+ {id:'burden',c:'#E8790C',emo:'💊',nm:'問題の転嫁',en:'Shifting the burden',tag:'すぐ効く方法に、頼りきり',
+  ttl:'国の呼びかけは、上がったり下がったり',
+  series:[{k:'x1'}],
+  read:'呼びかけは波のように上下。そのあいだも、野菜を食べる人はへり続けた（「目標のなし崩し」のカード）…。',
+  prob:'野菜不足が、ちっとも直らない',
+  names:{S:'野菜が\n足りない人',Q:'国の\n呼びかけ',E:'呼びかけで\nやった気に',F:'野菜を手軽に\n食べるしくみ'},
+  pr:['S'],data:['Q'],
+  story:['野菜不足が話題になる','「野菜を食べよう！」と呼びかけて、少し良くなる','「呼びかけたからOK」と、やった気になる','手軽に食べるしくみ（安い・すぐ食べられる）が育たず、また不足'],
+  hint:'呼びかけだけでなく、カット野菜や給食など、手軽に食べられるしくみも育てよう'},
+ {grp:'world',id:'fixes',c:'#E5533D',bad:1,nm:'応急処置の失敗',en:'Fixes that fail',tag:'その場しのぎが、あとで裏目に',
+  ttl:'ブラジル：いったん減ったのに、前より増えた',
+  series:[{k:'bra'}],
+  read:'2020年に一時的に改善（26.0%→19.4%）したあと、また悪化（29.8%）。この年はコロナで国の緊急給付があった年。短期的な対策だけでは、長く続く改善につながらないのかも？',
+  prob:'食事に困る人が、結局へらない',
+  names:{P:'健康な食事を\n買えない人',F:'一時的な\nお金の支援',U:'支援が続かず\n打ち切り'},
+  pr:['P'],data:['P'],
+  story:['コロナで、食事に困る人がふえそう','国が急いでお金を配る → いったん減る','でもお金が続かず、支援が小さくなる','前より多くの人が困ることに'],
+  hint:'配るだけでなく、支援が終わったあとの仕事や収入まで考えよう'},
+ {grp:'world',id:'success',c:'#C2457E',bad:1,nm:'成功には成功を',en:'Success to the successful',tag:'勝つほど有利になり、差が開く',
+  ttl:'地域の差が、どんどん広がっている',
+  series:[{k:'eap'},{k:'ssa',dash:1}],shared:1,
+  read:'東アジア・太平洋は29.3%→17.8%に減ったのに、サハラ以南アフリカは70%前後のまま。差は41→53ポイントに広がった。',
+  prob:'うまくいかない地域が、取り残される',
+  names:{Ae:'東アジアの\n食の改善',Ar:'東アジアに\n来るお金',Al:'東アジアを\n選ぶ投資',Be:'アフリカの\n食の改善',Br:'アフリカに\n来るお金'},
+  pr:['Be'],data:['Ae','Be'],dataNote:'（買えない人の反対）',
+  story:['少しうまくいった地域に、投資が集まる','仕事や工場がふえて、もっと豊かに','もう一方の地域には、お金が回らない','差がどんどん広がる'],
+  hint:'お金や支援の配り方を見直して、取り残される地域を作らない'},
+ {grp:'world',id:'limits',c:'#14A37F',bad:1,nm:'成功の限界',en:'Limits to success',tag:'伸びたあと、頭打ち',
+  ttl:'リトアニア：ぐんぐん減ったのに、9%前後でストップ',
+  series:[{k:'ltu'}],
+  read:'最初は大きく改善（21.3%→8.8%）。でもそのあとは、改善の幅が小さくなった。取り組みが進むほど、残った人に届けるのがむずかしく（お金や手間がかかるように）なるのかも？',
+  prob:'改善が、あるところで止まる',
+  names:{E:'給料アップ',S:'食事を\n買える人',B:'届きにくい\n人の壁',C:'年金だけの\n高齢者など'},
+  pr:['S'],data:['S'],dataNote:'（買えない人の反対）',
+  story:['給料が上がり、食事を買える人がふえる','お金が回って、さらに給料が上がる','でも、年金だけの高齢者など届きにくい人が残る','それ以上、なかなか減らない'],
+  hint:'みんな同じ対策より、届きにくい人にねらいを合わせよう'}
+];
+
+// 型の典型の形（tet_tool の botSVG2 と同じ線）
+const TYP={
+ drift:[[[0,.8],[.35,.68],[.65,.48],[1,.22]]],
+ fixes:[[[0,.5],[.15,.74],[.28,.76],[.5,.45],[.75,.25],[1,.12]]],
+ success:[[[0,.5],[.35,.62],[.65,.8],[1,.92]],[[0,.48],[.35,.36],[.65,.2],[1,.08]]],
+ limits:[[[0,.15],[.3,.25],[.5,.55],[.7,.78],[1,.84]]],
+ under:[[[0,.2],[.4,.72],[.6,.8],[.8,.68],[1,.48]]],
+ burden:[[[0,.7],[.12,.88],[.24,.6],[.38,.78],[.52,.48],[.66,.64],[.8,.32],[.92,.45],[1,.18]]]};
+
+
+// 型の名前に合わせたピクトグラム（白い線）
+const ICON={
+ fixes:'<path d="M3 15h34M3 25h34"/><rect x="15" y="11" width="10" height="18" rx="2"/><path d="M30 25c0 3 3 4 3 7a3 3 0 0 1-6 0c0-3 3-4 3-7z"/>',
+ success:'<path d="M6 34h28"/><path d="M8 28l9-9 6 4 11-13"/><path d="M28 10h6v6"/><path d="M8 28l9 1 6-1"/>',
+ drift:'<path d="M5 12h8v7h8v7h8v7h6"/><path d="M9 12V3l8 3-8 3"/>',
+ limits:'<path d="M4 7h32"/><path d="M8 7l-3-4M16 7l-3-4M24 7l-3-4M32 7l-3-4"/><path d="M5 35c8 0 12-6 15-14s6-9 10-9"/><path d="M26 10l4 2-3 4"/>',
+ under:'<path d="M13 27h14l-2 9H15z"/><path d="M20 27V11"/><path d="M20 19c-6 0-9-4-9-8 6 0 9 3 9 8z"/><path d="M20 15c5 0 9-3 9-8-6 0-9 3-9 8z"/><path d="M17 30l2 2-2 3"/>',
+ burden:'<g transform="rotate(-35 20 20)"><rect x="3" y="14" width="34" height="12" rx="6"/><rect x="14" y="14" width="12" height="12"/></g><circle cx="17" cy="20" r=".8" fill="#fff"/><circle cx="21" cy="18" r=".8" fill="#fff"/><circle cx="19" cy="23" r=".8" fill="#fff"/><circle cx="23" cy="21" r=".8" fill="#fff"/>'
+};
+const icon=id=>`<svg viewBox="0 0 40 40" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[id]}</svg>`;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let N=0;
+
+function typSVG(id,col,flip){
+  const W=120,H=60,x0=8,x1=W-6,yT=6,y0=H-8,X=t=>x0+(x1-x0)*t,Y=v=>yT+(y0-yT)*(flip?v:(1-v));
+  const curve=P=>{let d=`M${X(P[0][0])},${Y(P[0][1])}`;for(let i=1;i<P.length;i++){const[a,b]=P[i-1],[c,e]=P[i],mx=(a+c)/2;d+=` C${X(mx)},${Y(b)} ${X(mx)},${Y(e)} ${X(c)},${Y(e)}`;}return d;};
+  return `<svg viewBox="0 0 ${W} ${H}" aria-hidden="true"><path d="M${x0},${yT}V${y0}H${x1}" fill="none" stroke="#23263A" stroke-opacity=".25" stroke-width="1.5" stroke-dasharray="2 4"/>`+
+    TYP[id].map(P=>`<path d="${curve(P)}" fill="none" stroke="${col}" stroke-width="5" stroke-linecap="round"/>`).join('')+`</svg>`;
+}
+
+// 実データのグラフ（縦軸の上下の意味と、2019年の基準線をのせる）
+function dataSVG(card){
+  const ss=card.series.map(s=>({...D[s.k],...s}));
+  const hi=ss[0].hi,lo=ss[0].lo,lw=Math.max(hi.length,lo.length)*10.5;
+  const W=320,H=165,x0=Math.max(36,lw+20),x1=W-22,yT=16,y0=H-26;
+  const yrs=ss.flatMap(s=>s.h.map(p=>p[0])),ya=Math.min(...yrs),yb=Math.max(...yrs);
+  const X=y=>x0+(x1-x0)*(y-ya)/(yb-ya||1);
+  const vals=ss.flatMap(s=>s.h.map(p=>p[1])).concat(ss[0].base!=null?[ss[0].base]:[]);
+  let a=Math.min(...vals),b=Math.max(...vals),pd=(b-a)*.15||1;a-=pd;b+=pd;const Y=v=>y0-(y0-yT)*(v-a)/(b-a);
+  const col2=`color-mix(in srgb, ${card.c} 40%, #9AA0B5)`;
+  let g=`<path d="M${x0},${yT-6}V${y0}H${x1+8}" fill="none" stroke="#23263A" stroke-opacity=".28" stroke-width="1.5" stroke-dasharray="2 4"/>
+   <text x="${x0-5}" y="${yT+4}" font-size="10.5" text-anchor="end" fill="#4A4E66" font-weight="800">↑${hi}</text>
+   <text x="${x0-5}" y="${y0}" font-size="10.5" text-anchor="end" fill="#4A4E66" font-weight="800">↓${lo}</text>`;
+  if(ss[0].base!=null){const by=Y(ss[0].base);
+    g+=`<path d="M${x0},${by}H${x1+8}" stroke="#9AA0B5" stroke-width="1.2" stroke-dasharray="4 3"/><text x="${(x0+x1)/2+20}" y="${by+13}" font-size="9.5" text-anchor="middle" fill="#6B7088" stroke="#fff" stroke-width="3" paint-order="stroke">2019年＝${ss[0].base}</text>`;}
+  [...new Set([ya,Math.round((ya+yb)/2),yb])].forEach(t=>g+=`<text x="${X(t)}" y="${H-8}" font-size="10" text-anchor="middle" fill="#6B7088">${t}</text>`);
+  ss.forEach((s,i)=>{
+    const pts=s.h.map(([yr,v])=>[X(yr),Y(v),yr,v]),c=i?col2:card.c;
+    const segs=[[pts[0]]];for(let k=1;k<pts.length;k++){if(pts[k][2]-pts[k-1][2]>1){g+=`<path d="M${pts[k-1][0]},${pts[k-1][1]}L${pts[k][0]},${pts[k][1]}" stroke="${c}" stroke-width="2" stroke-dasharray="3 4" fill="none" opacity=".7"/>`;segs.push([]);}segs[segs.length-1].push(pts[k]);}
+    segs.forEach(P=>{if(P.length<2)return;let d=`M${P[0][0]},${P[0][1]}`;
+      for(let k=0;k<P.length-1;k++){const p0=P[k-1]||P[k],p1=P[k],p2=P[k+1],p3=P[k+2]||p2;
+        d+=` C${p1[0]+(p2[0]-p0[0])/6},${p1[1]+(p2[1]-p0[1])/6} ${p2[0]-(p3[0]-p1[0])/6},${p2[1]-(p3[1]-p1[1])/6} ${p2[0]},${p2[1]}`;}
+      g+=`<path d="${d}" fill="none" stroke="${c}" stroke-width="${i?(card.shared?5:3.5):6}" ${i&&!card.shared?'stroke-dasharray="6 5"':''} stroke-linecap="round" stroke-linejoin="round"/>`;});
+    const f=pts[0],l=pts[pts.length-1],T=(x,y,v,an)=>`<text x="${x}" y="${y}" font-size="11" font-weight="800" fill="#23263A" stroke="#fff" stroke-width="3" paint-order="stroke" text-anchor="${an}">${v}</text>`;
+    g+=`<circle cx="${f[0]}" cy="${f[1]}" r="3.6" fill="#23263A"/><circle cx="${l[0]}" cy="${l[1]}" r="3.6" fill="#23263A"/>`;
+    const off=card.shared?(i?-8:16):-8;g+=T(f[0]+6,f[1]+off,f[3],'start')+T(l[0],l[1]+off,l[3],'middle');
+    if(ss.length===1&&pts.length>3){const mid=pts.slice(1,-1);const mx=mid.reduce((p,q)=>q[3]>p[3]?q:p),mn=mid.reduce((p,q)=>q[3]<p[3]?q:p);
+      [mx,mn].forEach((q,k)=>{const lo=k===1,ex=lo?(q[3]<Math.min(f[3],l[3])):(q[3]>Math.max(f[3],l[3]));if(!ex)return;
+        g+=`<circle cx="${q[0]}" cy="${q[1]}" r="3" fill="#23263A"/>`+T(q[0],q[1]+(lo?16:-8),q[3]+'（'+q[2]+'）','middle');});}
+  });
+  const leg=ss.map((s,i)=>`<div class="lg"><i class="${i&&!card.shared?'dash':''}" style="--sc:${i?col2:card.c}"></i><div><b>${esc(s.name)}</b>${i&&s.what===ss[0].what?'':`<small>${esc(s.what)}</small>`}</div></div>`).join('');
+  return {svg:`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(card.ttl)}">${g}</svg>`,leg,src:[...new Set(ss.map(s=>s.src))]};
+}
+
+// 因果ループ図（tet_tool の archSVG を、食の言葉で描けるようにしたもの）
+function cldSVG(card){
+  const def=ARCH[card.id],U='m'+(++N),pos=def.roles,BX={},FS=12.5,LH=14;
+  const lines=k=>(card.names[k]||k).split('\n');
+  Object.keys(pos).forEach(k=>{const ls=lines(k);const w=Math.max(56,Math.max(...ls.map(x=>x.length))*FS+16);const pp=card.pr.includes(k)?5:0;BX[k]=[w/2+pp,(ls.length===2?21:14)+pp];});
+  const exitP=(k,tx,ty)=>{const[x,y]=pos[k],[hw,hh]=BX[k],dx=tx-x,dy=ty-y;if(!dx&&!dy)return[x,y];const sc=Math.min((hw+4)/Math.abs(dx||1e-9),(hh+4)/Math.abs(dy||1e-9));return[x+dx*sc,y+dy*sc];};
+  const loopsOf=(a,b)=>def.L.filter(l=>{const n=l[3];const i=n.indexOf(a);return i>=0&&n[(i+1)%n.length]===b;});
+  const mutual=(a,b)=>def.e.some(q=>q[0]===b&&q[1]===a);
+  let g='';
+  def.e.forEach(([a,b,p,dly])=>{const[x1,y1]=pos[a],[x2,y2]=pos[b],mx=(x1+x2)/2,my=(y1+y2)/2,dx=x2-x1,dy=y2-y1,L=Math.hypot(dx,dy)||1;let cx,cy;const lp=loopsOf(a,b);
+    if(mutual(a,b)){cx=mx+dy*.3;cy=my-dx*.3;}
+    else if(lp.length===1&&lp[0][3].length>2){const ns=lp[0][3],lx=ns.reduce((t,k)=>t+pos[k][0],0)/ns.length,ly=ns.reduce((t,k)=>t+pos[k][1],0)/ns.length;let vx=mx-lx,vy=my-ly;const l=Math.hypot(vx,vy)||1;cx=mx+vx/l*L*.22;cy=my+vy/l*L*.22;}
+    else{cx=mx+dy*.08;cy=my-dx*.08;}
+    const[sx,sy]=exitP(a,cx,cy),[ex,ey]=exitP(b,cx,cy),col=p==='+'?'#D0336B':'#1E88C8';
+    g+=`<path d="M${sx},${sy} Q${cx},${cy} ${ex},${ey}" fill="none" stroke="${col}" stroke-width="1.8" marker-end="url(#${U}${p==='+'?'p':'n'})"/>`;
+    const t=.78,qx=(1-t)**2*sx+2*(1-t)*t*cx+t*t*ex,qy=(1-t)**2*sy+2*(1-t)*t*cy+t*t*ey,tx=2*(1-t)*(cx-sx)+2*t*(ex-cx),ty=2*(1-t)*(cy-sy)+2*t*(ey-cy),tl=Math.hypot(tx,ty)||1;
+    let nx=ty/tl,ny=-tx/tl;const ox=cx-(sx+ex)/2,oy=cy-(sy+ey)/2;if(nx*ox+ny*oy<0){nx=-nx;ny=-ny;}
+    g+=`<text x="${qx+nx*9}" y="${qy+ny*9+4}" font-size="13" font-weight="800" fill="${col}" text-anchor="middle">${p==='+'?'+':'−'}</text>`;
+    if(dly){const hx=.25*sx+.5*cx+.25*ex,hy=.25*sy+.5*cy+.25*ey;g+=`<text x="${hx}" y="${hy+4}" font-size="12" font-weight="700" text-anchor="middle" fill="#555">∥</text>`;}});
+  def.L.forEach(([k,x,y])=>{const c=k==='R'?'#D0336B':'#1E88C8';g+=`<circle cx="${x}" cy="${y}" r="11" fill="#fff" stroke="${c}" stroke-width="1.5"/><text x="${x}" y="${y+4.5}" font-size="12" font-weight="800" text-anchor="middle" fill="${c}">${k}</text>`;});
+  Object.keys(pos).forEach(k=>{const[x,y]=pos[k],m=lines(k),isP=card.pr.includes(k),isD=card.data.includes(k),hw=BX[k][0]-(isP?5:0),hh=BX[k][1]-(isP?5:0);
+    if(isP)g+=`<rect x="${x-hw-5}" y="${y-hh-5}" width="${hw*2+10}" height="${hh*2+10}" rx="11" fill="#FFE9E5" stroke="#E5533D" stroke-width="2"/><text x="${x-hw-3}" y="${y-hh-9}" font-size="10.5" font-weight="800" fill="#C2412D">⚠ 問題</text>`;
+    g+=`<rect x="${x-hw}" y="${y-hh}" width="${hw*2}" height="${hh*2}" rx="8" fill="${isD?'#FFF1DC':'#fff'}" stroke="${isD?'#E8790C':'#D9DBEA'}" stroke-width="1.3"/>`;
+    m.forEach((ln,i)=>g+=`<text x="${x}" y="${y+(i-(m.length-1)/2)*LH+4.5}" font-size="${FS}" font-weight="700" text-anchor="middle" fill="${isD?'#9A4E00':'#23263A'}">${esc(ln)}</text>`);});
+  return `<svg class="cld" viewBox="-34 -16 398 240" role="img" aria-label="${esc(card.nm)}の因果ループ図"><defs>
+   <marker id="${U}p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#D0336B"/></marker>
+   <marker id="${U}n" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#1E88C8"/></marker></defs>${g}</svg>`;
+}
+
+function render(){
+  const html=c=>{const d=dataSVG(c);return `
+  <div class="card" tabindex="0" role="button" aria-pressed="false" aria-label="${esc(c.nm)}のカード。めくると因果ループ図" style="--c:${c.c}">
+   <div class="inner">
+    <section class="face front">
+      <div class="top"><span class="ico">${icon(c.id)}</span><div class="nm">${esc(c.nm)}</div><div class="tag">${esc(c.tag)}</div><div class="en">${esc(c.en)}</div><div class="q" aria-hidden="true">？</div></div>
+      <div class="body">
+        <div class="ttl">${esc(c.ttl)}</div>
+        <div class="gbox">
+          <span class="lbl">📊 このグラフは…</span>
+          <div class="legend">${d.leg}</div>
+          ${d.svg}
+          <div class="gsrc">データ：${d.src.map(esc).join('、')}</div>
+        </div>
+        <div class="read">${esc(c.read)}</div>
+        <div class="shape">${typSVG(c.id,c.c,c.bad)}<span>この型の、よくある形${c.bad?'（上ほど困る向き）':''}</span></div>
+      </div>
+      <div class="foot"><span class="pill">めくってみよう ↻</span></div>
+    </section>
+    <section class="face back">
+      <div class="hd"><b>${esc(c.nm)}</b><small>${esc(c.en)}</small></div>
+      <div class="body">
+        <div class="prob">⚠ ${esc(c.prob)}</div>
+        <div class="cldbox">${cldSVG(c)}<button class="zoom" type="button">図を大きく</button></div>
+        <div class="key"><span><em style="color:#D0336B">＋</em> 同じ向き</span><span><em style="color:#1E88C8">−</em> 反対向き</span><span><em>∥</em> 時間がかかる</span><span><em style="color:#E8790C">■</em> 表のグラフ${c.dataNote?esc(c.dataNote):''}</span></div>
+        <span class="lbl">🔄 ぐるっと一周すると…</span>
+        <ol class="story">${c.story.map(s=>`<li>${esc(s)}</li>`).join('')}</ol>
+        <div class="again">↺ また 1 にもどって、くり返し！</div>
+        <div class="hint"><b>💡 ぬけ出すヒント</b>${esc(c.hint)}</div>
+        <div class="src">出典：${d.src.map(esc).join('／')}</div>
+      </div>
+      <div class="foot"><span class="pill">表にもどす ↻</span></div>
+    </section>
+   </div>
+  </div>`;};
+  document.getElementById('grid-jp').innerHTML=CARDS.filter(c=>!c.grp).map(html).join('');
+  document.getElementById('grid-world').innerHTML=CARDS.filter(c=>c.grp==='world').map(html).join('');
+  document.querySelectorAll('.card').forEach(el=>{
+    const flip=()=>{el.classList.toggle('flipped');el.setAttribute('aria-pressed',el.classList.contains('flipped'));};
+    el.addEventListener('click',flip);
+    el.querySelector('.zoom').addEventListener('click',e=>{e.stopPropagation();const c=CARDS.filter(c=>!c.grp).concat(CARDS.filter(c=>c.grp==='world'))[[...document.querySelectorAll('.card')].indexOf(el)];
+      document.getElementById('dlgc').innerHTML=`<h2 style="color:${c.c}">${esc(c.nm)} <small style="font-size:13px;color:#6B7088">${esc(c.en)}</small></h2><div class="prob">⚠ 問題：${esc(c.prob)}</div>${cldSVG(c)}`;
+      document.getElementById('dlg').showModal();});
+    el.querySelector('.zoom').addEventListener('keydown',e=>e.stopPropagation());
+    el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();flip();}});
+  });
+}
+render();
+document.getElementById('dlgx').addEventListener('click',()=>document.getElementById('dlg').close());
+document.getElementById('dlg').addEventListener('click',e=>{if(e.target.id==='dlg')e.target.close();});
+document.getElementById('guess').addEventListener('click',e=>{const on=document.body.classList.toggle('guess');e.currentTarget.setAttribute('aria-pressed',on);});
+document.getElementById('reset').addEventListener('click',()=>document.querySelectorAll('.card.flipped').forEach(el=>{el.classList.remove('flipped');el.setAttribute('aria-pressed','false');}));
+</script>
+</body>
+</html>
