@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+<script>window.TET_CONFIG={"presetId": "foodlifestyle-wordtable-health", "title": "野菜を食べる未来を描く", "studyId": "foodlifestyle-health", "own": {"label": "野菜 g/日", "value": 350, "unit": "g"}, "nowYear": 2024, "horizons": [2030, 2040, 2050], "horizon": 2050, "interval": 5, "variables": [{"id": "x1", "role": "x", "pathway": "Top-down", "name": "社会・制度", "unit": "2019=100", "domain": [40, 160], "src": "食育白書の語の数え表（野菜・栄養・健康の合計÷全単語数、令和元年度＝100）", "history": [[2015, 80.2], [2016, 83.1], [2017, 97.7], [2018, 116.4], [2019, 100], [2020, 92.3], [2021, 105.6], [2022, 113.2], [2023, 92.2], [2024, 92.8]]}, {"id": "x2", "role": "x", "pathway": "Bottom-up", "name": "人々の関心", "unit": "2019=50", "domain": [0, 100], "src": "Google トレンド", "history": [[2019, 50], [2020, 70.8], [2021, 78.1], [2022, 79.1], [2023, 76.8], [2024, 69.8]]}, {"id": "x3", "role": "x", "pathway": "Affordability", "name": "買いやすさ", "unit": "2019=100", "domain": [40, 160], "src": "可処分所得（家計調査・勤労者世帯）÷生鮮野菜CPI（消費者物価指数）", "history": [[2015, 87.4], [2016, 83.6], [2017, 88.1], [2018, 87.9], [2019, 100], [2020, 99.9], [2021, 101.6], [2022, 98.1], [2023, 91.4], [2024, 87.7]]}, {"id": "y", "role": "y", "pathway": "Variable of interest", "name": "350g以上の人", "unit": "%", "domain": [0, 50], "src": "国民健康・栄養調査", "groups": {"女性": [[2014, 29.2], [2015, 31.4], [2016, 27.2], [2017, 29.0], [2018, 27.0], [2019, 26.5], [2022, 24.8], [2023, 21.9], [2024, 22.0]], "男性": [[2014, 33.2], [2015, 33.7], [2016, 29.3], [2017, 32.3], [2018, 30.7], [2019, 30.1], [2022, 28.9], [2023, 25.2], [2024, 26.2]]}}]};</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>TET ワークシート（記入と集計）</title>
@@ -368,8 +369,8 @@ let CONFIG = {
      history:[[2019,100],[2020,92.3],[2021,105.6],[2022,113.2],[2023,92.3],[2024,92.7]]},
     {id:'x2',role:'x',pathway:'Bottom-up',name:'人々の関心',unit:'2019=50',domain:[0,100],src:'Google トレンド',
      history:[[2019,50],[2020,70.8],[2021,78.1],[2022,79.1],[2023,76.8],[2024,69.8]]},
-    {id:'x3',role:'x',pathway:'Affordability',name:'買いやすさ',unit:'2019=100',domain:[40,160],src:'所得÷野菜CPI',
-     history:[[2019,100],[2020,100.4],[2021,119.6],[2022,114.6],[2023,99.6],[2024,88.1]]},
+    {id:'x3',role:'x',pathway:'Affordability',name:'買いやすさ',unit:'2019=100',domain:[40,160],src:'可処分所得（家計調査・勤労者世帯）÷生鮮野菜CPI（消費者物価指数）',
+     history:[[2019,100],[2020,99.9],[2021,101.6],[2022,98.1],[2023,91.4],[2024,87.7]]},
     {id:'y',role:'y',pathway:'Variable of interest',name:'350g以上の人',unit:'%',domain:[0,50],src:'（統計名を記入）',
      groups:{'女性':[[2014,29.2],[2015,31.4],[2016,27.2],[2017,29.0],[2018,27.0],[2019,26.5],[2022,24.8],[2023,21.9],[2024,22.0]],
              '男性':[[2014,33.2],[2015,33.7],[2016,29.3],[2017,32.3],[2018,30.7],[2019,30.1],[2022,28.9],[2023,25.2],[2024,26.2]]}}
@@ -1050,13 +1051,14 @@ function openSettings(vid){
       <label>縦軸の上限<input data-k="max" type="number" value="${v.domain[1]}"></label>
     </div>
     <label>過去のデータ<textarea data-k="data" spellcheck="false">${esc(dataText(v))}</textarea>
-      <span class="mini-btns"><button type="button" data-a="csv">CSVを読み込む</button><button type="button" data-a="gt" class="${/bottom/i.test(v.pathway)?'rec':''}">Googleトレンド</button><button type="button" data-a="pdf" class="${/top/i.test(v.pathway)?'rec':''}">PDFから語を数える</button><button type="button" data-a="ratio" class="${/afford/i.test(v.pathway)?'rec':''}">比で作る（所得÷価格）</button><button type="button" data-a="auto">縦軸をデータに合わせる</button></span></label>
+      <span class="mini-btns">${(()=>{const p=v.pathway||"";const td=/top/i.test(p),bu=/bottom/i.test(p),af=/afford/i.test(p),any=!(td||bu||af);return `<button type="button" data-a="csv">CSVを読み込む</button>`+(td?`<button type="button" data-a="wtab" class="rec">語の数え表（Excel）から作る</button><button type="button" data-a="pdf">PDFから語を数える</button>`:"")+(bu?`<button type="button" data-a="gt" class="rec">Googleトレンド</button>`:"")+(af?`<button type="button" data-a="ratio" class="rec">比で作る（所得÷価格）</button>`:"")+(any&&v.role!=="y"?`<button type="button" data-a="wtab">語の数え表（Excel）から作る</button><button type="button" data-a="pdf">PDFから語を数える</button><button type="button" data-a="gt">Googleトレンド</button><button type="button" data-a="ratio">比で作る（所得÷価格）</button>`:"");})()}<button type="button" data-a="auto">縦軸をデータに合わせる</button></span></label>
   </div>`).join('');
   document.querySelectorAll('.vbox').forEach(box=>{ const id=box.id.slice(3);
     box.querySelector('[data-a=csv]').onclick=()=>{csvTarget=id;$('csvIn').click()};
-    box.querySelector('[data-a=gt]').onclick=()=>helperTrends(id);
-    box.querySelector('[data-a=pdf]').onclick=()=>helperPdf(id);
-    box.querySelector('[data-a=ratio]').onclick=()=>helperRatio(id);
+    if(box.querySelector('[data-a=gt]'))box.querySelector('[data-a=gt]').onclick=()=>helperTrends(id);
+    if(box.querySelector('[data-a=pdf]'))box.querySelector('[data-a=pdf]').onclick=()=>helperPdf(id);
+    if(box.querySelector('[data-a=ratio]'))box.querySelector('[data-a=ratio]').onclick=()=>helperRatio(id);
+    if(box.querySelector('[data-a=wtab]'))box.querySelector('[data-a=wtab]').onclick=()=>helperWordTable(id);
     box.querySelector('[data-a=auto]').onclick=()=>{ try{ const d=parseData(box.querySelector('[data-k=data]').value);
       const vals=(d.history||Object.values(d.groups).flat()).map(r=>r[1]); const [a,b]=autoRange(vals);
       box.querySelector('[data-k=min]').value=a; box.querySelector('[data-k=max]').value=b; }catch(e){ $('mErr').textContent=e.message } };
@@ -1162,17 +1164,103 @@ function helperPdf(id){
 }
 
 // 3) 比で作る（所得÷価格 など）
+// 語の数え表（年度ごとの出現回数の表）から、政策の訴求度の指数を作る。食育白書・エネルギー白書など、どの分野の表でも使える
+const wareki=s=>{s=String(s??'').replace(/\s/g,'');let m;
+  if((m=s.match(/^(\d{4})(年度|年)?$/)))return +m[1];
+  if((m=s.match(/^(平成|令和|昭和)(元|\d{1,2})年度?$/))){const n=m[2]==='元'?1:+m[2];return {平成:1988,令和:2018,昭和:1925}[m[1]]+n;}
+  return null;};
+async function loadXLSXLib(){if(window.XLSX)return;await new Promise((ok,ng)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=ok;s.onerror=()=>ng(new Error('Excelを読む部品を読み込めませんでした（インターネット接続が必要です）'));document.head.appendChild(s);});}
+function helperWordTable(id){
+  hpOpen(`<h3>語の数え表から作る（トップダウン：政策の訴求度）</h3>
+  <p>白書などの文書を年度ごとに数えた表（1行目に年度、1列目に指標名）を読み込み、「数えた語の数 ÷ 全体の語の数」を基準の年＝100の指数にします。食育白書の「野菜・栄養・健康」でも、エネルギー白書の「再エネ・省エネ」でも、同じ形の表なら使えます。</p>
+  <div class="step"><input type="file" id="wtF" accept=".xlsx,.xls,.csv"> <span id="wtMsg" style="font-size:12px;color:var(--ink-3)"></span></div>
+  <div id="wtSet" hidden>
+   <div class="step"><b>数える語（分子）</b>　複数えらぶと足し合わせます<div id="wtNum" style="display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:4px"></div></div>
+   <div class="r"><label>割る数（分母）<select id="wtDen"></select></label><label>基準の年<input id="wtBY" type="number" value="2019"></label></div>
+   <label>出典として入れる名前<input id="wtSrc" value=""></label>
+   <div class="step" style="font-size:12px;color:var(--ink-3)">年度（平成27年度など）は西暦（2015など）に直して使います。</div>
+   <table class="prev" id="wtOut"></table></div>
+  <div class="ft"><button class="btn g" id="wtX">やめる</button><button class="btn" id="wtOk" disabled>この値を入れる</button></div>`);
+  $('wtX').onclick=hpClose;let tab=null,out=[];
+  const calc=()=>{const nums=[...document.querySelectorAll('#wtNum input:checked')].map(x=>+x.value);const den=+$('wtDen').value;const by=+$('wtBY').value;
+    out=tab.years.map((y,j)=>{const n=nums.reduce((s,r)=>s+(+tab.rows[r].vals[j]||0),0);const d=den>=0?+tab.rows[den].vals[j]:1;return [y,d?n/d:null];}).filter(r=>r[0]!=null&&r[1]!=null);
+    const b=(out.find(r=>r[0]===by)||out[0]||[0,1])[1];out=out.map(([y,v])=>[y,b?v/b*100:v]);
+    $('wtOut').innerHTML='<tr><th>年</th><th>指数</th></tr>'+out.map(([y,v])=>`<tr><td>${y}</td><td>${r1(v)}</td></tr>`).join('');$('wtOk').disabled=!out.length||!nums.length;
+    if(!$('wtSrc').dataset.touched)$('wtSrc').value=`${f0}（${nums.map(r=>tab.rows[r].name).join('・')}${den>=0?'÷'+tab.rows[den].name:''}）`;};
+  let f0='';
+  $('wtSrc').oninput=()=>{$('wtSrc').dataset.touched=1;};
+  $('wtF').onchange=async e=>{const f=e.target.files[0];if(!f)return;f0=f.name.replace(/\.[^.]+$/,'').replace(/_+\d*$/,'');try{
+      let rows;if(/\.csv$/i.test(f.name)){rows=(await f.text()).split(/\r?\n/).map(l=>l.split(','));}
+      else{await loadXLSXLib();const wb=XLSX.read(await f.arrayBuffer(),{type:'array'});rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:true,defval:null});}
+      const hi=rows.findIndex(r=>r&&r.filter(c=>wareki(c)!=null).length>=3);if(hi<0)throw new Error('年度の並んだ行が見つかりませんでした');
+      const cols=rows[hi].map((c,i)=>[i,wareki(c)]).filter(x=>x[1]!=null);
+      const body=rows.slice(hi+1).filter(r=>r&&r[0]!=null&&String(r[0]).trim()&&cols.some(([i])=>typeof r[i]==='number'||(r[i]!==''&&!isNaN(+r[i]))));
+      tab={years:cols.map(x=>x[1]),rows:body.map(r=>({name:String(r[0]).trim(),vals:cols.map(([i])=>+r[i])}))};
+      const isRatio=n=>/比率|%|％|割合/.test(n);
+      $('wtNum').innerHTML=tab.rows.map((r,i)=>isRatio(r.name)||/全単語|名詞数|総数|全体/.test(r.name)?'':`<label style="display:inline-flex;gap:4px;align-items:center;font-weight:500"><input type="checkbox" value="${i}" ${/合計/.test(r.name)?'checked':''} style="width:auto">${esc(r.name)}</label>`).join('');
+      if(!document.querySelector('#wtNum input:checked')){const c=document.querySelector('#wtNum input');if(c)c.checked=true;}
+      $('wtDen').innerHTML=`<option value="-1">（割らない）</option>`+tab.rows.map((r,i)=>isRatio(r.name)?'':`<option value="${i}">${esc(r.name)}</option>`).join('');
+      const di=tab.rows.findIndex(r=>/全単語/.test(r.name));$('wtDen').value=di>=0?di:-1;
+      $('wtMsg').textContent=`${tab.years[0]}〜${tab.years[tab.years.length-1]}年の${tab.rows.length}行を読み込みました`;$('wtSet').hidden=false;
+      $('wtNum').onchange=calc;$('wtDen').onchange=calc;$('wtBY').oninput=calc;calc();
+    }catch(err){$('wtMsg').textContent=err.message||String(err);}};
+  $('wtOk').onclick=()=>{const now=+($('cNow')&&$('cNow').value)||CONFIG.nowYear;const o2=out.filter(([y])=>y<=now);fillVar(id,o2,`${$('wtBY').value}=100`,$('wtSrc').value.trim()||'語の数え表');};
+}
 function helperRatio(id){
   hpOpen(`<h3>比で作る（アフォーダビリティ：買いやすさ）</h3>
   <p>「所得」を「野菜の価格（消費者物価指数）」で割り、基準の年を100にした指数を作ります。数値は e-Stat などからCSVで落として、それぞれ読み込むか貼り付けてください。月ごとの値は年の平均にします。</p>
   <div class="step">データの例：分子＝家計調査の可処分所得や実収入、分母＝消費者物価指数の「生鮮野菜」。<br>
   <button class="btn g" id="raInc" style="margin-top:6px">e-Statで家計調査を開く</button> <button class="btn g" id="raCpi" style="margin-top:6px">e-Statで消費者物価指数を開く</button></div>
+  <div class="step"><b>よく使う組み合わせ（2019〜2024年の値を入れます）</b><br>
+   <button class="btn" id="raP1" style="margin-top:6px">Price Sensitivity（可処分所得 ÷ 生鮮野菜CPI）</button>
+   <button class="btn g" id="raP2" style="margin-top:6px">可処分所得 ÷ キャベツの値段</button></div>
+  <div class="step"><b>家計調査のExcelから所得を読む</b><br>e-Stat「家計調査 → 長期時系列表 → 表2 用途分類 → 二人以上の世帯のうち勤労者世帯」のExcel（kin-ts.xlsx）を選ぶと、年ごとの<b>可処分所得</b>（1か月あたり・年平均）が分子に自動で入ります。<br>
+   <input type="file" id="raXls" accept=".xlsx,.xls" style="margin-top:6px"><span id="raXlsMsg" style="font-size:12px;color:var(--ink-3);margin-left:6px"></span></div>
+  <div class="step"><b>消費者物価指数のCSVから価格を読む</b><br>e-Stat「消費者物価指数 → 2020年基準 → 長期時系列データ → 品目別価格指数 → 全国 → 年平均 → 中分類指数（1970年～最新年）」のCSV（zni2020s.csv）を選ぶと、<b>生鮮野菜</b>の年平均（2020年＝100）が分母に入ります。<br>
+   <input type="file" id="raCsv" accept=".csv" style="margin-top:6px"> <select id="raCol" hidden style="max-width:220px"></select><span id="raCsvMsg" style="font-size:12px;color:var(--ink-3);margin-left:6px"></span></div>
   <div class="r"><label>分子（所得など）：年,値<textarea id="raN" placeholder="2019,450000&#10;2020,470000"></textarea><input type="file" id="raNF" accept=".csv,.txt"></label>
   <label>分母（価格など）：年,値<textarea id="raD" placeholder="2019,100&#10;2020,104.2"></textarea><input type="file" id="raDF" accept=".csv,.txt"></label></div>
   <div class="r"><label>基準の年<input id="raBY" type="number" value="2019"></label><label>基準の年の値<input id="raBV" type="number" value="100"></label></div>
+  <label>出典として入れる名前<input id="raSrc" value="所得÷価格（e-Statなど）"></label>
   <div id="raOut"></div><p class="warn" id="raErr"></p>
   <div class="ft"><button class="btn g" id="raX">やめる</button><button class="btn g" id="raRun">計算する</button><button class="btn" id="raOk" disabled>この値を入れる</button></div>`);
   $('raX').onclick=hpClose;
+  // 家計調査（勤労者世帯）の長期時系列Excelから「可処分所得」の年平均を読む（ブラウザの中だけで処理）
+  $('raXls').onchange=async e=>{const f=e.target.files[0];if(!f)return;const msg=$('raXlsMsg');msg.textContent='読み込み中…';
+    try{if(!window.XLSX){await new Promise((ok,ng)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=ok;s.onerror=()=>ng(new Error('Excelを読む部品を読み込めませんでした（インターネット接続が必要です）'));document.head.appendChild(s);});}
+      const wb=XLSX.read(await f.arrayBuffer(),{type:'array'});
+      const names=wb.SheetNames.slice().sort((a,b)=>(/（年）/.test(b)?1:0)-(/（年）/.test(a)?1:0));let found=null;
+      for(const nm of names){const rows=XLSX.utils.sheet_to_json(wb.Sheets[nm],{header:1,raw:true,defval:null});
+        const hi=rows.findIndex(r=>r&&r.filter(v=>/^\s*\d{4}年\s*$/.test(String(v??''))).length>=3);if(hi<0)continue;
+        const ri=rows.findIndex(r=>r&&r.slice(0,20).some(v=>String(v??'').replace(/[\s\u3000]/g,'')==='可処分所得'));if(ri<0)continue;
+        const out=[];rows[hi].forEach((v,c)=>{const m=String(v??'').match(/^\s*(\d{4})年\s*$/);const x=rows[ri][c];if(m&&typeof x==='number')out.push([+m[1],x]);});
+        if(out.length){found={nm,out};break;}}
+      if(!found)throw new Error('「可処分所得」の行と年の並びが見つかりませんでした。家計調査の勤労者世帯のファイルか確かめてください');
+      $('raN').value=found.out.map(([y,v])=>`${y},${v}`).join('\n');
+      msg.textContent=`「${found.nm}」から${found.out.length}年分（${found.out[0][0]}〜${found.out[found.out.length-1][0]}年）を入れました`;
+      if(!$('raSrc').value||/所得÷価格/.test($('raSrc').value))$('raSrc').value='可処分所得（家計調査・勤労者世帯）÷価格';
+      if($('raD').value.trim())$('raRun').click();
+    }catch(err){msg.textContent=err.message||String(err);}};
+  const parseCSV=txt=>{const out=[];let row=[],cur='',q=false;for(let i=0;i<txt.length;i++){const ch=txt[i];
+      if(q){if(ch==='"'){if(txt[i+1]==='"'){cur+='"';i++;}else q=false;}else cur+=ch;}
+      else if(ch==='"')q=true;else if(ch===','){row.push(cur);cur='';}else if(ch==='\n'||ch==='\r'){if(ch==='\r'&&txt[i+1]==='\n')i++;row.push(cur);out.push(row);row=[];cur='';}else cur+=ch;}
+    if(cur!==''||row.length){row.push(cur);out.push(row);}return out;};
+  // 消費者物価指数の中分類指数CSV（Shift_JIS）：1行目が分類名、1列目が年。初めは「生鮮野菜」の列を使う
+  let cpiRows=null;
+  const fillCpi=()=>{const col=+$('raCol').value;const out=cpiRows.filter(r=>r&&/^\s*\d{4}\s*$/.test(r[0]||'')&&r[col]!==''&&!isNaN(+r[col])).map(r=>[+r[0].trim(),+r[col]]);
+    $('raD').value=out.map(([y,v])=>`${y},${v}`).join('\n');const nm=cpiRows[0][col].replace('（再掲）','');
+    $('raCsvMsg').textContent=`「${nm}」${out.length}年分（${out[0][0]}〜${out[out.length-1][0]}年）を入れました`;
+    $('raSrc').value=`可処分所得（家計調査・勤労者世帯）÷${nm}CPI（消費者物価指数）`;if($('raN').value.trim())$('raRun').click();};
+  $('raCsv').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const buf=await f.arrayBuffer();let txt;try{txt=new TextDecoder('shift_jis').decode(buf);}catch(_){txt=new TextDecoder().decode(buf);}
+      if(!/類・品目|総合/.test(txt))txt=new TextDecoder().decode(buf);
+      cpiRows=parseCSV(txt);const hdr=cpiRows[0]||[];const sel=$('raCol');
+      sel.innerHTML=hdr.map((h,i)=>i?`<option value="${i}">${esc(h)}</option>`:'').join('');
+      const def=hdr.findIndex(h=>/^生鮮野菜/.test(h));if(def<0)throw new Error('「生鮮野菜」の列が見つかりませんでした。中分類指数のCSVか確かめてください');
+      sel.value=def;sel.hidden=false;sel.onchange=fillCpi;fillCpi();}catch(err){$('raCsvMsg').textContent=err.message||String(err);}};
+  // 家計調査の可処分所得（円/月）と、消費者物価指数の生鮮野菜（2020=100）、キャベツの値段（円/kg）
+  const INC='2019,476645\n2020,498639\n2021,492681\n2022,500914\n2023,494668\n2024,522569';
+  $('raP1').onclick=()=>{$('raN').value=INC;$('raD').value='2019,95.5\n2020,100.0\n2021,97.2\n2022,102.3\n2023,108.4\n2024,119.4';$('raSrc').value='Price Sensitivity指数（可処分所得÷生鮮野菜CPI）';$('raRun').click();};
+  $('raP2').onclick=()=>{$('raN').value=INC;$('raD').value='2019,169\n2020,189\n2021,160\n2022,181\n2023,197\n2024,244';$('raSrc').value='可処分所得÷キャベツの値段（円/kg）';$('raRun').click();};
   $('raInc').onclick=()=>window.open('https://www.e-stat.go.jp/stat-search/files?page=1&toukei=00200561','_blank','noopener');
   $('raCpi').onclick=()=>window.open('https://www.e-stat.go.jp/stat-search/files?page=1&toukei=00200573','_blank','noopener');
   [['raNF','raN'],['raDF','raD']].forEach(([f,t])=>$(f).onchange=async e=>{const x=e.target.files[0];if(!x)return;$(t).value=annualize(await x.text()).map(r=>`${r.year},${r1(r.value)}`).join('\n');});
@@ -1181,7 +1269,7 @@ function helperRatio(id){
     if(!rows.length)throw new Error('分子と分母で、同じ年のデータがありません');
     const out=rebase(rows,+$('raBY').value,+$('raBV').value);
     $('raOut').innerHTML=`<table><tr><th>年</th><th>分子</th><th>分母</th><th>入れる値</th></tr>${out.map(r=>`<tr><td>${r[0]}</td><td>${r1(N.find(x=>x.year===r[0]).value)}</td><td>${r1(D.find(x=>x.year===r[0]).value)}</td><td><b>${r1(r[1])}</b></td></tr>`).join('')}</table>`;
-    $('raOk').disabled=false;$('raOk').onclick=()=>fillVar(id,out,`${$('raBY').value}=${$('raBV').value}`,'所得÷価格（e-Statなど）');}
+    $('raOk').disabled=false;$('raOk').onclick=()=>{const now=+($('cNow')&&$('cNow').value)||CONFIG.nowYear;const o2=out.filter(([y])=>y<=now);if(o2.length<out.length)toast(`「いま」の年（${now}年）より後の値は入れていません`);fillVar(id,o2,`${$('raBY').value}=${$('raBV').value}`,$('raSrc').value.trim()||'所得÷価格');}}
     catch(e){$('raErr').textContent=e.message;$('raOk').disabled=true;}};
 }
 $('mClose').onclick=closeSettings;
