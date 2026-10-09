@@ -98,6 +98,12 @@ h1{cursor:pointer} h1:hover{text-decoration:underline dotted}
 #arP .dl button[aria-pressed="true"]{background:#5B3A8C;color:#fff;border-color:#5B3A8C}
 #arP .sug{display:flex;flex-direction:column;gap:2px;width:100%;text-align:left;border:1px solid #7A4EAB;background:#fff;border-radius:9px;padding:6px 9px;margin-top:5px;cursor:pointer;font:inherit;font-size:12px}
 #arP .sug span{color:var(--ink-3);font-size:11px;line-height:1.45}#arP .sug[aria-pressed="true"]{background:#F1EAF9}
+.acards{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.acard{position:relative;font:inherit;background:#fff;border:1.5px solid #E2E4F0;border-bottom-width:3px;border-radius:14px;padding:8px 6px 6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;color:#23263A}
+.acard:hover{border-color:var(--c)}.acard b{font-size:13px}.acard small{font-size:10.5px;color:var(--ink-3);line-height:1.3}
+.acard .bot{width:100%;height:auto;color:#23263A}
+.acard.near{border-color:var(--c);box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 18%,transparent)}
+.acard em{position:absolute;top:-8px;left:50%;transform:translateX(-50%);font-style:normal;font-size:10px;font-weight:800;color:#fff;background:var(--c);border-radius:999px;padding:1px 8px;white-space:nowrap}
 #arP .stps{display:flex;gap:6px;margin:2px 0 10px}
 #arP .stp{flex:1;display:flex;align-items:center;gap:6px;justify-content:center;border:2px solid #E2E4F0;background:#fff;border-radius:999px;padding:4px 6px;font:inherit;font-size:12px;font-weight:800;color:var(--ink-3);cursor:pointer}
 #arP .stp.on{border-color:#5B5BD6;color:#3F3FB0;background:#F1F1FF}#arP .stp.done{color:#14A37F;border-color:#BFE8DC}#arP .stp:disabled{opacity:.45;cursor:default}
@@ -119,7 +125,7 @@ h1{cursor:pointer} h1:hover{text-decoration:underline dotted}
 #tpl .sg button.arch{border-color:#7A4EAB;box-shadow:inset 0 0 0 1px #7A4EAB}
 #tpl .sg button.arch::after{content:'型の典型';font-size:9.5px;color:#7A4EAB;font-weight:700}
 #hp .hc.wide{max-width:980px}
-.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px;margin-top:10px}
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:10px}
 .gcard{border:2px solid #E2E4F0;border-bottom-width:4px;border-radius:16px;padding:10px 12px;background:#fff;display:flex;flex-direction:column;gap:6px}
 .gcard.focus{border-color:#5B5BD6;box-shadow:0 0 0 3px #ECECFD}
 .gcard h4{margin:0;font-size:15.5px;color:#3F3FB0;display:flex;justify-content:space-between;gap:6px;align-items:baseline}
@@ -134,6 +140,13 @@ h1{cursor:pointer} h1:hover{text-decoration:underline dotted}
 .story li:not(:last-child)::after{content:'→';margin-left:6px;color:#8A90A6}
 .story li.again{background:none;color:#5B5BD6;font-weight:800;counter-increment:none}.story li.again::before{display:none}
 .gcard .prob{font-size:13px;font-weight:800;color:#C2412D;background:#FFE9E5;border-radius:10px;padding:5px 10px;margin-bottom:6px}
+.gsimple{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding:4px 0}
+.gsimple .agt{font-size:17px;font-weight:800}.gsimple .ags{font-size:12.5px;color:var(--ink-3);line-height:1.4}
+.gsimple .bot{width:100%;max-width:200px;height:auto;color:#23263A;margin:4px 0}
+.gsimple .age{font-size:12.5px;font-weight:800;color:var(--c)}
+.gcard{border-color:#E2E4F0}.gcard:hover{border-color:var(--c)}
+.gdet{border-top:1px dashed #E2E4F0;padding-top:6px}.gdet summary{cursor:pointer;font-size:12.5px;font-weight:700;color:#5B5BD6;list-style:none;text-align:center}
+.gdet[open] summary{margin-bottom:6px}
 .gcard .catch{font-size:16px;font-weight:800;color:#23263A;line-height:1.4}
 .gcard .ex1{font-size:13px;line-height:1.55;color:var(--ink-2);background:#F6F7FC;border-radius:10px;padding:6px 9px}
 .gcard .ex1 span{display:inline-block;font-size:11px;font-weight:800;color:#fff;background:#5B5BD6;border-radius:999px;padding:0 8px;margin-right:6px}
@@ -635,7 +648,7 @@ const DIALS={
  success:{td:['Al','資源の配り方を政策が変えられるか'],bu:['Ae','関心の高い人・地域がさらに伸びる'],af:['Br','買いにくい人・地域ほど資源が減る']}
 };
 // 関心のある変数にあたる役割の性質：bad＝高いほど困る（問題の症状など）、good＝高いほど良い
-const YROLE={fixes:['bad','いったん良くなり、また悪くなる'],burden:['bad','良くなったり悪くなったりをくり返す'],drift:['good','目標350g → 300g → 250g…と下がる'],limits:['good','部員が増える → 体育館が混んで増えなくなる'],under:['good','人気のお店 → 待ち時間が長くなり客が減る'],esc:['good','A店とB店の値下げ合戦'],commons:['good','遅れて悪くなる'],success:['good','選ばれる選手ばかり点を取る']};
+const YROLE={fixes:['bad','いったん良くなり、また悪くなる'],burden:['bad','良くなったり悪くなったりをくり返す'],drift:['good','少しずつ悪くなっていく'],limits:['good','良くなるが、やがて頭打ちになる'],under:['good','良くなってから、また悪くなる'],esc:['good','張り合ううちに、おたがいに悪くなる'],commons:['good','しばらく良くなったあと、急に悪くなる'],success:['good','一方に偏っていく']};
 const yBetter=()=>{const y=VARS.find(v=>v.role==='y');if(!y)return 'up';if(S.yBetter)return S.yBetter;if(y.better)return y.better;return /ない|困る|不足|リスク|ゼロ|損失|乱高下/.test(y.name||'')?'down':'up';};
 // 型の典型の形を、変数の「良い向き」に合わせて上下を入れ替える
 function yShape(def){const r=def.roles.find(q=>q.y);if(!r)return null;const sense=(YROLE[def.id]||['good'])[0];const inv=(sense==='bad')!==(yBetter()==='down');
@@ -707,14 +720,53 @@ const ARCH_PROB={
 };
 // 研究者は設定ファイル（CONFIG.archetypesExtra）で型を追加できる
 function mergeExtraArch(){(CONFIG.archetypesExtra||[]).forEach(a=>{if(a&&a.id&&a.roles&&a.e&&!ARCH.find(q=>q.id===a.id)){ARCH.push(a);if(a.info)ARCH_INFO[a.id]=a.info;}});}
+// 型ごとの「問題の良し悪し」の動き。縦軸は上＝良い・下＝悪い、横軸は時間（すべてのカードで同じ向き）
+function botSVG2(id,col,better){
+  const W=170,H=92,x0=better?34:26,x1=W-8,yT=10,y0=H-18;
+  // better を渡すと、縦軸を「多い／少ない」（変数の値）にし、「減ると良い」なら形を上下反転する
+  const X=t=>x0+(x1-x0)*t,Y=v=>yT+(y0-yT)*(better==='down'?v:(1-v));
+  const curve=P=>{let d=`M${X(P[0][0])},${Y(P[0][1])}`;for(let i=1;i<P.length;i++){const [a,b]=P[i-1],[c,e]=P[i];const mx=(a+c)/2;d+=` C${X(mx)},${Y(b)} ${X(mx)},${Y(e)} ${X(c)},${Y(e)}`;}return d;};
+  const C={
+    fixes:[[[0,.5],[.15,.74],[.28,.76],[.5,.45],[.75,.25],[1,.12]]],                                   // いったん良くなり、また悪くなる
+    burden:[[[0,.7],[.12,.88],[.24,.6],[.38,.78],[.52,.48],[.66,.64],[.8,.32],[.92,.45],[1,.18]]], // 良くなったり悪くなったりしながら、だんだん悪くなる
+    drift:[[[0,.8],[.35,.68],[.65,.48],[1,.22]]],                                             // 少しずつ悪くなる
+    limits:[[[0,.15],[.3,.25],[.5,.55],[.7,.78],[1,.84]]],                                    // 良くなるが頭打ち
+    under:[[[0,.2],[.4,.72],[.6,.8],[.8,.68],[1,.48]]],                                      // 良くなってから悪くなる
+    esc:[[[0,.82],[.2,.64],[.4,.7],[.6,.44],[.8,.5],[1,.18]],[[0,.72],[.2,.78],[.4,.52],[.6,.6],[.8,.3],[1,.24]]], // 両方がどんどん悪くなる（2本）
+    commons:[[[0,.4],[.4,.7],[.65,.82],[.82,.55],[1,.08]]],                                   // 良くなってから急に悪くなる
+    success:[[[0,.5],[.35,.62],[.65,.8],[1,.92]],[[0,.48],[.35,.36],[.65,.2],[1,.08]]]};      // 差が広がる（2本）
+  const L=C[id]||[[[0,.5],[1,.5]]];
+  let g=`<path d="M${x0},${yT-2}V${y0}H${x1}" fill="none" stroke="currentColor" stroke-opacity=".3" stroke-width="1.5" stroke-dasharray="2 4"/>
+    <text x="${x0-4}" y="${yT+6}" font-size="9" text-anchor="end" fill="currentColor" fill-opacity=".55" font-weight="700">${better?'多い':'良い'}</text>
+    <text x="${x0-4}" y="${y0}" font-size="9" text-anchor="end" fill="currentColor" fill-opacity=".55" font-weight="700">${better?'少ない':'悪い'}</text>
+    <text x="${x1}" y="${H-4}" font-size="9" text-anchor="end" fill="currentColor" fill-opacity=".55">時間 →</text>`;
+  L.forEach((P,k)=>{const c=k===0?col:'color-mix(in srgb, '+col+' 45%, #9AA0B5)';g+=`<path d="${curve(P)}" fill="none" stroke="${c}" stroke-width="${k===0?7:5}" stroke-linecap="round" stroke-linejoin="round"/>`;
+    g+=`<circle cx="${X(P[0][0])}" cy="${Y(P[0][1])}" r="3.3" fill="#23263A"/><circle cx="${X(P[P.length-1][0])}" cy="${Y(P[P.length-1][1])}" r="3.3" fill="#23263A"/>`;});
+  if(id==='esc')g+=`<text x="${X(0)+4}" y="${Y(.82)-6}" font-size="9" fill="currentColor" fill-opacity=".6">AとBが張り合う</text>`;
+  if(id==='success')g+=`<text x="${X(1)}" y="${Y(.92)-6}" font-size="9" text-anchor="end" fill="currentColor" fill-opacity=".6">勝つ側</text><text x="${X(1)-8}" y="${Y(.08)-6}" font-size="9" text-anchor="end" fill="currentColor" fill-opacity=".6">負ける側</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" class="bot" aria-hidden="true">${g}</svg>`;
+}
+// 型の典型的な動き（参照モード）を、シンプルな線で描く
+function botSVG(sh,col){
+  const W=150,H=80,x0=12,x1=W-10,y0=H-14,yT=12;
+  const P={VALLEY:[[0,.35],[.3,.75],[.5,.85],[.7,.6],[1,.2]],PEAK:[[0,.75],[.3,.35],[.5,.18],[.7,.4],[1,.8]],OSC:[[0,.5],[.15,.25],[.3,.7],[.45,.25],[.6,.7],[.75,.3],[.9,.65],[1,.45]],
+    PEX:[[0,.85],[.4,.78],[.65,.6],[.85,.35],[1,.1]],NEX:[[0,.15],[.35,.3],[.6,.55],[.8,.75],[1,.88]],SSH:[[0,.85],[.3,.78],[.5,.5],[.7,.22],[1,.15]],LINR:[[0,.8],[1,.25]],CONST:[[0,.5],[1,.5]]}[sh]||[[0,.5],[1,.5]];
+  const X=t=>x0+(x1-x0)*t,Y=v=>yT+(y0-yT)*v;
+  let d=`M${X(P[0][0])},${Y(P[0][1])}`;for(let i=1;i<P.length;i++){const [a,b]=P[i-1],[c,e]=P[i];const mx=(a+c)/2;d+=` C${X(mx)},${Y(b)} ${X(mx)},${Y(e)} ${X(c)},${Y(e)}`;}
+  return `<svg viewBox="0 0 ${W} ${H}" class="bot" aria-hidden="true"><path d="M${x0},${yT-4}V${y0}H${x1}" fill="none" stroke="currentColor" stroke-opacity=".25" stroke-width="1.5" stroke-dasharray="2 4"/>
+    <path d="${d}" fill="none" stroke="${col}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="${X(P[0][0])}" cy="${Y(P[0][1])}" r="3.5" fill="#23263A"/><circle cx="${X(P[P.length-1][0])}" cy="${Y(P[P.length-1][1])}" r="3.5" fill="#23263A"/></svg>`;
+}
+
+const ACOL={fixes:'#E5533D',burden:'#E8790C',drift:'#7A4EAB',limits:'#14A37F',under:'#00879A',esc:'#C2412D',commons:'#2E86C1',success:'#C2457E'};
 function openGallery(focus){
   mergeExtraArch();const cur=archDef();
   hpOpen(`<h3><i class="ic ic-book" style="color:#5B5BD6"></i> 型の図かん</h3>
    <p class="gintro">世の中によくある<b>「くり返しのパターン」</b>を集めました。知っておくと「次に何が起きそう？」が考えやすくなります。</p>
    <div class="gal">${ARCH.map(d=>{const I=ARCH_INFO[d.id]||{},Sh=ARCH_SHORT[d.id]||[I.kid||d.d,I.ex||''];const ys=d.roles.find(r=>r.y);const sh=ys&&SHAPES.find(q=>q.id===ys.sh);
-     return `<div class="gcard ${d.id===focus?'focus':''}" id="gc-${d.id}">
-       <h4>${esc(d.nm)}<small>${esc(d.en||'')}</small></h4>
-       <div class="catch">${esc(Sh[0])}</div>
+     return `<div class="gcard ${d.id===focus?'focus':''}" id="gc-${d.id}" style="--c:${ACOL[d.id]||'#5B5BD6'}">
+       <div class="gsimple"><span class="agt">${esc(d.nm)}</span><span class="ags">${esc(Sh[0])}</span>${botSVG2(d.id,ACOL[d.id]||'#5B5BD6')}<span class="age">${esc(d.en||'')}</span></div>
+       <details class="gdet" ${d.id===focus?'open':''}><summary>くわしく見る ▾</summary>
        ${(()=>{const E=ARCH_EX[d.id];if(!E)return archSVG(d,{},{generic:true})+(Sh[1]?`<div class="ex1"><span>たとえば</span>${esc(Sh[1])}</div>`:'');
          const P=ARCH_PROB[d.id]||{r:[],t:['','']};
          return `<div class="gtab" data-id="${d.id}"><button type="button" data-v="gen" aria-pressed="true">しくみ</button><button type="button" data-v="ex" aria-pressed="false">たとえば</button></div>
@@ -724,6 +776,7 @@ function openGallery(focus){
        ${sh?`<div class="gs">${shapeIcon(sh.id)}<span>グラフは <b>${esc(sh.nm)}</b> になりやすい</span></div>`:''}
        <details class="more"><summary>もっとくわしく</summary>
          <div class="row2">${I.kid?`<b>どんな型？</b><span>${esc(I.kid)}</span>`:''}${I.food?`<b>食では</b><span>${esc(I.food)}</span>`:''}${I.hint?`<b>ヒント</b><span>${esc(I.hint)}</span>`:''}</div></details>
+       </details>
        ${CONFIG.archetypeLock?'':`<button class="btn" data-use="${d.id}" ${cur&&cur.id===d.id?'disabled':''}>${cur&&cur.id===d.id?'✓ 使っている型':'この型を使う'}</button>`}</div>`;}).join('')}</div>
    <p class="gintro adv" style="margin-top:10px">研究者の方へ：設定ファイル（JSON）の <code>archetypesExtra</code> に同じ形で書くと、型を追加できます。</p>
    <div class="ft"><button class="btn g" id="gX">閉じる</button></div>`);
@@ -795,58 +848,57 @@ function makeDrag(el){const h=el.querySelector('.th');if(!h||h._drag)return;h._d
     el.style.right='auto';el.style.left=(r.left-pr.left)+'px';el.style.top=(r.top-pr.top)+'px';h.setPointerCapture(e.pointerId);
     const mv=ev=>{el.style.left=Math.max(-r.width+80,Math.min(pr.width-80,ev.clientX-pr.left-ox))+'px';el.style.top=Math.max(0,Math.min(pr.height-40,ev.clientY-pr.top-oy))+'px';};
     const up=()=>{h.removeEventListener('pointermove',mv);h.removeEventListener('pointerup',up);};h.addEventListener('pointermove',mv);h.addEventListener('pointerup',up);});}
+// 型ごとの「良し悪しの動き」（カードの絵と同じ）。描いた線と比べて、近い型を見つけるのに使う
+const BOTC={fixes:[[0,.5],[.15,.74],[.28,.76],[.5,.45],[.75,.25],[1,.12]],burden:[[0,.7],[.12,.88],[.24,.6],[.38,.78],[.52,.48],[.66,.64],[.8,.32],[.92,.45],[1,.18]],
+  drift:[[0,.8],[.35,.68],[.65,.48],[1,.22]],limits:[[0,.15],[.3,.25],[.5,.55],[.7,.78],[1,.84]],under:[[0,.2],[.4,.72],[.6,.8],[.8,.68],[1,.48]],
+  esc:[[0,.82],[.2,.64],[.4,.7],[.6,.44],[.8,.5],[1,.18]],commons:[[0,.4],[.4,.7],[.65,.82],[.82,.55],[1,.08]],success:[[0,.48],[.35,.36],[.65,.2],[1,.08]]};
+const lerpC=(P,x)=>{for(let k=1;k<P.length;k++){if(x<=P[k][0]){const [a,b]=P[k-1],[c,d]=P[k];return b+(d-b)*((x-a)/((c-a)||1));}}return P[P.length-1][1];};
+// 関心のある変数について描いた線（いまの値＋将来の点）から、良し悪しの動きを取り出し、近い型を順に並べる
+function drawnMatch(){const y=VARS.find(v=>v.role==='y');if(!y)return null;const L=S.lanes[y.id];if(!L)return null;
+  const ys=Object.keys(L.points).map(Number).filter(v=>v>CONFIG.nowYear).sort((a,b)=>a-b);if(ys.length<3)return null;
+  const h=hist(y);const pts=[[CONFIG.nowYear,h[h.length-1].value],...ys.map(yr=>[yr,L.points[yr]])];const t0=pts[0][0],t1=pts[pts.length-1][0];
+  let g=pts.map(([yr,v])=>[(yr-t0)/((t1-t0)||1),yBetter()==='down'?-v:v]);const mn=Math.min(...g.map(p=>p[1])),mx=Math.max(...g.map(p=>p[1]));if(mx-mn<1e-9)return null;
+  g=g.map(([x,v])=>[x,(v-mn)/(mx-mn)]);
+  return Object.entries(BOTC).map(([id,P])=>{const c=g.map(([x])=>lerpC(P,x));const cm=Math.min(...c),cM=Math.max(...c);const cn=c.map(v=>(v-cm)/((cM-cm)||1));
+    return {id,err:g.reduce((s,[x,v],k)=>s+Math.abs(v-cn[k]),0)/g.length};}).sort((a,b)=>a.err-b.err);}
 function openArch(){
   mergeExtraArch();const p=$('arP');const lock=!!CONFIG.archetypeLock;const def=archDef();
-  S.dial=S.dial||{};const dl={};let auto=false;['td','bu','af'].forEach(k=>{dl[k]=S.dial[k]||'';if(!dl[k]){const a=dialFromLane(k);if(a){dl[k]=a;auto=true;}}});
-  const all3=!!(dl.td&&dl.bu&&dl.af);
-  let step=S._arStep||(def?3:1);if(step===3&&!def)step=all3?2:1;if(step===2&&!all3)step=1;
-  const yv=VARS.find(v=>v.role==='y');
-  const chip=(n,t)=>`<button type="button" class="stp ${step===n?'on':''} ${n<step?'done':''}" data-step="${n}" ${n>step&&!(n===2&&all3)&&!(n===3&&def)?'disabled':''}>${n<step?'✓':n}<span>${t}</span></button>`;
+  const yv=VARS.find(v=>v.role==='y');const yn=yv?(yv.name||yv.pathway):'';const bt=yBetter();
+  let step=S._arStep||(def?2:1);if(step===2&&!def)step=1;
+  // 3つの要因の見通しは、描いた線から自動で読む（入力はしなくてよい）
+  const dl={};['td','bu','af'].forEach(k=>dl[k]=(S.dial&&S.dial[k])||dialFromLane(k)||'');
+  const chip=(n,tx)=>`<button type="button" class="stp ${step===n?'on':''} ${n<step?'done':''}" data-step="${n}" ${n===2&&!def?'disabled':''}>${n<step?'✓':n}<span>${tx}</span></button>`;
   let body='';
   if(step===1){
-    body=`<div class="big">これから10〜20年で、<br>この3つはどうなりそう？</div>
-     ${['td','bu','af'].map(k=>`<div class="dial3"><div class="dn">${DIAL_JA[k]}<small>${{td:'社会・制度',bu:'人々の気持ち',af:'買いやすさ'}[k]}</small></div>
-       <div class="dl" data-k="${k}">${[['u','↑','強まる'],['s','→','同じ'],['d','↓','弱まる']].map(([v,ic,t])=>`<button type="button" data-v="${v}" aria-pressed="${dl[k]===v}" title="${t}"><b>${ic}</b><span>${t}</span></button>`).join('')}</div></div>`).join('')}
-     ${auto?`<div class="tip">描いた線から入れてあります。違えば押し直してください。</div>`:''}
-     <button type="button" class="btn nx" id="arNext" ${all3?'':'disabled'}>次へ ▸</button>`;
-  }else if(step===2){
-    const sug=suggestArch(dl);const list=sug.length?sug:[];
-    body=`<div class="big">あなたの見通しに近い「型」</div>
-     ${list.length?list.map((q,n)=>{const d=ARCH.find(x=>x.id===q.id);const ys=d.roles.find(r=>r.y);return `<div class="pick ${n===0?'best':''}">
-       <div class="ph"><b>${esc(d.nm)}</b>${n===0?'<em>いちばん近い</em>':''}</div>
-       <div class="pk">${esc((ARCH_SHORT[q.id]||[])[0]||(ARCH_INFO[q.id]||{}).kid||d.d)}</div>
-       <div class="pa"><button type="button" class="btn" data-use="${q.id}" ${lock?'disabled':''}>この型にする</button><button type="button" class="btn g" data-g="${q.id}">くわしく</button></div></div>`;}).join('')
-       :`<div class="tip">はっきり近い型はありません。図かんから選んでみましょう。</div>`}
-     <button type="button" class="btn g" id="arGal" style="width:100%;margin-top:8px" ><i class="ic ic-book"></i> ほかの型を図かんで見る</button>`;
+    const mt=drawnMatch();const near=mt?mt.slice(0,2).map(x=>x.id):[];
+    body=`<div class="big">「${esc(yn)}」は、<br>これからどう動きそう？</div>
+     <div class="yq" style="margin-top:0">この変数は <span class="dl" id="arBetter"><button type="button" data-b="up" aria-pressed="${bt==='up'}">増えると良い</button><button type="button" data-b="down" aria-pressed="${bt==='down'}">減ると良い</button></span></div>
+     <div class="tip" style="margin:6px 0 8px">カードの線は「${esc(yn)}」の値の動きです（上＝多い／下＝少ない）。「減ると良い」を選ぶと、線の形が上下に反転します。${mt?'<br>描いた線に近い動きに「あなたの線に近い」の印が付いています。':''}</div>
+     <div class="acards">${ARCH.map(d=>{const c=ACOL[d.id]||'#5B5BD6';return `<button type="button" class="acard ${near.includes(d.id)?'near':''}" data-use="${d.id}" style="--c:${c}" ${lock&&def&&def.id!==d.id?'disabled':''}>
+       ${near.includes(d.id)?'<em>あなたの線に近い</em>':''}<b>${esc(d.nm)}</b>${botSVG2(d.id,c,bt)}<small>${esc((ARCH_SHORT[d.id]||[''])[0])}</small></button>`;}).join('')}</div>`;
   }else{
-    const ys=yShape(def);const ysh=ys&&SHAPES.find(q=>q.id===ys.sh);const bt=yBetter();
+    const ys=yShape(def);const ysh=ys&&SHAPES.find(q=>q.id===ys.sh);const yr=def.roles.find(r=>r.y);
     body=`<div class="big">${esc(def.nm)}<a href="#" id="arMore">？</a></div>
      <div class="pk" style="margin-bottom:4px">${esc((ARCH_INFO[def.id]||{}).kid||def.d)}</div>
      ${archSVG(def,dl)}
-     ${yv&&ysh?`<div class="yq">「${esc(yv.name||yv.pathway)}」は、<span class="dl" id="arBetter"><button type="button" data-b="up" aria-pressed="${bt==='up'}">増えると良い</button><button type="button" data-b="down" aria-pressed="${bt==='down'}">減ると良い</button></span></div>
-     <div class="yshape">${shapeIcon(ysh.id)}<div><b>${esc(ysh.nm)}</b> になりやすい<br><small>${esc(ys.txt)}</small></div></div>
+     <div class="tip">上の3つの札は、トップダウン・ボトムアップ・アフォーダビリティの見通しです（描いた線から自動で入ります）。</div>
+     ${yv&&ysh?`<div class="yshape">${shapeIcon(ysh.id)}<div>「${esc(yn)}」は <b>${esc(ysh.nm)}</b> になりやすい<br><small>${esc(ys.txt)}</small></div></div>
      <button type="button" class="btn nx" id="arDraw">この形で描いてみる ▸</button>`:''}
      <details id="arNames" ${S._namesOpen?'open':''}><summary><i class="ic ic-pen"></i> 型の変数に名前を書く・変数を足す</summary>
        <div class="nr">${def.roles.filter(r=>!r.y).map(r=>`<span style="color:#5B3A8C;font-weight:700">${esc(r.nm)}</span><input data-nm="${r.k}" placeholder="具体的には？" value="${esc(((S.archNames||{})[def.id]||{})[r.k]||'')}">`).join('')}</div>
-       ${(((S.archExtra||{})[def.id])||[]).map((e,i)=>`<div class="xl"><span>${esc(e.nm)} ${e.dir==='in'?'→':'←'} ${esc((()=>{const r=def.roles.find(r=>r.k===e.to)||{};return r.y&&yv?(yv.name||yv.pathway):(((S.archNames||{})[def.id]||{})[r.k]||r.nm||'');})())}（${e.s==='-'?'−':'+'}）</span><button data-del="${i}" aria-label="消す">×</button></div>`).join('')}
-       <div class="ex"><input id="exN" placeholder="足す変数の名前" style="flex:1 1 140px"><select id="exD"><option value="in">が影響する →</option><option value="out">← から影響を受ける</option></select><select id="exT">${def.roles.map(r=>`<option value="${r.k}">${esc(r.y&&yv?(yv.name||yv.pathway):(((S.archNames||{})[def.id]||{})[r.k]||r.nm))}</option>`).join('')}</select><select id="exS"><option value="+">＋</option><option value="-">−</option></select><button type="button" class="btn" id="exAdd" style="padding:3px 10px">足す</button></div>
+       ${(((S.archExtra||{})[def.id])||[]).map((e,i)=>`<div class="xl"><span>${esc(e.nm)} ${e.dir==='in'?'→':'←'} ${esc((()=>{const r=def.roles.find(r=>r.k===e.to)||{};return r.y&&yv?yn:(((S.archNames||{})[def.id]||{})[r.k]||r.nm||'');})())}（${e.s==='-'?'−':'+'}）</span><button data-del="${i}" aria-label="消す">×</button></div>`).join('')}
+       <div class="ex"><input id="exN" placeholder="足す変数の名前" style="flex:1 1 140px"><select id="exD"><option value="in">が影響する →</option><option value="out">← から影響を受ける</option></select><select id="exT">${def.roles.map(r=>`<option value="${r.k}">${esc(r.y&&yv?yn:(((S.archNames||{})[def.id]||{})[r.k]||r.nm))}</option>`).join('')}</select><select id="exS"><option value="+">＋</option><option value="-">−</option></select><button type="button" class="btn" id="exAdd" style="padding:3px 10px">足す</button></div>
      </details>
-     <details><summary><i class="ic ic-bulb"></i> 3つの要因は、型のどこに効きやすい？（くわしく）</summary><div class="tip" style="margin-top:4px">${['td','bu','af'].map(k=>DIALS[def.id]&&DIALS[def.id][k]?`・${DIAL_JA[k]}：${esc(DIALS[def.id][k][1])}<br>`:'').join('')}</div></details>
      <div class="tip">型どおりでなくてOK。違うと思ったら、理由をコメントに書こう。</div>`;
   }
   p.innerHTML=`<div class="th"><b>型で考える</b><button id="arX" aria-label="閉じる">×</button></div>
-    <div class="stps">${chip(1,'見通し')}${chip(2,'型をえらぶ')}${chip(3,'描く')}</div>${body}`;
+    <div class="stps">${chip(1,'動きをえらぶ')}${chip(2,'型を見て描く')}</div>${body}`;
   p.style.display='block';
   const go=n=>{S._arStep=n;save();openArch();};
   $('arX').onclick=()=>{p.style.display='none'};
   p.querySelectorAll('[data-step]').forEach(b=>b.onclick=()=>go(+b.dataset.step));
-  p.querySelectorAll('.dl[data-k]').forEach(span=>span.querySelectorAll('button').forEach(b=>b.onclick=()=>{S.dial=S.dial||{};['td','bu','af'].forEach(k=>{if(!S.dial[k]&&dl[k])S.dial[k]=dl[k];});S.dial[span.dataset.k]=b.dataset.v;log('dial',{k:span.dataset.k,v:b.dataset.v});save();openArch();}));
-  const nx=$('arNext');if(nx)nx.onclick=()=>{S.dial=Object.assign({},dl);go(2);};
-  const setArch=id=>{S.arch=id?{id}:null;log('archetype',{value:id});S._arStep=3;save();draw();openArch();};
-  p.querySelectorAll('[data-use]').forEach(b=>b.onclick=()=>setArch(b.dataset.use));
-  p.querySelectorAll('[data-g]').forEach(b=>b.onclick=e=>{e.stopPropagation();openGallery(b.dataset.g);});
+  p.querySelectorAll('[data-use]').forEach(b=>b.onclick=()=>{if(lock&&def&&def.id!==b.dataset.use)return;S.arch={id:b.dataset.use};S._arStep=2;log('archetype',{value:b.dataset.use});save();draw();openArch();});
   const am=$('arMore');if(am)am.onclick=e=>{e.preventDefault();openGallery(def.id);};
-  const ag=$('arGal');if(ag)ag.onclick=()=>openGallery(def&&def.id);
   const dr=$('arDraw');if(dr)dr.onclick=()=>{p.style.display='none';openTpl(yv.id);};
   const nmd=$('arNames');if(nmd)nmd.addEventListener('toggle',()=>{S._namesOpen=nmd.open;});
   p.querySelectorAll('[data-nm]').forEach(inp=>inp.onchange=()=>{S.archNames=S.archNames||{};const o=S.archNames[def.id]=S.archNames[def.id]||{};const v=inp.value.trim();if(v)o[inp.dataset.nm]=v;else delete o[inp.dataset.nm];log('arch_name',{role:inp.dataset.nm,value:v});save();openArch();});
