@@ -781,15 +781,14 @@ function archSVG(def,dl,opt){
     const nm=e.nm.length>9?[e.nm.slice(0,9),e.nm.slice(9,18)]:[e.nm];g+=`<rect x="${ex-44}" y="${ey-11-(nm.length-1)*6}" width="88" height="${22+(nm.length-1)*12}" rx="8" fill="#fff" stroke="#999" stroke-dasharray="3 2"/>`;
     nm.forEach((ln,i)=>{g+=`<text x="${ex}" y="${ey+4+(i-(nm.length-1)/2)*12}" font-size="10.5" font-weight="700" text-anchor="middle" fill="#23263A">${esc(ln)}</text>`;});});
   // 心理社会的要因のつまみ（型の外から効く）
-  const D=opt.generic?{}:(DIALS[def.id]||{});const rows={top:[],bot:[]};
-  ['td','bu','af'].forEach(k=>{if(!D[k])return;const [tx,ty]=pos[D[k][0]];(ty<=H/2?rows.top:rows.bot).push({k,tx,ty});});
-  const slots=n=>n===1?null:n===2?[70,260]:[45,165,285];
-  Object.entries(rows).forEach(([rw,arr])=>{arr.sort((p,q)=>p.tx-q.tx||p.k.localeCompare(q.k));const sl=slots(arr.length);
-    arr.forEach((d,i)=>{const px=sl?sl[i]:Math.max(60,Math.min(270,d.tx)),py=rw==='top'?-34:H+30;const lv=dl[d.k],col=lv==='u'?'#14A37F':lv==='d'?'#B3261E':'#7A4EAB';
-      const ey=rw==='top'?d.ty-16:d.ty+18,sy=rw==='top'?py+12:py-12;
-      g+=`<path d="M${px},${sy} C${px},${(sy+ey)/2} ${d.tx},${(sy+ey)/2} ${d.tx},${ey}" fill="none" stroke="${col}" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#${U}d)"/>`;
-      g+=`<rect x="${px-54}" y="${py-12}" width="108" height="24" rx="12" fill="#fff" stroke="${col}" stroke-width="1.8"/><text x="${px}" y="${py+4}" font-size="10.5" font-weight="700" text-anchor="middle" fill="${col}">${DIAL_JA[d.k]}${lv?(lv==='u'?' ↑':lv==='d'?' ↓':' →'):''}</text>`;});});
-  return `<svg viewBox="${opt.generic?'-60 -12 '+(W+120)+' '+(H+34):'-70 -52 '+(W+140)+' '+(H+110)}" width="100%" class="arsvg" style="display:block;margin-top:4px;flex:none;height:auto"><defs><marker id="${U}d" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10z" fill="#7A4EAB"/></marker><marker id="${U}p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#D0336B"/></marker><marker id="${U}n" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#1E88C8"/></marker></defs>${g}</svg>`;
+  // 心理社会的要因は、ループの外に並べ、関心のある変数（問題の変数）にだけ矢印を引く（TETの「要因 → 関心のある変数」の形）
+  if(!opt.generic&&y){const yr=def.roles.find(r=>r.y);if(yr&&pos[yr.k]){const [tx,ty]=pos[yr.k];const hh=(BX[yr.k]||[46,13])[1];
+    const top=Math.max(-78,Math.min(...def.roles.map(r=>pos[r.k][1]))-92);const ks=['td','bu','af'];const xs=[0,165,330];
+    ks.forEach((k,ix)=>{const lv=dl[k],col=lv==='u'?'#14A37F':lv==='d'?'#B3261E':'#7A4EAB';const txt=DIAL_JA[k]+(lv==='u'?' ↑':lv==='d'?' ↓':lv==='s'?' →':'');const w=txt.length*10.5+18;const px=xs[ix],py=top;
+      const ex=tx+(px-tx)*0.12,ey=ty-hh-4;
+      g+=`<path d="M${px},${py+11} C${px},${(py+ey)/2} ${ex},${(py+ey)/2} ${ex},${ey}" fill="none" stroke="${col}" stroke-width="1.8" marker-end="url(#${U}d)"/>`;
+      g+=`<rect x="${px-w/2}" y="${py-11}" width="${w}" height="22" rx="11" fill="${col}"/><text x="${px}" y="${py+4}" font-size="10.5" font-weight="800" text-anchor="middle" fill="#fff">${txt}</text>`;});}}
+  return `<svg viewBox="${opt.generic?'-60 -12 '+(W+120)+' '+(H+34):'-70 -95 '+(W+140)+' '+(H+125)}" width="100%" class="arsvg" style="display:block;margin-top:4px;flex:none;height:auto"><defs><marker id="${U}d" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10z" fill="#6B7088"/></marker><marker id="${U}p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#D0336B"/></marker><marker id="${U}n" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#1E88C8"/></marker></defs>${g}</svg>`;
 }
 function makeDrag(el){const h=el.querySelector('.th');if(!h||h._drag)return;h._drag=1;h.style.cursor='move';h.title='ドラッグして動かせます';
   h.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;const r=el.getBoundingClientRect(),pr=el.offsetParent.getBoundingClientRect();const ox=e.clientX-r.left,oy=e.clientY-r.top;
@@ -832,7 +831,7 @@ function openArch(){
        ${(((S.archExtra||{})[def.id])||[]).map((e,i)=>`<div class="xl"><span>${esc(e.nm)} ${e.dir==='in'?'→':'←'} ${esc((()=>{const r=def.roles.find(r=>r.k===e.to)||{};return r.y&&yv?(yv.name||yv.pathway):(((S.archNames||{})[def.id]||{})[r.k]||r.nm||'');})())}（${e.s==='-'?'−':'+'}）</span><button data-del="${i}" aria-label="消す">×</button></div>`).join('')}
        <div class="ex"><input id="exN" placeholder="足す変数の名前" style="flex:1 1 140px"><select id="exD"><option value="in">が影響する →</option><option value="out">← から影響を受ける</option></select><select id="exT">${def.roles.map(r=>`<option value="${r.k}">${esc(r.y&&yv?(yv.name||yv.pathway):(((S.archNames||{})[def.id]||{})[r.k]||r.nm))}</option>`).join('')}</select><select id="exS"><option value="+">＋</option><option value="-">−</option></select><button type="button" class="btn" id="exAdd" style="padding:3px 10px">足す</button></div>
      </details>
-     <details><summary><i class="ic ic-bulb"></i> 3つの要因は、どこに効く？</summary><div class="tip" style="margin-top:4px">${['td','bu','af'].map(k=>DIALS[def.id]&&DIALS[def.id][k]?`・${DIAL_JA[k]}：${esc(DIALS[def.id][k][1])}<br>`:'').join('')}</div></details>
+     <details><summary><i class="ic ic-bulb"></i> 3つの要因は、型のどこに効きやすい？（くわしく）</summary><div class="tip" style="margin-top:4px">${['td','bu','af'].map(k=>DIALS[def.id]&&DIALS[def.id][k]?`・${DIAL_JA[k]}：${esc(DIALS[def.id][k][1])}<br>`:'').join('')}</div></details>
      <div class="tip">型どおりでなくてOK。違うと思ったら、理由をコメントに書こう。</div>`;
   }
   p.innerHTML=`<div class="th"><b>型で考える</b><button id="arX" aria-label="閉じる">×</button></div>
