@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>型カード：野菜のデータで見るくり返しのパターン</title>
+<title>めくって発見！ 食のシステムの振る舞いカード</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
@@ -50,8 +50,8 @@ header p{margin:0;color:var(--ink-2);font-size:14.5px;max-width:46em}
 .legend i{flex:none;width:18px;height:0;border-top:4px solid var(--sc);border-radius:2px}
 .legend i.dash{border-top-style:dashed;border-top-width:3px}
 .read{font-size:13px;color:var(--ink);background:#F7F7FC;border-radius:12px;padding:8px 11px;line-height:1.55}
-.shape{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-3);margin-top:auto}
-.shape svg{width:96px;height:auto;flex:none}
+
+
 .foot{display:flex;justify-content:space-between;align-items:center;padding:10px 18px 12px;font-size:12px;color:var(--ink-3)}
 .foot b{color:var(--c);font-size:13px}
 
@@ -83,7 +83,7 @@ dialog .close{float:right}
 .src{font-size:11px;color:var(--ink-3);line-height:1.45}
 
 /* あてっこモード：表の名前をかくす */
-body.guess .front .nm,body.guess .front .tag,body.guess .front .en,body.guess .front .shape{display:none}
+body.guess .front .nm,body.guess .front .tag,body.guess .front .en,body.guess .front 
 body.guess .front .q{display:block}
 body.guess .front .top{background:#3A3E57}
 
@@ -137,6 +137,12 @@ dialog .read::before{display:none}
 .gsrc a,.src a{color:#1C5FA8;text-decoration:underline;text-underline-offset:2px}
 .gsrc a:hover,.src a:hover{color:#0B3D75}
 .gsrc{text-align:left}
+.shape{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:12px;
+  background:#F7F7FC;border-radius:14px;padding:8px 14px}
+.shape .sl{font-size:13px;font-weight:800;color:var(--ink-2);line-height:1.35}
+.shape .sl small{display:block;font-size:11px;font-weight:700;color:var(--ink-3);margin-top:2px}
+.shape svg{width:150px;height:auto;flex:none}
+header h1{margin-bottom:0}
 @media (prefers-reduced-motion:reduce){
   .inner{transition:none}
 }
@@ -146,9 +152,7 @@ dialog .read::before{display:none}
 <body>
 <div class="wrap">
 <header>
-  <h1>めくって発見！ 野菜の「くり返しパターン」カード</h1>
-  <p>表は、本当のデータのグラフ。めくると、そのウラで回っている「しくみ」が見えるよ。カードには、日本のデータか世界のデータかのタグがついています。</p>
-  <p class="secp">「健康的な食事を買うお金がない人」：野菜・果物・豆・肉や魚などをバランスよく食べるお金が、生活に必要なほかのお金を引いた所得より高い人の割合です（世界銀行・FAO）。「FAO」のカードは、FAOの統計データベース（FAOSTAT）と報告書「世界食料農業白書2025」の数字を使っています。</p>
+  <h1>めくって発見！ 食のシステムの振る舞いカード</h1>
 </header>
 <div class="bar">
   <button class="btn" id="guess" aria-pressed="false">🙈 あてっこモード（名前をかくす）</button>
@@ -463,7 +467,7 @@ function render(){
           ${d.svg}
           <div class="gsrc">データ：${refLinks(d.src,'、')}</div>
         </div>
-        <div class="shape">${typSVG(c.id,c.c,c.bad)}<span>この型の、よくある形${c.bad?'（上ほど困る向き）':''}</span></div>
+        <div class="shape"><span class="sl">この型の<br>よくある形${c.bad?'<small>上ほど困る向き</small>':''}</span>${typSVG(c.id,c.c,c.bad)}</div>
       </div>
       <div class="foot"><span class="pill">めくってみよう ↻</span></div>
     </section>
