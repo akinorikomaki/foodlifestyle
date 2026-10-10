@@ -1,0 +1,1666 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TET ワークシート（記入と集計）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<style>
+/* TET ワークシート（1枚版）
+   ・変数は CONFIG.variables に並べるだけ（role:'x' は上、role:'y' は下に並ぶ）
+   ・?config=study.json で別の調査にも使える
+   ・?lock=1 で参加者用（設定・集計ボタンを隠す）
+   ・?mode=summary で集計画面から開く（研究者用）                                   */
+:root{--paper:#F4F5FB;--ink:#23263A;--ink-2:#555B73;--ink-3:#858BA3;--rule:#E2E4F0;
+  --x:#5B5BD6;--x-soft:#ECECFD;--y:#E8790C;--y-soft:#FFF1DC;--draw:#FF8A3D;--ok:#14A37F;--focus:#1C6FD1}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--paper);color:var(--ink);overflow:hidden}
+body{font-family:'M PLUS Rounded 1c','Zen Kaku Gothic New','Hiragino Kaku Gothic ProN','Yu Gothic','Meiryo',sans-serif;font-size:14px;font-feature-settings:"palt" 1}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.app{height:100vh;height:100dvh;display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:8px;
+  padding:calc(10px + env(safe-area-inset-top,0px)) 14px calc(8px + env(safe-area-inset-bottom,0px))}
+header{display:flex;align-items:center;gap:6px 9px;flex-wrap:wrap}
+h1{font-size:16px;font-weight:900;margin:0 4px 0 0}
+.f{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-2)}
+.f input,.f select{border:1px solid var(--rule);border-radius:8px;padding:5px 8px;background:#fff}
+.posw{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--rule);background:#fff;border-radius:999px;padding:2px 10px 2px 6px;font-size:12px;font-weight:700;color:var(--ink-2)}
+.posw svg{display:block}
+.posw.hi{border-color:var(--ok);color:var(--ok)} .posw.lo{border-color:var(--y);color:#8A5600}
+.sp{flex:1}
+.btn{border:1px solid var(--ink);background:var(--ink);color:#fff;border-radius:8px;padding:5px 10px;font-weight:700;cursor:pointer;font-size:12.5px}
+.btn.g{background:#fff;color:var(--ink)}
+.card{background:#fff;border:1px solid var(--rule);border-radius:14px;position:relative;min-height:0}
+#chart{position:absolute;inset:0}
+#chart svg{width:100%;height:100%;display:block;touch-action:none}
+footer{display:flex;gap:4px 16px;align-items:center;font-size:12px;color:var(--ink-3);flex-wrap:wrap;line-height:1.5}
+footer .hint2{flex:1 1 320px;min-width:0;overflow-wrap:anywhere}
+footer #prog{white-space:nowrap}
+footer .k{display:inline-flex;align-items:center;gap:5px}
+.sw{display:inline-block;width:20px;border-top:3px solid var(--ink)} .sw.d{border-top:3px dashed var(--draw)}
+
+/* コメント入力 */
+#pop{position:absolute;display:none;background:#fff;border:2px solid var(--ink);border-radius:10px;padding:8px;box-shadow:0 6px 20px rgba(0,0,0,.15);z-index:5;width:250px}
+#pop .t{font-size:12px;font-weight:700;margin-bottom:4px}
+#pop input{width:100%;border:1px solid var(--rule);border-radius:6px;padding:6px 8px}
+#pop .r{display:flex;gap:6px;margin-top:6px;justify-content:flex-end}
+#pop .r button{border:1px solid var(--rule);background:#fff;border-radius:6px;padding:3px 10px;cursor:pointer;font-size:12px}
+#pop .r .ok{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+/* SVG */
+.ax text{font-size:11px;fill:var(--ink-3);font-family:inherit}
+.ax path,.ax line{stroke:var(--rule)}
+.lt{font-family:inherit}
+.hl{fill:none;stroke:var(--ink);stroke-width:2.6}
+.hd{fill:var(--ink);stroke:#fff;stroke-width:1.5;cursor:pointer}
+.fl{fill:none;stroke:var(--draw);stroke-width:2.6;stroke-dasharray:8 5}
+.fp{fill:var(--draw);stroke:#fff;stroke-width:2;cursor:ns-resize}
+.fp.sel,.hd.sel{stroke:var(--ink);stroke-width:3}
+.vl{font-size:10.5px;fill:var(--ink-2);text-anchor:middle;font-family:inherit;pointer-events:none}
+.bub rect{fill:#fff;stroke:var(--draw);stroke-width:1.2}
+.bub.p rect{stroke:var(--ink-3)}
+.bub text{font-size:11px;fill:var(--ink);font-family:inherit}
+.hint{font-size:12.5px;fill:var(--ink-3);font-weight:700;text-anchor:middle;pointer-events:none;font-family:inherit}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:8px 16px;border-radius:999px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9}
+.toast.show{opacity:1}
+/* 設定 */
+h1{cursor:pointer} h1:hover{text-decoration:underline dotted}
+#modal{position:fixed;inset:0;background:rgba(20,30,25,.45);display:none;align-items:center;justify-content:center;z-index:20;padding:16px}
+#modal.open{display:flex}
+.mbox{background:#fff;border-radius:14px;width:min(980px,100%);max-height:100%;display:flex;flex-direction:column;overflow:hidden}
+.mhead{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--rule)}
+.mhead h2{margin:0;font-size:16px;font-weight:900;flex:1}
+.mbody{overflow:auto;padding:12px 16px;display:grid;gap:12px}
+.mrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+.mbody label{font-size:11.5px;font-weight:700;color:var(--ink-2);display:flex;flex-direction:column;gap:2px}
+.mbody input,.mbody textarea{border:1px solid var(--rule);border-radius:6px;padding:5px 8px;font-size:13px;width:100%}
+.mbody textarea{font-family:ui-monospace,Menlo,Consolas,monospace;min-height:92px;resize:vertical}
+.vbox{border:1px solid var(--rule);border-radius:10px;padding:10px 12px;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:10px}
+.vbox.hl{border:2px solid var(--draw)}
+.vbox h3{grid-column:1/-1;margin:0;font-size:13.5px}
+.vbox.x h3{color:var(--x)} .vbox.y h3{color:var(--y)}
+.mini-btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.mini-btns button.rec{border-color:var(--x);color:var(--x);font-weight:700}
+ #arP{position:absolute;display:none;right:10px;top:8px;background:#fff;border:2px solid #7A4EAB;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.18);z-index:7;width:470px;max-height:calc(100% - 16px);overflow:auto;padding:10px 12px;resize:both;min-width:340px;min-height:260px}
+#arP details{margin-top:8px;border:1px solid var(--rule);border-radius:9px;padding:6px 9px}#arP details summary{cursor:pointer;font-size:12.5px;font-weight:700;color:#5B3A8C}
+#arP .nr{display:grid;grid-template-columns:auto 1fr;gap:5px 8px;align-items:center;font-size:12px;margin-top:6px}#arP .nr input{border:1px solid var(--rule);border-radius:7px;padding:4px 7px;font:inherit;font-size:12.5px}
+#arP .ex{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}#arP .ex select{width:auto}#arP .ex input,#arP .ex select{border:1px solid var(--rule);border-radius:7px;padding:4px 6px;font:inherit;font-size:12px}
+#arP .xl{display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:3px 0;border-bottom:1px dashed var(--rule)}#arP .xl button{border:0;background:none;color:#B3261E;cursor:pointer;font-size:14px}
+#arP .th{display:flex;align-items:center;gap:8px;margin-bottom:6px}#arP .th b{flex:1;font-size:13.5px;color:#5B3A8C}#arP .th button{border:0;background:none;font-size:18px;cursor:pointer}
+#arP select{width:100%;border:1px solid var(--rule);border-radius:8px;padding:5px 6px;font:inherit;font-size:12.5px;background:#fff}
+#arP .ds{font-size:12px;color:var(--ink-2);margin:6px 0;line-height:1.55}
+#arP .rl{display:grid;grid-template-columns:auto 1fr;gap:4px 8px;align-items:center;font-size:12px;margin-top:6px}
+#arP .rl .nm{display:flex;align-items:center;gap:4px;font-weight:700;color:#5B3A8C}
+ #arP .dl{display:flex;gap:4px}#arP .dl button{flex:1;font:inherit;font-size:11px;border:1px solid var(--rule);background:#fff;border-radius:7px;padding:4px 2px;cursor:pointer}
+#arP .dl button[aria-pressed="true"]{background:#5B3A8C;color:#fff;border-color:#5B3A8C}
+#arP .sug{display:flex;flex-direction:column;gap:2px;width:100%;text-align:left;border:1px solid #7A4EAB;background:#fff;border-radius:9px;padding:6px 9px;margin-top:5px;cursor:pointer;font:inherit;font-size:12px}
+#arP .sug span{color:var(--ink-3);font-size:11px;line-height:1.45}#arP .sug[aria-pressed="true"]{background:#F1EAF9}
+.acards{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.acard{position:relative;font:inherit;background:#fff;border:1.5px solid #E2E4F0;border-bottom-width:3px;border-radius:14px;padding:8px 6px 6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;color:#23263A}
+.acard:hover{border-color:var(--c)}.acard b{font-size:13px}.acard small{font-size:10.5px;color:var(--ink-3);line-height:1.3}
+.acard .bot{width:100%;height:auto;color:#23263A}
+.acard.near{border-color:var(--c);box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 18%,transparent)}
+.acard em{position:absolute;top:-8px;left:50%;transform:translateX(-50%);font-style:normal;font-size:10px;font-weight:800;color:#fff;background:var(--c);border-radius:999px;padding:1px 8px;white-space:nowrap}
+#arP .stps{display:flex;gap:6px;margin:2px 0 10px}
+#arP .stp{flex:1;display:flex;align-items:center;gap:6px;justify-content:center;border:2px solid #E2E4F0;background:#fff;border-radius:999px;padding:4px 6px;font:inherit;font-size:12px;font-weight:800;color:var(--ink-3);cursor:pointer}
+#arP .stp.on{border-color:#5B5BD6;color:#3F3FB0;background:#F1F1FF}#arP .stp.done{color:#14A37F;border-color:#BFE8DC}#arP .stp:disabled{opacity:.45;cursor:default}
+#arP .big{font-size:17px;font-weight:800;line-height:1.45;margin:4px 0 10px;color:#23263A;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+#arP .big a{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#ECECFD;color:#3F3FB0;font-size:14px;text-decoration:none}
+#arP .dial3{display:flex;align-items:center;gap:10px;margin:8px 0}
+#arP .dial3 .dn{width:118px;font-weight:800;font-size:14px;color:#3F3FB0;line-height:1.3}#arP .dial3 .dn small{display:block;font-size:11px;color:var(--ink-3);font-weight:500}
+#arP .dial3 .dl{flex:1}#arP .dial3 .dl button{display:flex;flex-direction:column;align-items:center;padding:6px 2px;border-radius:12px;border-width:2px;border-bottom-width:3px}
+#arP .dial3 .dl button b{font-size:20px;line-height:1}#arP .dial3 .dl button span{font-size:11px}
+#arP .btn.nx{width:100%;margin-top:10px;padding:10px;font-size:15px}
+#arP .pick{border:2px solid #E2E4F0;border-bottom-width:4px;border-radius:16px;padding:10px 12px;margin-top:8px}
+#arP .pick.best{border-color:#5B5BD6;background:#F8F8FF}
+#arP .ph{display:flex;align-items:center;gap:8px;font-size:15.5px}#arP .ph em{font-style:normal;font-size:11px;background:#5B5BD6;color:#fff;border-radius:999px;padding:1px 8px}
+#arP .pk{font-size:13px;line-height:1.6;color:var(--ink-2);margin:4px 0}
+#arP .pa{display:flex;gap:6px;margin-top:6px}#arP .pa .btn{flex:1}
+#arP .yq{font-size:13.5px;font-weight:700;margin-top:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}#arP .yq .dl{flex:1;min-width:180px}
+#arP .yshape{display:flex;align-items:center;gap:10px;background:#FFF6E8;border-radius:12px;padding:8px 10px;margin-top:8px;font-size:14px}#arP .yshape small{color:var(--ink-3);font-size:12px}
+#arP .tip{font-size:11.5px;color:var(--ink-3);margin-top:8px;line-height:1.5}
+#tpl .sg button.arch{border-color:#7A4EAB;box-shadow:inset 0 0 0 1px #7A4EAB}
+#tpl .sg button.arch::after{content:'型の典型';font-size:9.5px;color:#7A4EAB;font-weight:700}
+#hp .hc.wide{max-width:980px}
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:10px}
+.gcard{border:2px solid #E2E4F0;border-bottom-width:4px;border-radius:16px;padding:10px 12px;background:#fff;display:flex;flex-direction:column;gap:6px}
+.gcard.focus{border-color:#5B5BD6;box-shadow:0 0 0 3px #ECECFD}
+.gcard h4{margin:0;font-size:15.5px;color:#3F3FB0;display:flex;justify-content:space-between;gap:6px;align-items:baseline}
+.gcard h4 small{font-size:11px;color:var(--ink-3);font-weight:500}
+.gcard svg.arsvg{flex:none;width:100%;height:auto;aspect-ratio:450/224;background:#FAFAFE;border-radius:12px}
+.gtab{display:inline-flex;border:2px solid #E2E4F0;border-radius:12px;overflow:hidden;align-self:flex-start}
+.gtab button{border:0;background:#fff;font:inherit;font-size:12px;font-weight:800;padding:4px 12px;cursor:pointer;color:var(--ink-3)}
+.gtab button[aria-pressed="true"]{background:#5B5BD6;color:#fff}
+.story{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:4px 2px;align-items:center;font-size:12.5px;counter-reset:st}
+.story li{counter-increment:st;background:#F6F7FC;border-radius:10px;padding:3px 8px;line-height:1.45}
+.story li::before{content:counter(st);display:inline-grid;place-items:center;width:17px;height:17px;border-radius:50%;background:#5B5BD6;color:#fff;font-size:10.5px;font-weight:800;margin-right:5px}
+.story li:not(:last-child)::after{content:'→';margin-left:6px;color:#8A90A6}
+.story li.again{background:none;color:#5B5BD6;font-weight:800;counter-increment:none}.story li.again::before{display:none}
+.gcard .prob{font-size:13px;font-weight:800;color:#C2412D;background:#FFE9E5;border-radius:10px;padding:5px 10px;margin-bottom:6px}
+.gsimple{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding:4px 0}
+.gsimple .agt{font-size:17px;font-weight:800}.gsimple .ags{font-size:12.5px;color:var(--ink-3);line-height:1.4}
+.gsimple .bot{width:100%;max-width:200px;height:auto;color:#23263A;margin:4px 0}
+.gsimple .age{font-size:12.5px;font-weight:800;color:var(--c)}
+.gcard{border-color:#E2E4F0}.gcard:hover{border-color:var(--c)}
+.gdet{border-top:1px dashed #E2E4F0;padding-top:6px}.gdet summary{cursor:pointer;font-size:12.5px;font-weight:700;color:#5B5BD6;list-style:none;text-align:center}
+.gdet[open] summary{margin-bottom:6px}
+.gcard .catch{font-size:16px;font-weight:800;color:#23263A;line-height:1.4}
+.gcard .ex1{font-size:13px;line-height:1.55;color:var(--ink-2);background:#F6F7FC;border-radius:10px;padding:6px 9px}
+.gcard .ex1 span{display:inline-block;font-size:11px;font-weight:800;color:#fff;background:#5B5BD6;border-radius:999px;padding:0 8px;margin-right:6px}
+.gcard details.more summary{cursor:pointer;font-size:12px;font-weight:700;color:#5B5BD6}
+.gcard details.more .row2{margin-top:6px}
+.gcard .kid{font-size:13px;font-weight:700;line-height:1.55}
+.gcard .row2{display:grid;grid-template-columns:auto 1fr;gap:4px 8px;font-size:12px;line-height:1.55;color:var(--ink-2)}
+.gcard .row2 b{color:var(--ink);white-space:nowrap}
+.gcard .gs{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2)}
+.gintro{font-size:13px;line-height:1.7;color:var(--ink-2)}
+#arP .sug{position:relative}#arP .sug .q{position:absolute;right:8px;top:6px;border:0;background:#ECECFD;color:#3F3FB0;border-radius:50%;width:22px;height:22px;font-weight:800;cursor:pointer}
+#hp{position:fixed;inset:0;background:rgba(20,30,25,.45);display:none;align-items:center;justify-content:center;z-index:200;padding:14px}
+#hp.open{display:flex}
+#hp .hc{background:#fff;border-radius:14px;max-width:640px;width:100%;max-height:calc(100dvh - 28px);overflow:auto;padding:16px 18px;box-shadow:0 12px 40px rgba(0,0,0,.25)}
+#hp h3{margin:0 0 8px;font-size:15px}
+#hp p{margin:6px 0;font-size:12.5px;color:var(--ink-2);line-height:1.6}
+#hp label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--ink-2);margin-top:8px}
+#hp input,#hp textarea,#hp select{border:1px solid var(--rule);border-radius:8px;padding:6px 8px;font:inherit;font-size:13px;background:#fff}
+#hp textarea{min-height:80px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px}
+#hp .r{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}
+#hp .r>*{flex:1 1 120px}
+#hp table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+#hp th,#hp td{border-bottom:1px solid var(--rule);padding:4px 6px;text-align:right}
+#hp th:first-child,#hp td:first-child{text-align:left}
+#hp .ft{display:flex;gap:8px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap}
+#hp .step{background:var(--x-soft);border-radius:8px;padding:8px 10px;font-size:12.5px;margin-top:8px;line-height:1.6}
+#hp .warn{color:#B3261E}
+.mini-btns button{border:1px solid var(--rule);background:#fff;border-radius:6px;padding:3px 10px;cursor:pointer;font-size:12px}
+.mfoot{display:flex;gap:8px;padding:10px 16px;border-top:1px solid var(--rule);flex-wrap:wrap}
+.err{color:#B04A3A;font-size:12px;font-weight:700}
+
+/* ---------- 形から描く ---------- */
+#tpl{position:absolute;display:none;background:#fff;border:2px solid var(--ink);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.18);z-index:6;width:380px;padding:10px 12px;resize:both;overflow:auto;min-width:300px;min-height:220px;max-height:calc(100% - 8px)}
+body.simple .adv{display:none !important}
+body:not(.simple) .sim{display:none !important}
+body.simple #tpl:not(.det) #tplF{display:none}
+#tplMore{display:none;border:0;background:none;color:#5B3A8C;font:inherit;font-size:12px;font-weight:700;cursor:pointer;padding:4px 0}
+body.simple #tplMore{display:inline-block}
+.uiseg{display:inline-flex;border:1px solid var(--rule);border-radius:9px;overflow:hidden}.uiseg button{border:0;background:#fff;font:inherit;font-size:12.5px;font-weight:700;padding:5px 10px;cursor:pointer;color:var(--ink-2)}.uiseg button[aria-pressed="true"]{background:var(--ink);color:#fff}
+#tpl .th{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+#tpl .th b{flex:1;font-size:13.5px}
+#tpl .th button{border:0;background:none;font-size:18px;cursor:pointer;line-height:1}
+#tpl .sg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+#tpl .sg button{border:1px solid var(--rule);background:#fff;border-radius:8px;padding:4px 4px 3px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:1px;font-size:11.5px;font-weight:700;color:var(--ink)}
+#tpl .sg button small{font-size:9.5px;font-weight:500;color:var(--ink-3);line-height:1.2;text-align:center}
+#tpl .sg button[aria-pressed="true"]{border:2px solid var(--draw);background:#FFF8EE}
+#tpl .tf{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;margin-top:8px}
+#tpl .tf label{font-size:11.5px;font-weight:700;color:var(--ink-2);display:flex;flex-direction:column;gap:2px}
+#tpl .tf input,#tpl .tf select{border:1px solid var(--rule);border-radius:6px;padding:4px 6px;font-size:12.5px;width:100%}
+#tpl .tf .w{grid-column:1/-1}
+#tpl .desc{font-size:12px;color:var(--ink-2);margin-top:6px;min-height:18px}
+#tpl .r{display:flex;gap:6px;margin-top:8px;justify-content:flex-end}
+#tpl .r button{border:1px solid var(--rule);background:#fff;border-radius:6px;padding:4px 12px;cursor:pointer;font-size:12.5px}
+#tpl .r .ok{background:var(--ink);color:#fff;border-color:var(--ink);font-weight:700}
+/* ---------- 集計モード ---------- */
+#sumApp{grid-template-rows:auto minmax(0,1fr);padding-bottom:calc(10px + env(safe-area-inset-bottom,0px))}
+#sumApp .n{font-weight:900;font-size:13px;background:#fff;border:1px solid var(--rule);border-radius:999px;padding:3px 12px}
+#sumApp main{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:10px;min-height:0}
+#sumApp #sm_chart{position:absolute;inset:0}
+#sumApp #sm_chart svg{width:100%;height:100%;display:block}
+#sumApp aside{display:flex;flex-direction:column;min-height:0}
+#sumApp .tabs{display:flex;border-bottom:1px solid var(--rule)}
+#sumApp .tabs button{flex:1;border:0;background:none;padding:9px 6px;font-weight:700;color:var(--ink-3);cursor:pointer;border-bottom:3px solid transparent}
+#sumApp .tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--draw)}
+#sumApp .pane{flex:1;overflow:auto;padding:10px 12px;font-size:13.5px}
+#sumApp .drop{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;color:var(--ink-2);border:3px dashed var(--rule);border-radius:14px;background:#FBFBFE}
+#sumApp .drop.over{border-color:var(--draw);background:#FFF8EE}
+#sumApp .drop b{font-size:16px;color:var(--ink)}
+#sumApp h3{font-size:13px;margin:10px 0 4px}
+#sumApp .cm{border-left:3px solid var(--rule);padding:3px 0 3px 8px;margin:4px 0;font-size:12.5px}
+#sumApp .cm .m{font-size:11px;color:var(--ink-3)}
+#sumApp .cm.f{border-left-color:var(--draw)}
+#sumApp table{border-collapse:collapse;width:100%;font-size:12.5px}
+#sumApp th,#sumApp td{border-bottom:1px solid var(--rule);padding:5px 4px;text-align:left}
+#sumApp th{font-size:11.5px;color:var(--ink-2)}
+#sumApp td.num{text-align:right;font-variant-numeric:tabular-nums}
+#sumApp .big{font-size:22px;font-weight:900}
+#sumApp .note{font-size:11.5px;color:var(--ink-3)}
+#sumApp .bar{height:8px;border-radius:4px;background:var(--draw)}
+.app[hidden]{display:none!important}
+@media (max-width:900px){#sumApp main{grid-template-columns:1fr}#sumApp .card{height:760px}#sumApp aside{height:600px}}
+@media (max-width:760px){html,body{overflow:auto}.app{height:auto}.card{height:900px}}
+
+/* ===== デザイン：やさしく整える（案E）＋ポップなカード（案B） ===== */
+:root{--pop:#5B5BD6;--pop-d:#3F3FB0;--sun:#FFC93C;--mint:#14A37F;--coral:#FF6B6B}
+body{font-size:15px}
+header{background:#fff;border-radius:18px;padding:8px 12px;box-shadow:0 2px 0 #E2E4F0,0 6px 18px rgba(35,38,58,.06)}
+h1{font-size:18px;font-weight:800;color:var(--pop-d)}
+.card{border-radius:20px !important;box-shadow:0 2px 0 #E2E4F0,0 8px 24px rgba(35,38,58,.06) !important;border:0 !important}
+.btn,.uiseg button{border-radius:12px !important;font-weight:800 !important}
+.btn{border:2px solid #E2E4F0 !important;border-bottom-width:4px !important;background:#fff !important;color:var(--ink) !important;transition:transform .08s,border-bottom-width .08s}
+.btn:active{transform:translateY(2px);border-bottom-width:2px !important}
+.btn:not(.g){background:var(--pop) !important;border-color:var(--pop-d) !important;color:#fff !important}
+#sj{background:var(--mint) !important;border-color:#0C7A5E !important}
+.uiseg{border:2px solid #E2E4F0 !important;border-radius:14px !important}
+.uiseg button[aria-pressed="true"]{background:var(--pop) !important}
+.f input,.f select{border-radius:10px !important;border:2px solid #E2E4F0 !important;background:#fff}
+footer{font-size:13px}
+#tpl,#arP,#pop{border-radius:18px !important;border-width:3px !important}
+#tpl .sg button{border-radius:14px !important;border-width:2px !important;border-bottom-width:4px !important;transition:transform .08s}
+#tpl .sg button:active{transform:translateY(2px)}
+#tpl .sg button[aria-pressed="true"]{border-color:var(--pop) !important;background:#F1F1FF !important}
+#tpl .ok,#pop .ok{background:var(--pop) !important;border-radius:12px !important}
+#hp .hc{border-radius:20px}
+/* 点を置いたとき・描き終えたときの小さな動き */
+@keyframes popIn{0%{transform:scale(.2)}60%{transform:scale(1.35)}100%{transform:scale(1)}}
+circle.fp.new{transform-box:fill-box;transform-origin:center;animation:popIn .35s ease-out}
+@keyframes stamp{0%{transform:scale(.3) rotate(-25deg);opacity:0}70%{transform:scale(1.15) rotate(6deg);opacity:1}100%{transform:scale(1) rotate(0)}}
+.cele{position:fixed;left:50%;top:38%;transform:translate(-50%,-50%);z-index:300;pointer-events:none}
+.cele div{background:#fff;border:3px solid var(--mint);color:#0C7A5E;font-weight:800;font-size:20px;padding:14px 22px;border-radius:20px;box-shadow:0 10px 30px rgba(20,163,127,.25);animation:stamp .45s ease-out}
+@media (prefers-reduced-motion:reduce){circle.fp.new,.cele div{animation:none}}
+
+.ic{display:inline-block;width:1.15em;height:1.15em;vertical-align:-.2em;background:currentColor;-webkit-mask:var(--m) center/contain no-repeat;mask:var(--m) center/contain no-repeat;flex:none}
+.icb::before{content:'';display:inline-block;width:1.1em;height:1.1em;margin-right:.35em;vertical-align:-.18em;background:currentColor;-webkit-mask:var(--m) center/contain no-repeat;mask:var(--m) center/contain no-repeat}
+.ic-chat{--m:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z'/></svg>")}
+.ic-info{--m:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='9'/><path d='M12 11v6M12 7.5v.5'/></svg>")}
+.ic-slider{--m:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1'/><circle cx='15' cy='6' r='2'/><circle cx='9' cy='12' r='2'/><circle cx='17' cy='18' r='2'/></svg>")}
+.ic-share{--m:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 15V3M7 8l5-5 5 5'/><path d='M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6'/></svg>")}
+.ic-click{--m:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M9 9l11 4-5 1.5L13.5 20z'/><path d='M5 3v3M3 5h3M2.5 9.5l2-1M9.5 2.5l-1 2'/></svg>")}
+.ic-ice{--m:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M2 13h20'/><path d='M8 13l4-8 4 8'/><path d='M6 13l2 7h8l2-7'/></svg>")}
+.ic-star{--m:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z'/></svg>")}
+.ic-side{--m:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='4' width='18' height='16' rx='2'/><path d='M15 4v16'/></svg>")}
+.ic-spark{--m:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z'/><path d='M19 16v4M17 18h4'/></svg>")}
+.ic-book{--m:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 5a2 2 0 0 1 2-2h13v15H6a2 2 0 0 0-2 2z'/><path d='M4 20V5'/></svg>")}
+.ic-plus{--m:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 5v14M5 12h14'/></svg>")}
+.ic-pen{--m:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 20l4-1 11-11-3-3L5 16z'/></svg>")}
+.ic-bulb{--m:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M9 18h6M10 21h4'/><path d='M12 3a6 6 0 0 0-3.5 10.9V16h7v-2.1A6 6 0 0 0 12 3z'/></svg>")}
+.ic-eye{--m:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z'/><circle cx='12' cy='12' r='3'/></svg>")}
+</style>
+</head>
+<body>
+<div class="app" id="sheetApp">
+  <header>
+    <h1 id="title"></h1>
+    <label class="f" title="名前の代わりの番号。保存ファイル名と集計で使います">参加者番号<input id="pid" size="5" placeholder="A-012"></label>
+    <label class="f" id="valWrap" title="食事記録ツールなどで測った自分の値。目標と比べて「以上／未満」を記録し、集計で立ち位置別に比べます"><span id="valLbl"></span><input id="val" type="number" min="0" style="width:66px"></label>
+    <span class="posw adv" id="pos" role="status" aria-live="polite"></span>
+    <label class="f" id="grpWrap" title="比べる行動データ"><select id="grp"></select></label>
+    <span class="sp"></span>
+    <span class="uiseg" role="group" aria-label="表示"><button id="uiS">かんたん</button><button id="uiA">くわしく</button></span>
+    <label class="f adv">将来<select id="hz"></select></label>
+    <label class="f adv">間隔<select id="iv"><option value="5">5年</option><option value="1">1年</option></select></label>
+    <button class="btn g" id="arB" title="システムの原型（型）と、変数の役割">型</button>
+    <button class="btn g adv" id="toSum">集計</button>
+    <button class="btn g adv" id="st">設定</button>
+    <button class="btn" id="sj">保存</button>
+    <button class="btn g adv" id="sc">CSV</button>
+    <button class="btn g adv" id="ld">読込</button>
+    <button class="btn g" id="rs">やり直す</button>
+  </header>
+  <section class="card"><div id="chart"></div>
+    <div id="tpl" role="dialog" aria-labelledby="tplT"><div class="th"><b id="tplT"></b><span style="font-size:10.5px;color:var(--ink-3)">⠿ ドラッグで移動</span><button id="tplX" aria-label="閉じる">×</button></div>
+      <div class="sg" id="tplGrid"></div><div class="desc" id="tplD"></div><button type="button" id="tplMore">▸ 数字で細かく調整する</button><div class="tf" id="tplF"></div>
+      <div class="r"><button id="tplCancel">やめる</button><button class="ok" id="tplOk">この形で描く</button></div></div>
+    <div id="arP" role="dialog" aria-label="システムの原型"></div>
+    <div id="pop" role="dialog" aria-label="コメント"><div class="t" id="popT"></div><input id="popIn" placeholder="なぜ？ 何が起きる？"><div class="r"><button id="popDel">点を消す</button><button id="popX">閉じる</button><button class="ok" id="popOk">OK</button></div></div>
+  </section>
+  <footer>
+    <span class="k"><i class="sw"></i>データ</span><span class="k"><i class="sw d"></i>あなたの将来</span>
+    <span class="hint2 adv">クリック：点を置く ／ 点をクリック：コメント ／ ドラッグ：上下に調整 ／ ▾で経路を閉じる（描かなくてOK）／ 右の ○：効く順</span><span class="hint2 sim">クリックで点を置く ／ 点をドラッグで上下に動かす ／ 点をクリックでコメント</span><span id="prog" class="adv"></span>
+  </footer>
+</div>
+<div class="app sum" id="sumApp" hidden>
+  <header>
+    <h1 id="sm_title">TET 集計</h1>
+    <span class="n" id="sm_count">0人</span>
+    <label class="f">対象<select id="sm_flt"></select></label>
+    <label class="f">表示<select id="sm_mode" style="max-width:150px"><option value="fan">中心と幅</option><option value="both">中心と幅＋個人の線</option><option value="lines">個人の線</option></select></label>
+    <span class="sp"></span>
+    <button class="btn g" id="sm_back">← 記入</button>
+    <button class="btn" id="sm_add" title="tet_tool.html で保存した回答（JSON・CSV、複数可）">回答を読込</button>
+    <button class="btn g" id="sm_self" title="この端末の記入内容を加える">＋自分</button>
+    <button class="btn g" id="sm_demo">サンプル</button>
+    <button class="btn g" id="sm_csv">CSV</button>
+    <button class="btn g" id="sm_svg">図</button>
+    <button class="btn g" id="sm_clr">クリア</button>
+  </header>
+  <main>
+    <section class="card"><div id="sm_chart"></div>
+      <div class="drop" id="sm_drop"><b>回答ファイルをここにドラッグ</b><span>tet_sheet.html で保存した JSON・CSV（複数まとめて可）</span><button class="btn" id="sm_add2">ファイルを選ぶ</button><button class="btn g" id="sm_demo2">サンプルで試す</button></div>
+    </section>
+    <aside class="card">
+      <div class="tabs" role="tablist"><button role="tab" data-t="types" aria-selected="true">型</button><button role="tab" data-t="rank">順位</button><button role="tab" data-t="notes">コメント</button><button role="tab" data-t="people">参加者</button></div>
+      <div class="pane" id="sm_pane"></div>
+    </aside>
+  </main>
+</div>
+<input type="file" id="sm_files" accept=".json,.csv" multiple hidden>
+<div class="toast" id="sm_toast"></div>
+<div id="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle"><div class="mbox">
+  <div class="mhead"><h2 id="mTitle">設定（研究者用）</h2><button class="btn g" id="mClose">閉じる</button></div>
+  <div class="mbody">
+    <div class="mrow">
+      <label>タイトル<input id="cTitle"></label>
+      <label>自分の値の名前<input id="cOwnL"></label>
+      <label>目標値<input id="cOwnV" type="number"></label>
+      <label>単位<input id="cOwnU"></label>
+      <label>「いま」の年<input id="cNow" type="number"></label>
+      <label>システムの原型（初期値）<select id="cArch"><option value="">（使わない）</option></select></label>
+      <label style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="cArchLock" style="width:auto">参加者が型を変えられないようにする</label>
+    </div>
+    <div class="hint" style="font-size:12px;color:var(--ink-3)">過去のデータは「年,値」を1行ずつ（Excelから貼り付け可）。男女などの区分があるときは「年,値,区分」。CSVファイルも読み込めます。</div>
+    <div id="mVars"></div>
+  </div>
+  <div class="mfoot"><button class="btn" id="mApply">適用</button><button class="btn g" id="mExport">設定を書き出す（JSON）</button><button class="btn g" id="mDefault">初期設定に戻す</button><span class="err" id="mErr"></span></div>
+</div></div>
+<div id="hp" role="dialog" aria-modal="true"><div class="hc" id="hpc"></div></div>
+<input type="file" id="csvIn" accept=".csv,.txt,.tsv" hidden>
+<input type="file" id="fileIn" accept=".json" hidden>
+<div class="toast" id="toast"></div>
+<!--TET_PRESET-->
+<script>
+let CONFIG = {
+  title:'野菜を食べる未来を描く', studyId:'foodlifestyle',
+  own:{label:'野菜 g/日', value:350, unit:'g'},
+  nowYear:2024, horizons:[2030,2040,2050], horizon:2050, interval:5,
+  variables:[
+    {id:'x1',role:'x',pathway:'Top-down',name:'社会・制度',unit:'2019=100',domain:[40,160],src:'食育白書',
+     history:[[2019,100],[2020,92.3],[2021,105.6],[2022,113.2],[2023,92.3],[2024,92.7]]},
+    {id:'x2',role:'x',pathway:'Bottom-up',name:'人々の関心',unit:'2019=50',domain:[0,100],src:'Google トレンド',
+     history:[[2019,50],[2020,70.8],[2021,78.1],[2022,79.1],[2023,76.8],[2024,69.8]]},
+    {id:'x3',role:'x',pathway:'Affordability',name:'買いやすさ',unit:'2019=100',domain:[40,160],src:'可処分所得（家計調査・勤労者世帯）÷生鮮野菜CPI（消費者物価指数）',
+     history:[[2019,100],[2020,99.9],[2021,101.6],[2022,98.1],[2023,91.4],[2024,87.7]]},
+    {id:'y',role:'y',pathway:'Variable of interest',name:'350g以上の人',unit:'%',domain:[0,50],src:'（統計名を記入）',
+     groups:{'女性':[[2014,29.2],[2015,31.4],[2016,27.2],[2017,29.0],[2018,27.0],[2019,26.5],[2022,24.8],[2023,21.9],[2024,22.0]],
+             '男性':[[2014,33.2],[2015,33.7],[2016,29.3],[2017,32.3],[2018,30.7],[2019,30.1],[2022,28.9],[2023,25.2],[2024,26.2]]}}
+  ]
+};
+const SCHEMA='tet-sheet-1.0', qs=new URLSearchParams(location.search);
+let S, STORE, VARS;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const toast=m=>{const e=$('toast');e.textContent=m;e.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('show'),2000)};
+const fresh=()=>{const lanes={};VARS.forEach(v=>lanes[v.id]={points:{},notes:{}});const g=VARS.find(v=>v.groups);
+  return {schema:SCHEMA,studyId:CONFIG.studyId,participant:{id:'',value:'',group:g?Object.keys(g.groups)[0]:''},horizon:CONFIG.horizon,interval:CONFIG.interval,lanes,rank:[],collapsed:defaultCollapsed(),startedAt:new Date().toISOString(),log:[]}};
+const defaultCollapsed=()=>{ const c={}; const xs=VARS.filter(v=>v.role==='x'); xs.forEach((v,i)=>{ if(CONFIG.openX ? !CONFIG.openX.includes(v.id) : i>0) c[v.id]=true; }); return c; };
+const save=()=>{try{localStorage.setItem(STORE,JSON.stringify(S))}catch(e){}};
+const log=(type,d)=>{S.log.push({t:new Date().toISOString(),type,...(d||{})});save()};
+const hist=v=>(v.groups?v.groups[S.participant.group]:v.history).map(([year,value])=>({year,value}));
+const fYears=()=>{const a=[];for(let y=CONFIG.nowYear+1;y<=S.horizon;y+=S.interval)a.push(y);if(a.at(-1)!==S.horizon)a.push(S.horizon);return a};
+const nPts=id=>fYears().filter(y=>S.lanes[id].points[y]!=null).length;
+const hasFutureNote=id=>Object.keys(S.lanes[id].notes).some(y=>+y>CONFIG.nowYear&&S.lanes[id].notes[y].trim());
+const done=id=>nPts(id)===fYears().length&&hasFutureNote(id);
+const isCol=id=>!!(S.collapsed&&S.collapsed[id]) && (VARS.find(v=>v.id===id)||{}).role==='x';
+function toggleCol(id){ S.collapsed=S.collapsed||{}; S.collapsed[id]=!S.collapsed[id]; log('collapse',{v:id,collapsed:S.collapsed[id]}); save(); if(typeof closeTpl==='function') closeTpl(); draw(); }
+const pos=()=>S.participant.value===''?null:(+S.participant.value>=CONFIG.own.value?'hi':'lo');
+
+/* ---------- ヘッダー ---------- */
+function header(){
+  $('title').textContent=CONFIG.title; $('valLbl').textContent='あなたの'+CONFIG.own.label;
+  $('pid').value=S.participant.id; $('val').value=S.participant.value;
+  posWidget();
+  const g=VARS.find(v=>v.groups); $('grpWrap').style.display=g?'':'none';
+  if(g){$('grp').innerHTML=Object.keys(g.groups).map(k=>`<option ${k===S.participant.group?'selected':''}>${esc(k)}</option>`).join('')}
+  $('hz').innerHTML=CONFIG.horizons.map(h=>`<option ${h===S.horizon?'selected':''}>${h}</option>`).join('');
+  $('iv').value=String(S.interval);
+  const d=VARS.filter(v=>done(v.id)).length, X=VARS.filter(v=>v.role==='x').length;
+  const op=VARS.filter(v=>!isCol(v.id)), dO=op.filter(v=>done(v.id)).length;
+  $('prog').textContent=`完了 ${dO}/${op.length}（開いている変数）　順位 ${S.rank.length}/${X}`;
+}
+$('title').onclick=()=>openSettings(); $('st').onclick=()=>openSettings();
+$('pid').oninput=e=>{S.participant.id=e.target.value.trim();save()};
+$('val').oninput=e=>{S.participant.value=e.target.value;save();header();clearTimeout(window.__pv);window.__pv=setTimeout(draw,300)};
+$('val').onchange=()=>log('own',{value:S.participant.value});
+$('grp').onchange=e=>{const g=VARS.find(v=>v.groups);if(nPts(g.id)&&!confirm('線を消して切り替えますか？')){header();return}
+  S.participant.group=e.target.value;S.lanes[g.id]={points:{},notes:{}};log('group',{value:e.target.value});draw()};
+$('hz').onchange=e=>{S.horizon=+e.target.value;log('horizon',{value:S.horizon});draw()};
+$('iv').onchange=e=>{S.interval=+e.target.value;log('interval',{value:S.interval});draw()};
+
+/* 自分の位置：色だけに頼らず「バーの位置・印・文字」で示す */
+function posWidget(){
+  const el=$('pos'), p=pos(), T=CONFIG.own.value, U=CONFIG.own.unit, mx=Math.max(T*1.7, +S.participant.value||0), v=+S.participant.value||0;
+  const W=64,H=14, tx=T/mx*W, fx=Math.min(v,mx)/mx*W;
+  const bar=`<svg width="${W}" height="${H+6}" viewBox="0 0 ${W} ${H+6}" aria-hidden="true">
+    <defs><pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="5" height="5" fill="#FFF1DC"/><line x1="0" y1="0" x2="0" y2="5" stroke="#E8790C" stroke-width="2.4"/></pattern></defs>
+    <rect x="0" y="4" width="${W}" height="${H-4}" rx="5" fill="#E5EAEC"/>
+    ${p?`<rect x="0" y="4" width="${fx}" height="${H-4}" rx="5" fill="${p==='hi'?'#14A37F':'url(#hatch)'}" stroke="${p==='hi'?'#14A37F':'#E8790C'}"/>`:''}
+    <line x1="${tx}" x2="${tx}" y1="0" y2="${H+4}" stroke="#23263A" stroke-width="2"/></svg>`;
+  el.className='posw adv '+(p||'');
+  const txt = !p ? `目標 ${T}${U}（線）` : (p==='hi' ? `✓ 目標以上 +${Math.round(v-T)}${U}` : `△ あと${Math.round(T-v)}${U}で目標`);
+  el.innerHTML=bar+`<span>${txt}</span>`;
+  el.setAttribute('aria-label', !p?`目標は${T}${U}`:`あなたは${v}${U}。${p==='hi'?'目標以上':'目標未満'}`);
+}
+
+/* ---------- 1枚のグラフ ---------- */
+let selKey=null;
+function celebrate(msg){const d=document.createElement('div');d.className='cele';d.innerHTML=`<div>${msg}</div>`;document.body.appendChild(d);setTimeout(()=>d.remove(),1400);}
+let _doneSeen=null;
+function draw(){
+  if(S&&VARS){const now=VARS.filter(v=>done(v.id)).map(v=>v.id);if(_doneSeen){now.filter(id=>!_doneSeen.includes(id)).forEach(id=>{const v=VARS.find(q=>q.id===id);celebrate(`✓ 「${esc(v.name||v.pathway)}」を描けました！`);});}_doneSeen=now;}
+  setTimeout(()=>{window._newPt=null;},400);
+  header(); closePop();
+  const box=$('chart'); const W=box.clientWidth,H=box.clientHeight; if(W<50||H<50)return; box.innerHTML='';
+  const LW=138, RW=46, TOP=30, BOT=26, GAP=8, n=VARS.length, sepExtra=10;
+  const CH=30, nCol=VARS.filter(v=>isCol(v.id)).length, nOpen=Math.max(1,n-nCol);
+  const laneH=(H-TOP-BOT-GAP*(n-1)-sepExtra-CH*nCol)/nOpen; let yCur=TOP;
+  const first=Math.min(...VARS.map(v=>hist(v)[0].year));
+  const x=d3.scaleLinear().domain([first,S.horizon]).range([LW+34,W-RW-8]);
+  const nowX=x(CONFIG.nowYear), X0=x.range()[0], X1=x.range()[1];
+  const svg=d3.select(box).append('svg').attr('viewBox',`0 0 ${W} ${H}`);
+  const pat=svg.append('defs').append('pattern').attr('id','gr').attr('width',16).attr('height',16).attr('patternUnits','userSpaceOnUse');
+  pat.append('rect').attr('width',16).attr('height',16).attr('fill','#FFFDF8');pat.append('path').attr('d','M16 0H0V16').attr('fill','none').attr('stroke','#F2EAD9');
+  // 上の帯
+  svg.append('rect').attr('x',X0).attr('y',4).attr('width',nowX-X0-3).attr('height',22).attr('rx',6).attr('fill','#23263A');
+  fitText(svg.append('text').attr('class','lt').attr('x',(X0+nowX)/2).attr('y',19).attr('text-anchor','middle').attr('fill','#fff').attr('font-size',12).attr('font-weight',700).text('データに基づく過去'), nowX-X0-3, '過去');
+  svg.append('rect').attr('x',nowX+3).attr('y',4).attr('width',X1-nowX-3).attr('height',22).attr('rx',6).attr('fill','#E8790C');
+  fitText(svg.append('text').attr('class','lt').attr('x',(nowX+X1)/2).attr('y',19).attr('text-anchor','middle').attr('fill','#fff').attr('font-size',12).attr('font-weight',700).text('あなたが描く将来'), X1-nowX-3, '将来');
+  const FY=fYears(), line=d3.line().x(p=>x(p.year)).y(p=>p.yy);
+  VARS.forEach((v,i)=>{
+    if(v.role==='y') yCur+=sepExtra;
+    const y0=yCur; yCur+=(isCol(v.id)?CH:laneH)+GAP;
+    if(isCol(v.id)){ // 折りたたんだ帯：名前と状態だけ
+      const cg=svg.append('g').style('cursor','pointer').attr('tabindex',0).attr('role','button').attr('aria-expanded','false').attr('aria-label',`${v.pathway}を開く`)
+        .on('click',()=>toggleCol(v.id)).on('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();toggleCol(v.id)}});
+      cg.append('rect').attr('x',8).attr('y',y0).attr('width',W-RW-16).attr('height',CH).attr('rx',8).attr('fill','#ECECFD').attr('stroke','#D9D9F7');
+      cg.append('text').attr('class','lt').attr('x',18).attr('y',y0+20).attr('font-size',13).attr('font-weight',900).attr('fill','#5B5BD6').text((typeof UI!=='undefined'&&UI==='simple')?`▸ ${v.name||v.pathway}`:`▸ ${v.pathway}`)
+        .append('tspan').attr('font-weight',700).attr('fill','#23263A').attr('dx',10).text((typeof UI!=='undefined'&&UI==='simple')?'':v.name);
+      cg.append('text').attr('class','lt').attr('x',W-RW-24).attr('y',y0+20).attr('text-anchor','end').attr('font-size',11.5).attr('font-weight',700).attr('fill','#555B73')
+        .text(nPts(v.id)?`${done(v.id)?'✓ 完了':'描きかけ'}・開く ▸`:(typeof UI!=='undefined'&&UI==='simple')?'開いて描く ▸':'開いて描く（任意）▸');
+      if(!(typeof UI!=='undefined'&&UI==='simple')){ const r=S.rank.indexOf(v.id), cx=W-RW/2-4, cy=y0+CH/2;
+      const rb=svg.append('g').style('cursor','pointer').attr('role','button').attr('tabindex',0).attr('aria-label',`${v.pathway}の順位`).on('click',()=>rank(v.id)).on('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();rank(v.id)}});
+      rb.append('circle').attr('cx',cx).attr('cy',cy).attr('r',12).attr('fill',r>=0?'#FF8A3D':'#fff').attr('stroke','#FF8A3D').attr('stroke-width',2);
+      rb.append('text').attr('class','lt').attr('x',cx).attr('y',cy+4.5).attr('text-anchor','middle').attr('font-size',12.5).attr('font-weight',900).attr('fill',r>=0?'#fff':'#FF8A3D').text(r>=0?r+1:'?');
+      }
+      delete GEOM[v.id]; return;
+    }
+    const y=d3.scaleLinear().domain(v.domain).range([y0+laneH-6,y0+8]);
+    const L=S.lanes[v.id], g=svg.append('g'); L.bounds=L.bounds||{};
+    if(v.role==='y') svg.append('line').attr('x1',8).attr('x2',W-8).attr('y1',y0-GAP/2-sepExtra/2).attr('y2',y0-GAP/2-sepExtra/2).attr('stroke','#C3C7D9');
+    // ラベル
+    g.append('rect').attr('x',8).attr('y',y0).attr('width',LW-12).attr('height',laneH).attr('rx',10).attr('fill',v.role==='y'?'#FFF1DC':'#ECECFD').style('cursor','pointer').on('click',()=>openSettings(v.id)).append('title').text('クリックで範囲・データを設定');
+    if(v.role==='x'){ const cb=g.append('g').style('cursor','pointer').attr('role','button').attr('tabindex',0).attr('aria-expanded','true').attr('aria-label',`${v.pathway}を閉じる`)
+        .on('click',ev=>{ev.stopPropagation();toggleCol(v.id)}).on('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();toggleCol(v.id)}});
+      cb.append('rect').attr('x',LW-30).attr('y',y0+6).attr('width',22).attr('height',22).attr('rx',6).attr('fill','#fff').attr('stroke','#B7B7EE');
+      cb.append('text').attr('class','lt').attr('x',LW-19).attr('y',y0+22).attr('text-anchor','middle').attr('font-size',12).attr('font-weight',900).attr('fill','#5B5BD6').text('▾');
+      cb.append('title').text('閉じる（この経路は描かなくても大丈夫です）'); }
+    { const lim=y0+laneH-48, wMain=LW-12-10-(v.role==='x'?30:6), wAll=LW-12-14; let cy=y0+22;
+      if((typeof UI!=='undefined'&&UI==='simple')) cy=svgWrap(g,v.name||v.pathway,18,cy,wMain,{fs:15,fw:900,fill:v.role==='y'?'#B35C00':'#4343B8',lh:18,maxLines:3})+2;
+      else { cy=svgWrap(g,v.pathway,18,cy,wMain,{fs:v.pathway.length>14?12.5:14,fw:900,fill:v.role==='y'?'#E8790C':'#5B5BD6',lh:15,maxLines:2})+2;
+      if(cy<lim) cy=svgWrap(g,v.name,18,cy,wAll,{fs:12.5,fw:700,lh:15,maxLines:2}); }
+      if(cy<lim&&!(typeof UI!=='undefined'&&UI==='simple')) cy=svgWrap(g,[v.src,v.unit].filter(Boolean).join('・'),18,cy,wAll,{fs:10.5,fill:'#858BA3',lh:13,maxLines:2})+3;
+      { const rr=roleOfVar(v.id),dd=archDef(); if(rr&&dd&&cy<lim&&!(typeof UI!=='undefined'&&UI==='simple')) cy=svgWrap(g,`型：${dd.nm}（${(yShape(dd)||{}).txt||rr.dir}）`,18,cy,wAll,{fs:10.5,fw:700,fill:'#7A4EAB',lh:13,maxLines:2})+2; }
+      if(v.role==='y' && pos() && cy<lim+6 && !(typeof UI!=='undefined'&&UI==='simple')) svgWrap(g,pos()==='hi'?`あなた：${CONFIG.own.value}${CONFIG.own.unit}以上の側 ✓`:`あなた：${CONFIG.own.value}${CONFIG.own.unit}未満の側 △`,18,cy+2,wAll,{fs:11,fw:700,lh:14,maxLines:2}); }
+    g.append('text').attr('class','lt').attr('x',18).attr('y',y0+laneH-10).attr('font-size',11).attr('font-weight',700).attr('fill',done(v.id)?'#14A37F':'#858BA3')
+      .text(done(v.id)?'✓ 完了':(typeof UI!=='undefined'&&UI==='simple')?'':`点 ${nPts(v.id)}/${FY.length}・コメント ${hasFutureNote(v.id)?'✓':'—'}`);
+    { const tb=g.append('g').style('cursor','pointer').attr('tabindex',0).attr('role','button').attr('aria-label',`${v.pathway}：形から描く`)
+        .on('click',ev=>{ev.stopPropagation();openTpl(v.id)}).on('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();openTpl(v.id)}});
+      const tw=LW-32, ty=y0+laneH-44;
+      tb.append('rect').attr('x',18).attr('y',ty).attr('width',tw).attr('height',20).attr('rx',6).attr('fill','#fff').attr('stroke','#FF8A3D');
+      const sh=L.template&&SHAPES.find(q=>q.id===L.template.shape);
+      tb.append('text').attr('class','lt').attr('x',18+tw/2).attr('y',ty+14).attr('text-anchor','middle').attr('font-size',11).attr('font-weight',700).attr('fill','#B35C00').text(sh?`形：${sh.nm} ▸`:'形から描く ▸'); }
+    // 背景
+    g.append('rect').attr('x',X0).attr('y',y0).attr('width',nowX-X0).attr('height',laneH).attr('fill','#EEF0F7');
+    g.append('rect').attr('x',nowX).attr('y',y0).attr('width',X1-nowX).attr('height',laneH).attr('fill','url(#gr)');
+    g.append('g').attr('class','ax').attr('transform',`translate(${X0},0)`).call(d3.axisLeft(y).ticks(3).tickSizeOuter(0));
+    g.append('rect').attr('x',X0-34).attr('y',y0).attr('width',32).attr('height',laneH).attr('fill','transparent').style('cursor','ns-resize').on('click',()=>openSettings(v.id)).append('title').text('クリックで縦軸の範囲を変更');
+    [['max','上限'],['min','下限']].forEach(([k,lb])=>{ const b=L.bounds[k]; if(b==null||b===''||!isFinite(b)) return; const yy=y(+b);
+      g.append('line').attr('x1',nowX).attr('x2',X1).attr('y1',yy).attr('y2',yy).attr('stroke','#8A4A86').attr('stroke-width',1.2).attr('stroke-dasharray','6 3');
+      g.append('text').attr('class','lt').attr('x',X1-2).attr('y',yy+(k==='max'?-4:12)).attr('text-anchor','end').attr('font-size',10.5).attr('font-weight',700).attr('fill','#8A4A86').text(`${lb} ${b}`); });
+    GEOM[v.id]={x,y,y0,laneH,nowX,X1,last:null};
+    FY.forEach(yr=>g.append('line').attr('x1',x(yr)).attr('x2',x(yr)).attr('y1',y0).attr('y2',y0+laneH).attr('stroke','#EDE3CF').attr('stroke-dasharray','2 4'));
+    // 過去
+    const H0=hist(v).map(p=>({...p,yy:y(p.value)})), last=H0.at(-1); GEOM[v.id].last=last;
+    g.append('path').datum(H0).attr('class','hl').attr('d',line);
+    H0.forEach(p=>g.append('circle').attr('class','hd'+(selKey===v.id+':'+p.year?' sel':'')).attr('cx',x(p.year)).attr('cy',p.yy).attr('r',4.5)
+      .on('click',ev=>{ev.stopPropagation();openPop(v,p.year,x(p.year),p.yy,false)}).append('title').text(`${p.year}年 ${p.value}（クリックでコメント）`));
+    // 将来
+    const P=FY.filter(yr=>L.points[yr]!=null).map(yr=>({year:yr,value:L.points[yr],yy:y(L.points[yr])}));
+    const hit=g.append('rect').attr('x',nowX+4).attr('y',y0).attr('width',X1-nowX+6).attr('height',laneH).attr('fill','transparent').style('cursor','crosshair');
+    if(P.length) g.append('path').datum([last,...P]).attr('class','fl').attr('d',line);
+    else g.append('text').attr('class','hint').attr('x',(nowX+X1)/2).attr('y',y0+laneH/2+4).text((typeof UI!=='undefined'&&UI==='simple')?'ここをクリックして点を置く':'クリックして将来の点を置く');
+    const clamp=val=>clampV(v,val), r1=val=>Math.round(val*10)/10;
+    hit.on('click',ev=>{const [mx,my]=d3.pointer(ev,svg.node());const yr=FY.reduce((a,b)=>Math.abs(x(b)-mx)<Math.abs(x(a)-mx)?b:a);
+      L.points[yr]=r1(clamp(y.invert(my)));selKey=v.id+':'+yr;window._newPt=selKey;log('place',{v:v.id,year:yr,value:L.points[yr]});save();draw()});
+    P.forEach(p=>{
+      if(!(L.notes[p.year]||'').trim()) g.append('text').attr('class','vl').attr('x',x(p.year)).attr('y',p.yy-10).text(+(+p.value).toFixed(1));
+      g.append('circle').datum(p).attr('class','fp'+(selKey===v.id+':'+p.year?' sel':'')+(window._newPt===v.id+':'+p.year?' new':'')).attr('cx',x(p.year)).attr('cy',p.yy).attr('r',6.5).attr('tabindex',0)
+        .attr('aria-label',`${v.pathway} ${p.year}年 ${p.value}`)
+        .on('keydown',(ev,d)=>{const s=(v.domain[1]-v.domain[0])/(ev.shiftKey?10:50);let val=d.value;
+          if(ev.key==='ArrowUp')val+=s;else if(ev.key==='ArrowDown')val-=s;else if(ev.key==='Enter'){openPop(v,d.year,x(d.year),d.yy,true);return}else return;
+          ev.preventDefault();L.points[d.year]=r1(clamp(val));selKey=v.id+':'+d.year;save();draw();
+          setTimeout(()=>{const c=[...document.querySelectorAll('circle.fp')].find(n=>n.__data__&&n.__data__.year===d.year&&n.getAttribute('aria-label').startsWith(v.pathway));c&&c.focus()},0)})
+        .call(d3.drag().clickDistance(4)
+          .on('start',function(){this.__moved=false})
+          .on('drag',function(ev,d){this.__moved=true;const val=r1(clamp(y.invert(ev.y)));L.points[d.year]=val;d.value=val;d.yy=y(val);d3.select(this).attr('cy',d.yy)})
+          .on('end',function(ev,d){ if(!this.__moved) return; save();log('drag',{v:v.id,year:d.year,value:L.points[d.year]});draw()}))
+        .on('click',(ev,d)=>{ev.stopPropagation();selKey=v.id+':'+d.year;openPop(v,d.year,x(d.year),d.yy,true)});
+    });
+    // コメント（吹き出し）
+    Object.entries(L.notes).forEach(([yr,txt])=>{ if(!txt.trim())return; yr=+yr;
+      let px=x(yr), py; if(yr<=CONFIG.nowYear){const h=H0.find(p=>p.year===yr); if(!h)return; py=h.yy} else { if(L.points[yr]==null)return; py=y(L.points[yr]) }
+      if(yr>S.horizon) return;
+      const t=txt.length>14?txt.slice(0,14)+'…':txt, w=Math.min(190,t.length*11.2+14), vtxt=(yr>CONFIG.nowYear&&L.points[yr]!=null)?' '+(+(+L.points[yr]).toFixed(1)):'';
+      const wt=w+vtxt.length*7, above=py-y0>34, by=above?py-32:py+12, bx=Math.max(X0+2,Math.min(X1-wt,px-wt/2));
+      const b=g.append('g').attr('class','bub'+(yr<=CONFIG.nowYear?' p':'')).style('cursor','pointer').on('click',ev=>{ev.stopPropagation();openPop(v,yr,px,py,yr>CONFIG.nowYear)});
+      b.append('rect').attr('x',bx).attr('y',by).attr('width',w).attr('height',20).attr('rx',6);
+      b.select('rect').attr('width',wt); b.append('text').attr('x',bx+7).attr('y',by+14).text(t).append('tspan').attr('font-weight',700).attr('fill','#E8790C').text(vtxt); b.append('title').text(txt);
+    });
+    // 順位（x のみ）
+    if(v.role==='x'&&!(typeof UI!=='undefined'&&UI==='simple')){ const r=S.rank.indexOf(v.id), cx=W-RW/2-4, cy=y0+laneH/2;
+      const rb=g.append('g').style('cursor','pointer').attr('tabindex',0).attr('role','button').attr('aria-label',`${v.pathway}の順位`)
+        .on('click',()=>rank(v.id)).on('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();rank(v.id)}});
+      rb.append('circle').attr('cx',cx).attr('cy',cy).attr('r',15).attr('fill',r>=0?'#FF8A3D':'#fff').attr('stroke','#FF8A3D').attr('stroke-width',2);
+      rb.append('text').attr('class','lt').attr('x',cx).attr('y',cy+5).attr('text-anchor','middle').attr('font-size',14).attr('font-weight',900).attr('fill',r>=0?'#fff':'#FF8A3D').text(r>=0?r+1:'?');
+    }
+  });
+  // 共通の時間軸・いま
+  const axY=H-BOT;
+  svg.append('g').attr('class','ax').attr('transform',`translate(0,${axY})`).call(d3.axisBottom(x).tickValues(d3.range(Math.ceil(first/5)*5,S.horizon+1,5)).tickFormat(d3.format('d')).tickSizeOuter(0));
+  svg.append('line').attr('x1',nowX).attr('x2',nowX).attr('y1',TOP-2).attr('y2',axY).attr('stroke','#23263A').attr('stroke-dasharray','4 4');
+  svg.append('g').attr('id','pvg').style('pointer-events','none');
+  setTimeout(()=>{ if(typeof tplV!=='undefined' && tplV) preview(); },0);
+  if(VARS.some(v=>v.role==='x')&&!(typeof UI!=='undefined'&&UI==='simple')) svg.append('text').attr('class','lt').attr('x',W-RW/2-4).attr('y',TOP+10).attr('text-anchor','middle').attr('font-size',10.5).attr('font-weight',700).attr('fill','#E8790C').text('効く順');
+}
+/* ---------- 文字の折り返し（SVG） ---------- */
+function svgWrap(g, str, x, y, maxW, o){
+  str=String(str||''); if(!str) return y;
+  const t=g.append('text').attr('class','lt').attr('x',x).attr('y',y).attr('font-size',o.fs).attr('font-weight',o.fw||400).attr('fill',o.fill||'#23263A');
+  const tokens=str.match(/[A-Za-z0-9.,%=+\-\/()≥≤·:]+\s*|\s+|./gu)||[];
+  const tmp=t.append('tspan'); let line='', lines=[];
+  for(const tok of tokens){ tmp.text(line+tok); if(tmp.node().getComputedTextLength()>maxW && line.trim()){ lines.push(line.trimEnd()); line=tok.trimStart(); } else line+=tok; }
+  if(line.trim()) lines.push(line.trimEnd()); tmp.remove();
+  const mx=o.maxLines||2; if(lines.length>mx){ lines=lines.slice(0,mx); lines[mx-1]=lines[mx-1].replace(/.$/,'…'); }
+  lines.forEach((l,i)=>t.append('tspan').attr('x',x).attr('dy',i?o.lh:0).text(l));
+  t.append('title').text(str);
+  return y+o.lh*lines.length;
+}
+/* 帯の見出しが入りきらないときは短い言葉にする */
+function fitText(sel,maxW,short){ const n=sel.node(); if(n && n.getComputedTextLength()>maxW-8) sel.text(short); return sel; }
+/* 以前の設定（ブラウザに保存された設定・配布した設定）の名前を新しい名前にそろえる */
+function migrateCfg(c){ (c&&c.variables||[]).forEach(v=>{ if(v.role==='y' && (v.pathway==='y 行動'||v.pathway==='y Behaviour')) v.pathway='Variable of interest'; }); return c; }
+
+/* ---------- 形から描く（Tang et al., 2024 の型にもとづく） ---------- */
+const GEOM={};
+function clampV(v,val){ const B=S.lanes[v.id].bounds||{}; const lo=Math.max(v.domain[0], B.min!=null&&B.min!==''?+B.min:-Infinity), hi=Math.min(v.domain[1], B.max!=null&&B.max!==''?+B.max:Infinity); return Math.max(lo,Math.min(hi,val)); }
+const SHAPES=[
+  {id:'CONST', nm:'横ばい', sub:'いまと同じ', d:'いまの値がそのまま続く', p:[]},
+  {id:'ZERO',  nm:'ゼロへ', sub:'なくなる', d:'すぐに0（または下限）になる', p:[]},
+  {id:'LINR',  nm:'直線', sub:'一定のペース', d:'一定のペースで増える／減る', p:['end']},
+  {id:'PEX',   nm:'だんだん速く', sub:'後で急に', d:'はじめはゆっくり、後になるほど速く変わる', p:['end']},
+  {id:'NEX',   nm:'はじめ速く', sub:'だんだん落ち着く', d:'はじめに大きく変わり、だんだん落ち着く', p:['end']},
+  {id:'SSH',   nm:'S字', sub:'頭打ちになる', d:'ゆっくり→速く→ゆっくり。最後は到達値で頭打ち', p:['end','mid']},
+  {id:'PEAK',  nm:'山型', sub:'上がって下がる', d:'いったん山まで上がり、その後下がる', p:['ext','extYear','end']},
+  {id:'VALLEY',nm:'谷型', sub:'下がって戻る', d:'いったん谷まで下がり、その後戻る', p:['ext','extYear','end']},
+  {id:'OSC',   nm:'波', sub:'上下をくり返す', d:'上がり下がりをくり返しながら到達値へ向かう', p:['end','amp','cycles']}
+];
+const ease={LINR:t=>t, PEX:t=>t*t, NEX:t=>(1-Math.exp(-3*t))/(1-Math.exp(-3))};
+function shapeValues(v,shape,pr){
+  const L0=GEOM[v.id]?.last?.value ?? hist(v).at(-1).value, FY=fYears(), N=CONFIG.nowYear, Hz=S.horizon;
+  const tt=yr=>(yr-N)/(Hz-N), end=+pr.end;
+  return FY.map(yr=>{ const t=tt(yr); let val;
+    if(shape==='CONST') val=L0;
+    else if(shape==='ZERO') val=Math.max(0,v.domain[0]);
+    else if(ease[shape]) val=L0+(end-L0)*ease[shape](t);
+    else if(shape==='SSH'){ const m=Math.min(.9,Math.max(.1,tt(+pr.mid))), k=10, f=u=>1/(1+Math.exp(-k*(u-m))); val=L0+(end-L0)*(f(t)-f(0))/(f(1)-f(0)); }
+    else if(shape==='PEAK'||shape==='VALLEY'){ const tp=Math.min(.95,Math.max(.05,tt(+pr.extYear))), ex=+pr.ext;
+      val = t<=tp ? L0+(ex-L0)*Math.sin(Math.PI/2*t/tp) : ex+(end-ex)*(1-Math.cos(Math.PI/2*(t-tp)/(1-tp))); }
+    else if(shape==='OSC'){ val=L0+(end-L0)*t+(+pr.amp)*Math.sin(2*Math.PI*(+pr.cycles)*t); }
+    return {year:yr, value:Math.round(clampV(v,val)*10)/10};
+  });
+}
+/* ---------- システムの原型（型） ---------- */
+// roles: k=キー, nm=役割の名前, sh=典型的な形, dir=向き, y=関心のある変数に向く役割, hint=経路の目安
+const ARCH=[
+ {id:'fixes',nm:'応急処置の失敗',en:'Fixes that fail',d:'応急処置が長期的に意図せざる結果をうみ、問題がかえって悪化する。',
+  roles:[{k:'P',nm:'問題の症状',sh:'VALLEY',dir:'いったん良くなり、また悪くなる',y:1,x:40,yy:100},{k:'F',nm:'応急処置',sh:'PEX',dir:'だんだん増える',hint:/top/i,x:290,yy:100},{k:'U',nm:'意図しない結果',sh:'PEX',dir:'遅れて増える',hint:/afford|bottom/i,x:165,yy:178}],
+  e:[['P','F','+'],['F','P','-'],['F','U','+',1],['U','P','+']],L:[['B',165,72,['P','F']],['R',165,128,['F','U','P']]]},
+ {id:'burden',nm:'問題の転嫁',en:'Shifting the burden',d:'即効性のある対処療法を繰り返し、根本的な解決から離れていく。',
+  roles:[{k:'S',nm:'問題の症状',sh:'OSC',dir:'上下をくり返す',y:1,x:165,yy:100},{k:'Q',nm:'対処療法',sh:'PEX',dir:'だんだん増える',hint:/top/i,x:165,yy:20},{k:'E',nm:'副作用',sh:'PEX',dir:'遅れて増える',hint:/afford/i,x:295,yy:100},{k:'F',nm:'根本的解決策',sh:'NEX',dir:'だんだん減る',hint:/bottom/i,x:165,yy:180}],
+  e:[['S','Q','+'],['Q','S','-'],['Q','E','+'],['E','F','-'],['S','F','+'],['F','S','-',1]],L:[['B',118,60,['S','Q']],['R',225,100,['Q','E','F','S']],['B',118,140,['S','F']]]},
+ {id:'drift',nm:'目標のなし崩し',en:'Drifting goals',d:'実際のレベルに合わせて目標が少しずつ下がっていく。',
+  roles:[{k:'G',nm:'目標のレベル',sh:'LINR',dir:'少しずつ下がる',hint:/top/i,x:50,yy:30},{k:'A',nm:'実際のレベル',sh:'NEX',dir:'下がっていく',y:1,x:50,yy:172},{k:'Gp',nm:'ギャップ',sh:'CONST',dir:'あまり変わらない',x:168,yy:100},{k:'Pr',nm:'目標を引き下げる圧力',sh:'PEAK',dir:'強まってから弱まる',hint:/bottom/i,x:285,yy:30},{k:'C',nm:'是正措置',sh:'PEAK',dir:'いったん増えて減る',hint:/afford/i,x:285,yy:172}],
+  e:[['G','Gp','+'],['Gp','Pr','+'],['Pr','G','-'],['A','Gp','-'],['Gp','C','+'],['C','A','+',1]],L:[['B',168,52,['G','Gp','Pr']],['B',168,150,['A','Gp','C']]]},
+ {id:'limits',nm:'成功の限界',en:'Limits to success',d:'成長が続くと、それを抑える動きが強まり、頭打ちになる。',
+  roles:[{k:'E',nm:'努力',sh:'SSH',dir:'増えて頭打ち',hint:/bottom|top/i,x:35,yy:110},{k:'S',nm:'成果',sh:'SSH',dir:'S字に増えて頭打ち',y:1,x:165,yy:110},{k:'B',nm:'成功を妨げる動き',sh:'PEX',dir:'遅れて強まる',hint:/afford/i,x:295,yy:110},{k:'C',nm:'制約',sh:'CONST',dir:'あまり変わらない',x:295,yy:25}],
+  e:[['E','S','+'],['S','E','+'],['S','B','+'],['B','S','-'],['C','B','+']],L:[['R',100,110,['E','S']],['B',230,110,['S','B']]]},
+ {id:'under',nm:'成長と投資不足',en:'Growth and underinvestment',d:'成長に見合う能力への投資が足りず、成長が止まる。',
+  roles:[{k:'Eg',nm:'成長への努力',sh:'SSH',dir:'増えて頭打ち',hint:/bottom/i,x:35,yy:55},{k:'D',nm:'需要',sh:'PEAK',dir:'増えてから減る',y:1,x:160,yy:55},{k:'Lm',nm:'制約要因の影響',sh:'PEX',dir:'だんだん強まる',hint:/afford/i,x:290,yy:55},{k:'N',nm:'投資の必要性の認識',sh:'PEAK',dir:'遅れて高まる',x:290,yy:170},{k:'I',nm:'能力への投資',sh:'NEX',dir:'少しだけ・遅れて',hint:/top/i,x:160,yy:170}],
+  e:[['Eg','D','+'],['D','Eg','+'],['D','Lm','+'],['Lm','D','-'],['Lm','N','+'],['N','I','+',1],['I','Lm','-']],L:[['R',97,55,['Eg','D']],['B',225,55,['D','Lm']],['B',245,125,['Lm','N','I']]]},
+ {id:'esc',nm:'エスカレーション',en:'Escalation',d:'強く押せば押すほど、相手も強く押し返す。',
+  roles:[{k:'Aa',nm:'Aの行動',sh:'PEX',dir:'だんだん速く増える',hint:/top/i,x:35,yy:100},{k:'R',nm:'Aの相対的な優位',sh:'OSC',dir:'行ったり来たり',y:1,x:165,yy:25},{k:'Ba',nm:'Bの行動',sh:'PEX',dir:'だんだん速く増える',hint:/bottom/i,x:295,yy:100},{k:'Ta',nm:'Aにとっての脅威',sh:'PEX',dir:'増える',x:100,yy:178},{k:'Tb',nm:'Bにとっての脅威',sh:'PEX',dir:'増える',hint:/afford/i,x:230,yy:178}],
+  e:[['Aa','R','+'],['R','Tb','+'],['Tb','Ba','+'],['Ba','R','-'],['R','Ta','-'],['Ta','Aa','+']],L:[['B',100,100,['Aa','R','Ta']],['B',230,100,['R','Tb','Ba']]]},
+ {id:'commons',nm:'共有地の悲劇',en:'Tragedy of the commons',d:'それぞれの当事者の最適化が、全体の破壊につながる。',
+  roles:[{k:'Aa',nm:'Aの行動',sh:'PEAK',dir:'増えてから急に減る',hint:/top/i,x:45,yy:30},{k:'Ba',nm:'Bの行動',sh:'PEAK',dir:'増えてから急に減る',hint:/bottom/i,x:45,yy:170},{k:'T',nm:'行動の総量',sh:'PEAK',dir:'増えてから減る',x:165,yy:100},{k:'G',nm:'行動あたりの利益',sh:'NEX',dir:'遅れて減る',y:1,x:295,yy:100},{k:'Lm',nm:'資源の限界',sh:'CONST',dir:'変わらない',hint:/afford/i,x:295,yy:22}],
+  e:[['Aa','T','+'],['Ba','T','+'],['T','G','-',1],['G','Aa','+'],['G','Ba','+'],['Lm','G','+']],L:[['B',160,52,['Aa','T','G']],['B',160,148,['Ba','T','G']]]},
+ {id:'success',nm:'成功には成功を',en:'Success to the successful',d:'勝者がすべてを手に入れ、差が広がっていく。',
+  roles:[{k:'Ae',nm:'Aの努力・成果',sh:'PEX',dir:'だんだん増える',hint:/top/i,x:45,yy:35},{k:'Ar',nm:'Aへの資源',sh:'PEX',dir:'増える',x:45,yy:170},{k:'Al',nm:'BではなくAへの配分',sh:'SSH',dir:'増えて偏る',y:1,x:165,yy:100},{k:'Be',nm:'Bの努力・成果',sh:'NEX',dir:'だんだん減る',hint:/bottom/i,x:285,yy:35},{k:'Br',nm:'Bへの資源',sh:'NEX',dir:'減る',hint:/afford/i,x:285,yy:170}],
+  e:[['Ar','Ae','+'],['Ae','Al','+'],['Al','Ar','+'],['Al','Br','-'],['Br','Be','+'],['Be','Al','-']],L:[['R',88,102,['Ar','Ae','Al']],['R',242,102,['Al','Br','Be']]]}
+];
+
+const DIALS={
+ fixes:{td:['F','政策や情報の働きかけが強いほど、応急処置（キャンペーンなど）が強くなる'],bu:['P','人々の関心が低いと、効果が定着せず症状が戻りやすい'],af:['U','買いにくいほど、費用負担などの意図しない結果が大きくなる']},
+ burden:{td:['Q','即効性のある対処（啓発など）に頼るほど、この矢印が太くなる'],bu:['F','地域や家庭の取り組みが弱いと、根本的な解決が育たない'],af:['E','買いにくさが副作用（あきらめ・依存）を強める']},
+ drift:{td:['G','政策の目標（350gなど）を掲げ続けるかどうか'],bu:['Pr','周りの習慣が弱いと、「無理だ」と目標を下げる圧力が強まる'],af:['C','買いやすいほど、目標に近づける行動（是正措置）を取りやすい']},
+ limits:{td:['E','政策が努力を後押しする'],bu:['E','関心や習慣の広がりが、伸びを生む強化ループを回す'],af:['C','買いにくさが、伸びを止める制約になる']},
+ under:{td:['I','供給や環境への投資を政策が支えるかどうか'],bu:['Eg','関心の高まりが需要を伸ばす'],af:['Lm','価格や手間の制約が、伸びを抑える']},
+ esc:{td:['Aa','一方の働きかけが強まるほど'],bu:['Ba','もう一方の反応が強まるほど'],af:['Tb','負担感が脅威として受け止められる']},
+ commons:{td:['Lm','資源のルールづくり（政策）'],bu:['Aa','それぞれが自分の得を優先するほど'],af:['G','一人あたりの得（買いやすさ）が下がる']},
+ success:{td:['Al','資源の配り方を政策が変えられるか'],bu:['Ae','関心の高い人・地域がさらに伸びる'],af:['Br','買いにくい人・地域ほど資源が減る']}
+};
+// 関心のある変数にあたる役割の性質：bad＝高いほど困る（問題の症状など）、good＝高いほど良い
+const YROLE={fixes:['bad','いったん良くなり、また悪くなる'],burden:['bad','良くなったり悪くなったりをくり返す'],drift:['good','少しずつ悪くなっていく'],limits:['good','良くなるが、やがて頭打ちになる'],under:['good','良くなってから、また悪くなる'],esc:['good','張り合ううちに、おたがいに悪くなる'],commons:['good','しばらく良くなったあと、急に悪くなる'],success:['good','一方に偏っていく']};
+const yBetter=()=>{const y=VARS.find(v=>v.role==='y');if(!y)return 'up';if(S.yBetter)return S.yBetter;if(y.better)return y.better;return /ない|困る|不足|リスク|ゼロ|損失|乱高下/.test(y.name||'')?'down':'up';};
+// 型の典型の形を、変数の「良い向き」に合わせて上下を入れ替える
+function yShape(def){const r=def.roles.find(q=>q.y);if(!r)return null;const sense=(YROLE[def.id]||['good'])[0];const inv=(sense==='bad')!==(yBetter()==='down');
+  let sh=r.sh;if(inv)sh=sh==='VALLEY'?'PEAK':sh==='PEAK'?'VALLEY':sh;
+  const dv0={drift:-1,commons:-1,limits:1,success:1,fixes:-1}[def.id]||1;return {sh,dir:inv?-dv0:dv0,inv,txt:(YROLE[def.id]||['',''])[1]};}
+let tplDir=0;
+const DIAL_NM={td:'Top-down',bu:'Bottom-up',af:'Affordability'},DIAL_JA={td:'トップダウン',bu:'ボトムアップ',af:'アフォーダビリティ'};
+const DIAL_RE={td:/top/i,bu:/bottom/i,af:/afford/i};
+const LV={u:'強まる ↑',s:'変わらない →',d:'弱まる ↓'};
+// 描いた線から「強まる／変わらない／弱まる」を読み取る
+function dialFromLane(k){const v=VARS.find(q=>q.role==='x'&&DIAL_RE[k].test(q.pathway));if(!v)return null;const L=S.lanes[v.id];if(!L)return null;
+  const ys=Object.keys(L.points).map(Number).filter(y=>y>CONFIG.nowYear).sort((a,b)=>a-b);if(!ys.length)return null;
+  const h=hist(v);const last=h[h.length-1].value,end=L.points[ys[ys.length-1]],sp=(v.domain[1]-v.domain[0])||1;const d=(end-last)/sp;
+  return d>0.05?'u':d<-0.05?'d':'s';}
+// 3つのつまみの組み合わせから、近い型を2つまで挙げる（ワークショップの出発点となる仮説）
+function suggestArch(dl){const m=(k,v)=>dl[k]===v?1:0,sc={};
+  sc.fixes=2*m('td','u')+(dl.bu!=='u'?1:0)+(dl.af!=='u'?0.5:0);
+  sc.burden=1.5*m('td','u')+1.5*m('bu','d');
+  sc.drift=2*m('bu','d')+(dl.td!=='u'?1:0);
+  sc.limits=2*m('bu','u')+(dl.af==='s'?1:0)+0.5*m('af','d');
+  sc.success=1.5*m('bu','u')+1.5*m('af','d');
+  sc.under=1.5*m('af','d')+(dl.td!=='u'?1:0)-(dl.bu==='u'?0.5:0);
+  const why={fixes:'政策や情報だけが強まり、関心や買いやすさが追いつかないと、一時的に良くなっても戻りやすい',burden:'即効性のある働きかけに頼り、地域や家庭の取り組みが弱まると、根本的な解決から離れていく',
+    drift:'周りの関心や習慣が弱まると、「無理だ」と目標や基準が少しずつ下がっていく',limits:'関心や習慣が広がって伸びるが、やがて何かの制約で頭打ちになる',
+    success:'関心は高まっても買いやすさが下がると、買える人だけが伸びて差が広がる',under:'買いやすさが下がり、供給や環境への手当ても弱いと、伸びが止まる'};
+  return Object.entries(sc).filter(([k,v])=>v>=2).sort((a,b)=>b[1]-a[1]).slice(0,2).map(([k])=>({id:k,why:why[k]}));}
+
+// 型の図かん：だれにでも分かる説明・身近な例・食の例・抜け出すヒント
+const ARCH_INFO={
+ fixes:{kid:'その場しのぎの手当てが、あとで別の問題を生み、かえって困ってしまう。',ex:'宿題を友だちに写させてもらう → その日は助かるけど、分からないまま次へ進み、もっと分からなくなる。',food:'空腹を安いお菓子でしのぐ → 栄養がかたよって体調をくずす。',hint:'その場しのぎの効き目が切れたあとに何が起きるか、先に考えてみる。'},
+ burden:{kid:'すぐ効く方法に頼っているうちに、根本から直す力が弱っていく。',ex:'眠いので毎日エナジードリンク → 生活リズムを直す力が落ちて、ますます頼るようになる。',food:'野菜不足をサプリでおぎなう → 野菜を料理して食べる習慣が育たない。',hint:'すぐ効く方法と並行して、根本の解決にも少しずつ力を回す。'},
+ drift:{kid:'目標になかなか届かないと、目標のほうを少しずつ下げてしまう。',ex:'「毎日1時間勉強」のはずが、30分、15分…と目標がいつのまにか下がる。',food:'「野菜350g」は無理だからと、目標をだんだん低くしていく。',hint:'目標を下げる前に、届かない理由を確かめる。'},
+ limits:{kid:'うまく伸びていたのに、ある時からブレーキがかかって伸びなくなる。',ex:'部員が増えて部活が強くなる → 練習場所や道具が足りなくなり、伸びが止まる。',food:'野菜を食べる人が増える → 値段の高さや料理の手間がブレーキになる。',hint:'もっとがんばるより、ブレーキ（制約）をゆるめるほうに目を向ける。'},
+ under:{kid:'人気が出て求められているのに、準備（設備や人）が追いつかず、人が離れていく。',ex:'人気のパン屋に行列 → 店を広げないまま待ち時間がのび、お客さんが減る。',food:'野菜の人気が上がっても、産地や運ぶしくみへの投資が遅れ、値段が上がる。',hint:'伸びているうちに、先回りして準備（能力）に投資する。'},
+ esc:{kid:'相手に負けまいと張り合ううちに、お互いにどんどんエスカレートする。',ex:'SNSでの言い合いや、お店どうしの値下げ合戦。',food:'お店どうしが安さを競い、品質や生産者の暮らしが追いつめられる。',hint:'どちらかが一歩引くか、両方にとっての共通の目標を見つける。'},
+ commons:{kid:'みんなが自分の得だけを考えて使うと、みんなの資源がなくなり、全員が困る。',ex:'学校の共有スペースを好き勝手に使って散らかる／海の魚のとりすぎ。',food:'みんなが同じ土地や水を使いすぎて、畑がやせ、収穫が減る。',hint:'使う人みんなで、使い方のルールを決める。'},
+ success:{kid:'最初に少しうまくいった方に、チャンスや資源がどんどん集まり、差が広がる。',ex:'試合に出られる選手ばかり上達し、出られない選手との差が広がる。',food:'野菜を買いやすい地域ほど食生活がよくなり、地域の差が広がる。',hint:'チャンスや資源の配り方を見直して、かたよらないようにする。'}
+};
+const ARCH_SHORT={
+ fixes:['その場しのぎが、あとで裏目に','宿題を写させてもらう → あとでもっと分からなくなる'],
+ burden:['すぐ効く方法に、頼りきり','眠いからエナジードリンク → 生活リズムがくずれる'],
+ drift:['目標が、だんだん下がっていく','毎日1時間の勉強 → 30分 → 15分…'],
+ limits:['伸びたあと、頭打ち','部員が増える → 練習場所が足りなくなる'],
+ under:['人気に、準備が追いつかない','人気のパン屋 → 行列が長すぎて客が減る'],
+ esc:['張り合うほど、エスカレート','SNSの言い合いが、どんどん激しくなる'],
+ commons:['みんなで使いすぎて、なくなる','海の魚を、みんながとりすぎる'],
+ success:['勝つほど有利になり、差が開く','試合に出る人ばかり、上手になる']};
+// 型の図に「たとえば」の言葉をあてはめた例（役割ごと）と、ぐるっと一周するお話
+const ARCH_EX={ // 変数は「増えたり減ったりする量」で、数えたり測ったりできるものにする
+ fixes:{n:{P:'テストの間違いの数',F:'一夜漬けの時間',U:'すぐ忘れる量'},st:['テストの間違いが多い','一夜漬けの時間を増やす','その場は間違いが減る','でもすぐ忘れて、次のテストでまた間違いが増える']},
+ burden:{n:{S:'昼間の眠さ',Q:'エナジードリンクの本数',E:'夜ねむれない時間',F:'早寝できた日数'},st:['昼間に眠い','エナジードリンクの本数が増える','その場は眠気が減る','でも夜ねむれず、早寝の日が減って、また眠くなる']},
+ drift:{n:{G:'目標の野菜の量（g）',A:'実際に食べた野菜の量（g）',Gp:'目標との差（g）',Pr:'「無理だよ」という声',C:'野菜を食べる工夫の数'},st:['目標350gに、実際は250gで届かない','差が大きくて「無理だよ」という声が増える','目標を300gに下げる','差は小さくなるが、工夫も減って、食べる量も少しずつ減る']},
+ limits:{n:{E:'部員を誘う回数',S:'部員の数',B:'体育館の混みぐあい',C:'体育館のせまさ'},st:['部員を誘う','部員が増えて、もっと誘える','でも体育館が混んで、練習しにくくなる','やめる人も出て、部員が増えなくなる']},
+ under:{n:{Eg:'お店の評判',D:'お客さんの数',Lm:'待ち時間（分）',N:'席を増やす計画',I:'席の数'},st:['評判が良くて、お客さんが増える','口コミで、もっと増える','待ち時間が長くなり、お客さんが減り始める','席を増やす計画が遅れて、間に合わない']},
+ esc:{n:{Aa:'A店の値下げ',R:'A店がB店より安い分',Ba:'B店の値下げ',Ta:'A店の売上の落ちこみ',Tb:'B店の売上の落ちこみ'},st:['A店が値下げする','B店のお客さんが減る','B店がもっと値下げする','今度はA店のお客さんが減り、A店がさらに値下げする']},
+ commons:{n:{Aa:'Aさんがとる魚の量',Ba:'Bさんがとる魚の量',T:'とった魚の合計',G:'1回の漁でとれる量',Lm:'海の魚の数'},st:['みんなが魚をたくさんとる','海の魚が減っていく','1回の漁でとれる量が減る','もっととろうとして、さらに減る']},
+ success:{n:{Ae:'Aさんの得点',Ar:'Aさんの出場回数',Al:'監督がAさんを選ぶ割合',Be:'Bさんの得点',Br:'Bさんの出場回数'},st:['Aさんが少し多く点を取る','監督がAさんを選ぶことが増える','Aさんは出場が増えてもっと点を取り、Bさんは出場が減る','2人の差がどんどん広がる']}
+};
+// それぞれの型で「何が問題なのか」（図で目立たせる変数と、ひとことの説明：[しくみ, たとえば]）
+const ARCH_PROB={
+ fixes:{r:['P'],t:['問題の症状が、結局なくならない','テストの間違いが、結局減らない']},
+ burden:{r:['S'],t:['問題の症状が、根本から解決しない','昼間の眠さが、いつまでもなくならない']},
+ drift:{r:['A'],t:['実際のレベルが、少しずつ下がっていく','食べる野菜の量が、少しずつ減っていく']},
+ limits:{r:['S'],t:['成果が、あるところで伸びなくなる','部員の数が、それ以上増えなくなる']},
+ under:{r:['D'],t:['需要が、途中から減ってしまう','お客さんの数が、途中から減ってしまう']},
+ esc:{r:['Aa','Ba'],t:['おたがいの行動が、どんどん激しくなる','値下げ合戦が止まらない']},
+ commons:{r:['G'],t:['みんなの資源が減り、1回あたりの得が減る','海の魚が減り、1回の漁でとれる量が減る']},
+ success:{r:['Be'],t:['負けた側の努力や成果が、どんどん小さくなる','Bさんが活躍できず、差が広がる']}
+};
+// 研究者は設定ファイル（CONFIG.archetypesExtra）で型を追加できる
+function mergeExtraArch(){(CONFIG.archetypesExtra||[]).forEach(a=>{if(a&&a.id&&a.roles&&a.e&&!ARCH.find(q=>q.id===a.id)){ARCH.push(a);if(a.info)ARCH_INFO[a.id]=a.info;}});}
+// 型ごとの「問題の良し悪し」の動き。縦軸は上＝良い・下＝悪い、横軸は時間（すべてのカードで同じ向き）
+function botSVG2(id,col,better){
+  const W=170,H=92,x0=better?34:26,x1=W-8,yT=10,y0=H-18;
+  // better を渡すと、縦軸を「多い／少ない」（変数の値）にし、「減ると良い」なら形を上下反転する
+  const X=t=>x0+(x1-x0)*t,Y=v=>yT+(y0-yT)*(better==='down'?v:(1-v));
+  const curve=P=>{let d=`M${X(P[0][0])},${Y(P[0][1])}`;for(let i=1;i<P.length;i++){const [a,b]=P[i-1],[c,e]=P[i];const mx=(a+c)/2;d+=` C${X(mx)},${Y(b)} ${X(mx)},${Y(e)} ${X(c)},${Y(e)}`;}return d;};
+  const C={
+    fixes:[[[0,.5],[.15,.74],[.28,.76],[.5,.45],[.75,.25],[1,.12]]],                                   // いったん良くなり、また悪くなる
+    burden:[[[0,.7],[.12,.88],[.24,.6],[.38,.78],[.52,.48],[.66,.64],[.8,.32],[.92,.45],[1,.18]]], // 良くなったり悪くなったりしながら、だんだん悪くなる
+    drift:[[[0,.8],[.35,.68],[.65,.48],[1,.22]]],                                             // 少しずつ悪くなる
+    limits:[[[0,.15],[.3,.25],[.5,.55],[.7,.78],[1,.84]]],                                    // 良くなるが頭打ち
+    under:[[[0,.2],[.4,.72],[.6,.8],[.8,.68],[1,.48]]],                                      // 良くなってから悪くなる
+    esc:[[[0,.82],[.2,.64],[.4,.7],[.6,.44],[.8,.5],[1,.18]],[[0,.72],[.2,.78],[.4,.52],[.6,.6],[.8,.3],[1,.24]]], // 両方がどんどん悪くなる（2本）
+    commons:[[[0,.4],[.4,.7],[.65,.82],[.82,.55],[1,.08]]],                                   // 良くなってから急に悪くなる
+    success:[[[0,.5],[.35,.62],[.65,.8],[1,.92]],[[0,.48],[.35,.36],[.65,.2],[1,.08]]]};      // 差が広がる（2本）
+  const L=C[id]||[[[0,.5],[1,.5]]];
+  let g=`<path d="M${x0},${yT-2}V${y0}H${x1}" fill="none" stroke="currentColor" stroke-opacity=".3" stroke-width="1.5" stroke-dasharray="2 4"/>
+    <text x="${x0-4}" y="${yT+6}" font-size="9" text-anchor="end" fill="currentColor" fill-opacity=".55" font-weight="700">${better?'多い':'良い'}</text>
+    <text x="${x0-4}" y="${y0}" font-size="9" text-anchor="end" fill="currentColor" fill-opacity=".55" font-weight="700">${better?'少ない':'悪い'}</text>
+    <text x="${x1}" y="${H-4}" font-size="9" text-anchor="end" fill="currentColor" fill-opacity=".55">時間 →</text>`;
+  L.forEach((P,k)=>{const c=k===0?col:'color-mix(in srgb, '+col+' 45%, #9AA0B5)';g+=`<path d="${curve(P)}" fill="none" stroke="${c}" stroke-width="${k===0?7:5}" stroke-linecap="round" stroke-linejoin="round"/>`;
+    g+=`<circle cx="${X(P[0][0])}" cy="${Y(P[0][1])}" r="3.3" fill="#23263A"/><circle cx="${X(P[P.length-1][0])}" cy="${Y(P[P.length-1][1])}" r="3.3" fill="#23263A"/>`;});
+  if(id==='esc')g+=`<text x="${X(0)+4}" y="${Y(.82)-6}" font-size="9" fill="currentColor" fill-opacity=".6">AとBが張り合う</text>`;
+  if(id==='success')g+=`<text x="${X(1)}" y="${Y(.92)-6}" font-size="9" text-anchor="end" fill="currentColor" fill-opacity=".6">勝つ側</text><text x="${X(1)-8}" y="${Y(.08)-6}" font-size="9" text-anchor="end" fill="currentColor" fill-opacity=".6">負ける側</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" class="bot" aria-hidden="true">${g}</svg>`;
+}
+// 型の典型的な動き（参照モード）を、シンプルな線で描く
+function botSVG(sh,col){
+  const W=150,H=80,x0=12,x1=W-10,y0=H-14,yT=12;
+  const P={VALLEY:[[0,.35],[.3,.75],[.5,.85],[.7,.6],[1,.2]],PEAK:[[0,.75],[.3,.35],[.5,.18],[.7,.4],[1,.8]],OSC:[[0,.5],[.15,.25],[.3,.7],[.45,.25],[.6,.7],[.75,.3],[.9,.65],[1,.45]],
+    PEX:[[0,.85],[.4,.78],[.65,.6],[.85,.35],[1,.1]],NEX:[[0,.15],[.35,.3],[.6,.55],[.8,.75],[1,.88]],SSH:[[0,.85],[.3,.78],[.5,.5],[.7,.22],[1,.15]],LINR:[[0,.8],[1,.25]],CONST:[[0,.5],[1,.5]]}[sh]||[[0,.5],[1,.5]];
+  const X=t=>x0+(x1-x0)*t,Y=v=>yT+(y0-yT)*v;
+  let d=`M${X(P[0][0])},${Y(P[0][1])}`;for(let i=1;i<P.length;i++){const [a,b]=P[i-1],[c,e]=P[i];const mx=(a+c)/2;d+=` C${X(mx)},${Y(b)} ${X(mx)},${Y(e)} ${X(c)},${Y(e)}`;}
+  return `<svg viewBox="0 0 ${W} ${H}" class="bot" aria-hidden="true"><path d="M${x0},${yT-4}V${y0}H${x1}" fill="none" stroke="currentColor" stroke-opacity=".25" stroke-width="1.5" stroke-dasharray="2 4"/>
+    <path d="${d}" fill="none" stroke="${col}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="${X(P[0][0])}" cy="${Y(P[0][1])}" r="3.5" fill="#23263A"/><circle cx="${X(P[P.length-1][0])}" cy="${Y(P[P.length-1][1])}" r="3.5" fill="#23263A"/></svg>`;
+}
+
+const ACOL={fixes:'#E5533D',burden:'#E8790C',drift:'#7A4EAB',limits:'#14A37F',under:'#00879A',esc:'#C2412D',commons:'#2E86C1',success:'#C2457E'};
+function openGallery(focus){
+  mergeExtraArch();const cur=archDef();
+  hpOpen(`<h3><i class="ic ic-book" style="color:#5B5BD6"></i> 型の図かん</h3>
+   <p class="gintro">世の中によくある<b>「くり返しのパターン」</b>を集めました。知っておくと「次に何が起きそう？」が考えやすくなります。</p>
+   <div class="gal">${ARCH.map(d=>{const I=ARCH_INFO[d.id]||{},Sh=ARCH_SHORT[d.id]||[I.kid||d.d,I.ex||''];const ys=d.roles.find(r=>r.y);const sh=ys&&SHAPES.find(q=>q.id===ys.sh);
+     return `<div class="gcard ${d.id===focus?'focus':''}" id="gc-${d.id}" style="--c:${ACOL[d.id]||'#5B5BD6'}">
+       <div class="gsimple"><span class="agt">${esc(d.nm)}</span><span class="ags">${esc(Sh[0])}</span>${botSVG2(d.id,ACOL[d.id]||'#5B5BD6')}<span class="age">${esc(d.en||'')}</span></div>
+       <details class="gdet" ${d.id===focus?'open':''}><summary>くわしく見る ▾</summary>
+       ${(()=>{const E=ARCH_EX[d.id];if(!E)return archSVG(d,{},{generic:true})+(Sh[1]?`<div class="ex1"><span>たとえば</span>${esc(Sh[1])}</div>`:'');
+         const P=ARCH_PROB[d.id]||{r:[],t:['','']};
+         return `<div class="gtab" data-id="${d.id}"><button type="button" data-v="gen" aria-pressed="true">しくみ</button><button type="button" data-v="ex" aria-pressed="false">たとえば</button></div>
+         <div class="gv gen"><div class="prob">⚠ 問題：${esc(P.t[0])}</div>${archSVG(d,{},{generic:true,prob:P.r})}</div>
+         <div class="gv ex" hidden><div class="prob">⚠ 問題：${esc(P.t[1])}</div>${archSVG(d,{},{generic:true,names:E.n,prob:P.r})}
+         <ol class="story">${E.st.map(t=>`<li>${esc(t)}</li>`).join('')}<li class="again">↺ はじめにもどって、くり返す</li></ol></div>`;})()}
+       ${sh?`<div class="gs">${shapeIcon(sh.id)}<span>グラフは <b>${esc(sh.nm)}</b> になりやすい</span></div>`:''}
+       <details class="more"><summary>もっとくわしく</summary>
+         <div class="row2">${I.kid?`<b>どんな型？</b><span>${esc(I.kid)}</span>`:''}${I.food?`<b>食では</b><span>${esc(I.food)}</span>`:''}${I.hint?`<b>ヒント</b><span>${esc(I.hint)}</span>`:''}</div></details>
+       </details>
+       ${CONFIG.archetypeLock?'':`<button class="btn" data-use="${d.id}" ${cur&&cur.id===d.id?'disabled':''}>${cur&&cur.id===d.id?'✓ 使っている型':'この型を使う'}</button>`}</div>`;}).join('')}</div>
+   <p class="gintro adv" style="margin-top:10px">研究者の方へ：設定ファイル（JSON）の <code>archetypesExtra</code> に同じ形で書くと、型を追加できます。</p>
+   <div class="ft"><button class="btn g" id="gX">閉じる</button></div>`);
+  hpc.classList.add('wide');
+  hpc.querySelectorAll('.gtab').forEach(t=>t.querySelectorAll('button').forEach(b=>b.onclick=()=>{const card=t.closest('.gcard');t.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));card.querySelector('.gv.ex').hidden=b.dataset.v!=='ex';card.querySelector('.gv.gen').hidden=b.dataset.v!=='gen';}));
+  $('gX').onclick=()=>{hpc.classList.remove('wide');hpClose();};
+  hpc.querySelectorAll('[data-use]').forEach(b=>b.onclick=()=>{S.arch={id:b.dataset.use};S._arStep=3;log('archetype',{value:b.dataset.use,from:'gallery'});save();hpc.classList.remove('wide');hpClose();draw();openArch();});
+  if(focus)setTimeout(()=>{const el=$('gc-'+focus);if(el)el.scrollIntoView({block:'center'});},50);
+}
+const archOf=()=>{let a=(S&&S.arch!==undefined)?S.arch:CONFIG.archetype;if(CONFIG.archetypeLock&&CONFIG.archetype)a=(S&&S.arch&&S.arch.id===CONFIG.archetype.id)?S.arch:CONFIG.archetype;return a&&ARCH.find(q=>q.id===a.id)?a:null;};
+const archDef=()=>{const a=archOf();return a?ARCH.find(q=>q.id===a.id):null;};
+// 型の中心は「関心のある変数」だけをあてる（心理社会的要因は型の外のつまみ）
+const roleOfVar=vid=>{const d=archDef();const v=VARS.find(q=>q.id===vid);if(!d||!v||v.role!=='y')return null;return d.roles.find(r=>r.y)||null;};
+// 日本語の名前を、助詞や（）の前後など自然な位置で2行に分ける
+function jpSplit(t){if(t.length<=9)return [t];const n=t.length;let best=null;
+  for(let i=3;i<=n-2;i++){const ok=/[のをがにはとで・）」]/.test(t[i-1])||/[（「]/.test(t[i]);if(!ok)continue;const sc=Math.abs(i-n/2);if(!best||sc<best.sc)best={i,sc};}
+  const i=best&&best.sc<=n*0.3?best.i:Math.ceil(n/2);return [t.slice(0,i),t.slice(i)];}
+let _svgN=0;
+function archSVG(def,dl,opt){
+  const U='a'+(++_svgN);
+  opt=opt||{};const W=330,H=190,pos={};def.roles.forEach(r=>pos[r.k]=[r.x,r.yy]);const y=opt.generic?null:VARS.find(v=>v.role==='y');const NM=opt.names||(opt.generic?{}:((S.archNames&&S.archNames[def.id])||{}));const EX=opt.generic?[]:((S.archExtra&&S.archExtra[def.id])||[]);
+  let g='';
+  // 箱の大きさ（文字数から）
+  const lab=r=>{const isY=r.y&&y;const own=!isY&&NM[r.k];return isY?(y.name||y.pathway):(own||r.nm);};
+  const BX={};def.roles.forEach(r=>{const t=lab(r);const ls=jpSplit(t);const lines=ls.length;const w=Math.min(124,Math.max(56,Math.max(...ls.map(x=>x.length))*11.5+16));const sub=(r.y&&y)||(!r.y&&NM[r.k]);const pp=opt.prob&&opt.prob.includes(r.k)?5:0;BX[r.k]=[w/2+pp,(lines===2?20:13)+(sub?6:0)+pp];});
+  const exitP=(k,tx,ty)=>{const [x,yy]=pos[k],[hw,hh]=BX[k];const dx=tx-x,dy=ty-yy;if(!dx&&!dy)return [x,yy];const sc=Math.min((hw+4)/Math.abs(dx||1e-9),(hh+4)/Math.abs(dy||1e-9));return [x+dx*sc,yy+dy*sc];};
+  const loopsOfEdge=(a,b)=>def.L.filter(l=>{const n=l[3]||[];const i=n.indexOf(a);return i>=0&&n[(i+1)%n.length]===b;});
+  const mutual=(a,b)=>def.e.some(q=>q[0]===b&&q[1]===a);
+  def.e.forEach(([a,b,p,dly])=>{const [x1,y1]=pos[a],[x2,y2]=pos[b];const mx=(x1+x2)/2,my=(y1+y2)/2,dx=x2-x1,dy=y2-y1,L=Math.hypot(dx,dy)||1;
+    let cx,cy;const lp=loopsOfEdge(a,b);
+    if(mutual(a,b)){cx=mx+dy/L*L*0.3;cy=my-dx/L*L*0.3;}
+    else if(lp.length===1&&(lp[0][3]||[]).length>2){const ns=lp[0][3];const lx0=ns.reduce((t,k)=>t+pos[k][0],0)/ns.length,ly0=ns.reduce((t,k)=>t+pos[k][1],0)/ns.length;let vx=mx-lx0,vy=my-ly0;const l=Math.hypot(vx,vy)||1;cx=mx+vx/l*L*0.22;cy=my+vy/l*L*0.22;}
+    else{cx=mx+dy/L*L*0.08;cy=my-dx/L*L*0.08;}
+    const [sx,sy]=exitP(a,cx,cy),[ex,ey]=exitP(b,cx,cy);const col=p==='+'?'#D0336B':'#1E88C8';
+    g+=`<path d="M${sx},${sy} Q${cx},${cy} ${ex},${ey}" fill="none" stroke="${col}" stroke-width="1.8" marker-end="url(#${U}${p==='+'?'p':'n'})"/>`;
+    const t=.78,qx=(1-t)**2*sx+2*(1-t)*t*cx+t*t*ex,qy=(1-t)**2*sy+2*(1-t)*t*cy+t*t*ey,tx2=2*(1-t)*(cx-sx)+2*t*(ex-cx),ty2=2*(1-t)*(cy-sy)+2*t*(ey-cy),tl=Math.hypot(tx2,ty2)||1;
+    // ＋／－は曲線の外側に置く
+    let nx=ty2/tl,ny=-tx2/tl;const ox=cx-(sx+ex)/2,oy=cy-(sy+ey)/2;if(nx*ox+ny*oy<0){nx=-nx;ny=-ny;}
+    g+=`<text x="${qx+nx*9}" y="${qy+ny*9+4}" font-size="12.5" font-weight="800" fill="${col}" text-anchor="middle">${p==='+'?'+':'−'}</text>`;
+    if(dly){const hx=.25*sx+.5*cx+.25*ex,hy=.25*sy+.5*cy+.25*ey;g+=`<text x="${hx}" y="${hy+4}" font-size="12" font-weight="700" text-anchor="middle" fill="#555">∥</text>`;}});
+  def.L.forEach(([k,x,yy])=>{const c=k==='R'?'#D0336B':'#1E88C8';g+=`<circle cx="${x}" cy="${yy}" r="11" fill="#fff" stroke="${c}" stroke-width="1.5"/><text x="${x}" y="${yy+4.5}" font-size="12" font-weight="800" text-anchor="middle" fill="${c}">${k}</text>`;});
+  def.roles.forEach(r=>{const [x,yy]=pos[r.k];const isY=r.y&&y;const own=!isY&&NM[r.k];const main=isY?(y.name||y.pathway):(own||r.nm);const m=jpSplit(main);
+    const isP=opt.prob&&opt.prob.includes(r.k);const hw=BX[r.k][0]-(isP?5:0);
+    if(isP)g+=`<rect x="${x-hw-4}" y="${yy-17-(m.length-1)*6}" width="${hw*2+8}" height="${34+(m.length-1)*12+(isY||own?12:0)}" rx="11" fill="#FFE9E5" stroke="#E5533D" stroke-width="2"/><text x="${x-hw-2}" y="${yy-21-(m.length-1)*6}" font-size="10" font-weight="800" fill="#C2412D">⚠ 問題</text>`;
+    g+=`<rect x="${x-hw}" y="${yy-13-(m.length-1)*6}" width="${hw*2}" height="${26+(m.length-1)*12+(isY||own?12:0)}" rx="8" fill="${isY?'#FFF1DC':'#fff'}" stroke="${isY?'#E8790C':'#D9DBEA'}" stroke-width="1.2"/>`;
+    m.forEach((ln,i)=>{g+=`<text x="${x}" y="${yy+(i-(m.length-1)/2)*12+(isY?-2:4)}" font-size="11" font-weight="700" text-anchor="middle" fill="${isY?'#B35C00':'#23263A'}">${esc(ln)}</text>`;});
+    if(isY)g+=`<text x="${x}" y="${yy+(m.length-1)*6+12}" font-size="9" text-anchor="middle" fill="#B35C00">（${esc(r.nm)}）</text>`;
+    else if(own)g+=`<text x="${x}" y="${yy+(m.length-1)*6+13}" font-size="9" text-anchor="middle" fill="#7A4EAB">（${esc(r.nm)}）</text>`;});
+  // 足した変数
+  const cnt={};EX.forEach(e=>{if(!pos[e.to])return;const [tx,ty]=pos[e.to];const n=cnt[e.to]=(cnt[e.to]||0)+1;let vx=tx-165,vy=ty-95;const l=Math.hypot(vx,vy)||1;vx/=l;vy/=l;
+    const ex=Math.max(-24,Math.min(W+24,tx+(tx<W/2?-58:58))),ey=ty<=H/2?ty-46-(n-1)*26:ty+46+(n-1)*26;const col=e.s==='-'?'#1E88C8':'#D0336B';
+    const [ax,ay,bx,by]=e.dir==='in'?[ex,ey,tx,ty]:[tx,ty,ex,ey];const dx=bx-ax,dy=by-ay,L=Math.hypot(dx,dy)||1;
+    g+=`<path d="M${ax+dx/L*30},${ay+dy/L*14} L${bx-dx/L*32},${by-dy/L*15}" stroke="${col}" stroke-width="1.5" fill="none" marker-end="url(#${U}${e.s==='-'?'n':'p'})"/>`;
+    g+=`<text x="${(ax+bx)/2+dy/L*8}" y="${(ay+by)/2-dx/L*8+4}" font-size="11" font-weight="700" text-anchor="middle" fill="${col}">${e.s==='-'?'−':'+'}</text>`;
+    const nm=e.nm.length>9?[e.nm.slice(0,9),e.nm.slice(9,18)]:[e.nm];g+=`<rect x="${ex-44}" y="${ey-11-(nm.length-1)*6}" width="88" height="${22+(nm.length-1)*12}" rx="8" fill="#fff" stroke="#999" stroke-dasharray="3 2"/>`;
+    nm.forEach((ln,i)=>{g+=`<text x="${ex}" y="${ey+4+(i-(nm.length-1)/2)*12}" font-size="10.5" font-weight="700" text-anchor="middle" fill="#23263A">${esc(ln)}</text>`;});});
+  // 心理社会的要因のつまみ（型の外から効く）
+  // 心理社会的要因は、ループの外に並べ、関心のある変数（問題の変数）にだけ矢印を引く（TETの「要因 → 関心のある変数」の形）
+  if(!opt.generic&&y){const yr=def.roles.find(r=>r.y);if(yr&&pos[yr.k]){const [tx,ty]=pos[yr.k];const hh=(BX[yr.k]||[46,13])[1];
+    const top=Math.max(-78,Math.min(...def.roles.map(r=>pos[r.k][1]))-92);const ks=['td','bu','af'];const xs=[0,165,330];
+    ks.forEach((k,ix)=>{const lv=dl[k],col=lv==='u'?'#14A37F':lv==='d'?'#B3261E':'#7A4EAB';const txt=DIAL_JA[k]+(lv==='u'?' ↑':lv==='d'?' ↓':lv==='s'?' →':'');const w=txt.length*10.5+18;const px=xs[ix],py=top;
+      const ex=tx+(px-tx)*0.12,ey=ty-hh-4;
+      g+=`<path d="M${px},${py+11} C${px},${(py+ey)/2} ${ex},${(py+ey)/2} ${ex},${ey}" fill="none" stroke="${col}" stroke-width="1.8" marker-end="url(#${U}d)"/>`;
+      g+=`<rect x="${px-w/2}" y="${py-11}" width="${w}" height="22" rx="11" fill="${col}"/><text x="${px}" y="${py+4}" font-size="10.5" font-weight="800" text-anchor="middle" fill="#fff">${txt}</text>`;});}}
+  return `<svg viewBox="${opt.generic?'-60 -12 '+(W+120)+' '+(H+34):'-70 -95 '+(W+140)+' '+(H+125)}" width="100%" class="arsvg" style="display:block;margin-top:4px;flex:none;height:auto"><defs><marker id="${U}d" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10z" fill="#6B7088"/></marker><marker id="${U}p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#D0336B"/></marker><marker id="${U}n" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#1E88C8"/></marker></defs>${g}</svg>`;
+}
+function makeDrag(el){const h=el.querySelector('.th');if(!h||h._drag)return;h._drag=1;h.style.cursor='move';h.title='ドラッグして動かせます';
+  h.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;const r=el.getBoundingClientRect(),pr=el.offsetParent.getBoundingClientRect();const ox=e.clientX-r.left,oy=e.clientY-r.top;
+    el.style.right='auto';el.style.left=(r.left-pr.left)+'px';el.style.top=(r.top-pr.top)+'px';h.setPointerCapture(e.pointerId);
+    const mv=ev=>{el.style.left=Math.max(-r.width+80,Math.min(pr.width-80,ev.clientX-pr.left-ox))+'px';el.style.top=Math.max(0,Math.min(pr.height-40,ev.clientY-pr.top-oy))+'px';};
+    const up=()=>{h.removeEventListener('pointermove',mv);h.removeEventListener('pointerup',up);};h.addEventListener('pointermove',mv);h.addEventListener('pointerup',up);});}
+// 型ごとの「良し悪しの動き」（カードの絵と同じ）。描いた線と比べて、近い型を見つけるのに使う
+const BOTC={fixes:[[0,.5],[.15,.74],[.28,.76],[.5,.45],[.75,.25],[1,.12]],burden:[[0,.7],[.12,.88],[.24,.6],[.38,.78],[.52,.48],[.66,.64],[.8,.32],[.92,.45],[1,.18]],
+  drift:[[0,.8],[.35,.68],[.65,.48],[1,.22]],limits:[[0,.15],[.3,.25],[.5,.55],[.7,.78],[1,.84]],under:[[0,.2],[.4,.72],[.6,.8],[.8,.68],[1,.48]],
+  esc:[[0,.82],[.2,.64],[.4,.7],[.6,.44],[.8,.5],[1,.18]],commons:[[0,.4],[.4,.7],[.65,.82],[.82,.55],[1,.08]],success:[[0,.48],[.35,.36],[.65,.2],[1,.08]]};
+const lerpC=(P,x)=>{for(let k=1;k<P.length;k++){if(x<=P[k][0]){const [a,b]=P[k-1],[c,d]=P[k];return b+(d-b)*((x-a)/((c-a)||1));}}return P[P.length-1][1];};
+// 関心のある変数について描いた線（いまの値＋将来の点）から、良し悪しの動きを取り出し、近い型を順に並べる
+function drawnMatch(){const y=VARS.find(v=>v.role==='y');if(!y)return null;const L=S.lanes[y.id];if(!L)return null;
+  const ys=Object.keys(L.points).map(Number).filter(v=>v>CONFIG.nowYear).sort((a,b)=>a-b);if(ys.length<3)return null;
+  const h=hist(y);const pts=[[CONFIG.nowYear,h[h.length-1].value],...ys.map(yr=>[yr,L.points[yr]])];const t0=pts[0][0],t1=pts[pts.length-1][0];
+  let g=pts.map(([yr,v])=>[(yr-t0)/((t1-t0)||1),yBetter()==='down'?-v:v]);const mn=Math.min(...g.map(p=>p[1])),mx=Math.max(...g.map(p=>p[1]));if(mx-mn<1e-9)return null;
+  g=g.map(([x,v])=>[x,(v-mn)/(mx-mn)]);
+  return Object.entries(BOTC).map(([id,P])=>{const c=g.map(([x])=>lerpC(P,x));const cm=Math.min(...c),cM=Math.max(...c);const cn=c.map(v=>(v-cm)/((cM-cm)||1));
+    return {id,err:g.reduce((s,[x,v],k)=>s+Math.abs(v-cn[k]),0)/g.length};}).sort((a,b)=>a.err-b.err);}
+function openArch(){
+  mergeExtraArch();const p=$('arP');const lock=!!CONFIG.archetypeLock;const def=archDef();
+  const yv=VARS.find(v=>v.role==='y');const yn=yv?(yv.name||yv.pathway):'';const bt=yBetter();
+  let step=S._arStep||(def?2:1);if(step===2&&!def)step=1;
+  // 3つの要因の見通しは、描いた線から自動で読む（入力はしなくてよい）
+  const dl={};['td','bu','af'].forEach(k=>dl[k]=(S.dial&&S.dial[k])||dialFromLane(k)||'');
+  const chip=(n,tx)=>`<button type="button" class="stp ${step===n?'on':''} ${n<step?'done':''}" data-step="${n}" ${n===2&&!def?'disabled':''}>${n<step?'✓':n}<span>${tx}</span></button>`;
+  let body='';
+  if(step===1){
+    const mt=drawnMatch();const near=mt?mt.slice(0,2).map(x=>x.id):[];
+    body=`<div class="big">「${esc(yn)}」は、<br>これからどう動きそう？</div>
+     <div class="yq" style="margin-top:0">この変数は <span class="dl" id="arBetter"><button type="button" data-b="up" aria-pressed="${bt==='up'}">増えると良い</button><button type="button" data-b="down" aria-pressed="${bt==='down'}">減ると良い</button></span></div>
+     <div class="tip" style="margin:6px 0 8px">カードの線は「${esc(yn)}」の値の動きです（上＝多い／下＝少ない）。「減ると良い」を選ぶと、線の形が上下に反転します。${mt?'<br>描いた線に近い動きに「あなたの線に近い」の印が付いています。':''}</div>
+     <div class="acards">${ARCH.map(d=>{const c=ACOL[d.id]||'#5B5BD6';return `<button type="button" class="acard ${near.includes(d.id)?'near':''}" data-use="${d.id}" style="--c:${c}" ${lock&&def&&def.id!==d.id?'disabled':''}>
+       ${near.includes(d.id)?'<em>あなたの線に近い</em>':''}<b>${esc(d.nm)}</b>${botSVG2(d.id,c,bt)}<small>${esc((ARCH_SHORT[d.id]||[''])[0])}</small></button>`;}).join('')}</div>`;
+  }else{
+    const ys=yShape(def);const ysh=ys&&SHAPES.find(q=>q.id===ys.sh);const yr=def.roles.find(r=>r.y);
+    body=`<div class="big">${esc(def.nm)}<a href="#" id="arMore">？</a></div>
+     <div class="pk" style="margin-bottom:4px">${esc((ARCH_INFO[def.id]||{}).kid||def.d)}</div>
+     ${archSVG(def,dl)}
+     <div class="tip">上の3つの札は、トップダウン・ボトムアップ・アフォーダビリティの見通しです（描いた線から自動で入ります）。</div>
+     ${yv&&ysh?`<div class="yshape">${shapeIcon(ysh.id)}<div>「${esc(yn)}」は <b>${esc(ysh.nm)}</b> になりやすい<br><small>${esc(ys.txt)}</small></div></div>
+     <button type="button" class="btn nx" id="arDraw">この形で描いてみる ▸</button>`:''}
+     <details id="arNames" ${S._namesOpen?'open':''}><summary><i class="ic ic-pen"></i> 型の変数に名前を書く・変数を足す</summary>
+       <div class="nr">${def.roles.filter(r=>!r.y).map(r=>`<span style="color:#5B3A8C;font-weight:700">${esc(r.nm)}</span><input data-nm="${r.k}" placeholder="具体的には？" value="${esc(((S.archNames||{})[def.id]||{})[r.k]||'')}">`).join('')}</div>
+       ${(((S.archExtra||{})[def.id])||[]).map((e,i)=>`<div class="xl"><span>${esc(e.nm)} ${e.dir==='in'?'→':'←'} ${esc((()=>{const r=def.roles.find(r=>r.k===e.to)||{};return r.y&&yv?yn:(((S.archNames||{})[def.id]||{})[r.k]||r.nm||'');})())}（${e.s==='-'?'−':'+'}）</span><button data-del="${i}" aria-label="消す">×</button></div>`).join('')}
+       <div class="ex"><input id="exN" placeholder="足す変数の名前" style="flex:1 1 140px"><select id="exD"><option value="in">が影響する →</option><option value="out">← から影響を受ける</option></select><select id="exT">${def.roles.map(r=>`<option value="${r.k}">${esc(r.y&&yv?yn:(((S.archNames||{})[def.id]||{})[r.k]||r.nm))}</option>`).join('')}</select><select id="exS"><option value="+">＋</option><option value="-">−</option></select><button type="button" class="btn" id="exAdd" style="padding:3px 10px">足す</button></div>
+     </details>
+     <div class="tip">型どおりでなくてOK。違うと思ったら、理由をコメントに書こう。</div>`;
+  }
+  p.innerHTML=`<div class="th"><b>型で考える</b><button id="arX" aria-label="閉じる">×</button></div>
+    <div class="stps">${chip(1,'動きをえらぶ')}${chip(2,'型を見て描く')}</div>${body}`;
+  p.style.display='block';
+  const go=n=>{S._arStep=n;save();openArch();};
+  $('arX').onclick=()=>{p.style.display='none'};
+  p.querySelectorAll('[data-step]').forEach(b=>b.onclick=()=>go(+b.dataset.step));
+  p.querySelectorAll('[data-use]').forEach(b=>b.onclick=()=>{if(lock&&def&&def.id!==b.dataset.use)return;S.arch={id:b.dataset.use};S._arStep=2;log('archetype',{value:b.dataset.use});save();draw();openArch();});
+  const am=$('arMore');if(am)am.onclick=e=>{e.preventDefault();openGallery(def.id);};
+  const dr=$('arDraw');if(dr)dr.onclick=()=>{p.style.display='none';openTpl(yv.id);};
+  const nmd=$('arNames');if(nmd)nmd.addEventListener('toggle',()=>{S._namesOpen=nmd.open;});
+  p.querySelectorAll('[data-nm]').forEach(inp=>inp.onchange=()=>{S.archNames=S.archNames||{};const o=S.archNames[def.id]=S.archNames[def.id]||{};const v=inp.value.trim();if(v)o[inp.dataset.nm]=v;else delete o[inp.dataset.nm];log('arch_name',{role:inp.dataset.nm,value:v});save();openArch();});
+  const xa=$('exAdd');if(xa)xa.onclick=()=>{const n=$('exN').value.trim();if(!n){$('exN').focus();return;}S.archExtra=S.archExtra||{};(S.archExtra[def.id]=S.archExtra[def.id]||[]).push({nm:n,dir:$('exD').value,to:$('exT').value,s:$('exS').value});S._namesOpen=true;log('arch_extra',{name:n});save();openArch();};
+  p.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{S.archExtra[def.id].splice(+b.dataset.del,1);save();openArch();});
+  p.querySelectorAll('#arBetter [data-b]').forEach(b=>b.onclick=()=>{S.yBetter=b.dataset.b;log('better',{value:S.yBetter});save();draw();openArch();});
+  makeDrag(p);
+}
+function shapeIcon(id){ const W=54,H=26, pts=d3.range(0,1.0001,.05).map(t=>{ let u;
+    if(id==='CONST')u=.5; else if(id==='ZERO')u=t<.08?.5-t*6:0.02; else if(id==='LINR')u=.25+.55*t; else if(id==='PEX')u=.2+.65*t*t; else if(id==='NEX')u=.2+.65*(1-Math.exp(-3*t))/(1-Math.exp(-3));
+    else if(id==='SSH'){const f=q=>1/(1+Math.exp(-10*(q-.5)));u=.18+.66*(f(t)-f(0))/(f(1)-f(0));} else if(id==='PEAK')u=t<.5?.35+.5*Math.sin(Math.PI*t):.85-.55*(1-Math.cos(Math.PI*(t-.5))); else if(id==='VALLEY')u=t<.5?.65-.5*Math.sin(Math.PI*t):.15+.55*(1-Math.cos(Math.PI*(t-.5)));
+    else u=.3+.35*t+.15*Math.sin(4*Math.PI*t); return [4+t*(W-8),H-3-u*(H-6)]; });
+  return `<svg width="${W}" height="${H}" aria-hidden="true"><path d="M${pts.map(p=>p.join(',')).join('L')}" fill="none" stroke="#FF8A3D" stroke-width="2.2" stroke-linecap="round"/></svg>`; }
+let tplV=null, tplShape=null;
+function openTpl(id){
+  if(isCol(id)){ toggleCol(id); }
+  const v=VARS.find(q=>q.id===id), L=S.lanes[id], G=GEOM[id]; if(!G) return; closePop();
+  tplV=v; const rr0=roleOfVar(v.id); const ys0=rr0?yShape(archDef()):null; tplDir=ys0?ys0.dir:0; tplShape=(L.template&&L.template.shape)||(ys0?ys0.sh:null);
+  const el=$('tpl'), card=el.parentNode; $('tplT').textContent=`${v.pathway}：形を選んで描く`;
+  $('tplGrid').innerHTML=SHAPES.map(q=>`<button type="button" data-s="${q.id}" aria-pressed="${q.id===tplShape}" class="${ys0&&ys0.sh===q.id?'arch':''}">${shapeIcon(q.id)}${esc(q.nm)}<small>${esc(q.sub)}</small></button>`).join('');
+  $('tplGrid').querySelectorAll('button').forEach(b=>b.onclick=()=>{ tplShape=b.dataset.s; $('tplGrid').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b)); tplFields(); });
+  tplFields();
+  el.style.display='block';
+  const top=Math.max(4,Math.min(card.clientHeight-el.offsetHeight-4, G.y0-4));
+  // 将来の下書きが隠れないよう、過去側（左）に出す
+  makeDrag(el);el.style.left=Math.max(8, G.nowX-el.offsetWidth-10)+'px'; el.style.top=top+'px';
+}
+function tplFields(){
+  const v=tplV, L=S.lanes[v.id], G=GEOM[v.id], L0=G.last.value, sp=v.domain[1]-v.domain[0], FY=fYears(), q=SHAPES.find(s=>s.id===tplShape);
+  const pr=(L.template&&L.template.shape===tplShape)?L.template.params:{};
+  const def={end:+(tplDir&&(tplShape==='PEAK'||tplShape==='VALLEY')?L0+(tplShape==='PEAK'?-1:1)*sp*.03:L0+(tplDir<0?-1:1)*sp*.2).toFixed(1), mid:FY[Math.floor(FY.length/2)], ext:+(L0+(tplShape==='VALLEY'?-1:1)*sp*.25).toFixed(1), extYear:FY[Math.floor(FY.length/2)], amp:+(sp*.08).toFixed(1), cycles:2};
+  const val=k=>pr[k]??def[k], B=L.bounds||{};
+  const yopt=sel=>FY.map(y=>`<option ${+sel===y?'selected':''}>${y}</option>`).join('');
+  $('tplD').innerHTML = q ? `<b>${esc(q.nm)}</b>：${esc(q.d)}（いま ${L0}）` : '形を選ぶと、線が下書きされます。後から点をドラッグして直せます。';
+  const f=[];
+  if(q&&q.p.includes('end')) f.push(`<label>${S.horizon}年の値（到達値）<input data-p="end" type="number" step="any" value="${val('end')}"></label>`);
+  if(q&&q.p.includes('mid')) f.push(`<label>いちばん速く変わる年<select data-p="mid">${yopt(val('mid'))}</select></label>`);
+  if(q&&q.p.includes('ext')) f.push(`<label>${tplShape==='PEAK'?'山':'谷'}の値<input data-p="ext" type="number" step="any" value="${val('ext')}"></label><label>${tplShape==='PEAK'?'山':'谷'}の年<select data-p="extYear">${yopt(val('extYear'))}</select></label>`);
+  if(q&&q.p.includes('amp')) f.push(`<label>波の大きさ<input data-p="amp" type="number" step="any" value="${val('amp')}"></label><label>波の回数<input data-p="cycles" type="number" min="1" max="6" value="${val('cycles')}"></label>`);
+  f.push(`<label>上限（これ以上は上がらない）<input data-b="max" type="number" step="any" value="${B.max??''}" placeholder="なし"></label><label>下限（これ以下にはならない）<input data-b="min" type="number" step="any" value="${B.min??''}" placeholder="なし"></label>`);
+  $('tplF').innerHTML=f.join('');
+  $('tplF').querySelectorAll('input,select').forEach(i=>i.oninput=i.onchange=preview);
+  $('tplOk').disabled=!q; preview();
+}
+function tplRead(){ const pr={}; $('tplF').querySelectorAll('[data-p]').forEach(i=>pr[i.dataset.p]=i.value); const b={}; $('tplF').querySelectorAll('[data-b]').forEach(i=>b[i.dataset.b]=i.value===''?null:+i.value); return {pr,b}; }
+function preview(){
+  const g=d3.select('#pvg'); g.selectAll('*').remove(); if(!tplV||!tplShape) return;
+  const v=tplV, G=GEOM[v.id], {pr,b}=tplRead(), L=S.lanes[v.id], keep=L.bounds; L.bounds=b;
+  const vals=shapeValues(v,tplShape,pr); L.bounds=keep;
+  const ln=d3.line().x(d=>G.x(d.year)).y(d=>G.y(d.value));
+  g.append('path').datum([G.last,...vals]).attr('fill','none').attr('stroke','#8A4A86').attr('stroke-width',2.5).attr('stroke-dasharray','3 3').attr('d',ln);
+  vals.forEach(d=>g.append('circle').attr('cx',G.x(d.year)).attr('cy',G.y(d.value)).attr('r',4).attr('fill','#8A4A86'));
+  ['max','min'].forEach(k=>{ if(b[k]==null) return; g.append('line').attr('x1',G.nowX).attr('x2',G.X1).attr('y1',G.y(b[k])).attr('y2',G.y(b[k])).attr('stroke','#8A4A86').attr('stroke-dasharray','6 3'); });
+}
+function closeTpl(){ $('tpl').style.display='none'; tplV=null; d3.select('#pvg').selectAll('*').remove(); }
+$('tplX').onclick=$('tplCancel').onclick=closeTpl;
+$('tplOk').onclick=()=>{ if(!tplV||!tplShape) return; const v=tplV, L=S.lanes[v.id], {pr,b}=tplRead();
+  L.bounds=b; const vals=shapeValues(v,tplShape,pr);
+  vals.forEach(d=>L.points[d.year]=d.value); L.template={shape:tplShape, params:pr, at:new Date().toISOString()};
+  log('template',{v:v.id,shape:tplShape,params:pr,bounds:b}); save(); closeTpl(); draw(); toast('下書きしました。点をドラッグして直せます'); };
+document.addEventListener('keydown',e=>{ if(e.key==='Escape' && $('tpl').style.display==='block') closeTpl(); });
+
+function rank(id){const r=S.rank.indexOf(id); if(r>=0)S.rank.splice(r,1); else S.rank.push(id); log('rank',{rank:[...S.rank]}); save(); draw()}
+
+/* ---------- コメント入力 ---------- */
+let popCtx=null;
+function openPop(v,year,px,py,future){
+  popCtx={v,year}; selKey=v.id+':'+year;
+  const pop=$('pop'), card=pop.parentNode;
+  $('popT').textContent=`${v.pathway}・${year}年`;
+  $('popIn').value=S.lanes[v.id].notes[year]||'';
+  $('popIn').placeholder=future?'なぜこうなる？':'このとき何があった？';
+  $('popDel').style.display=future?'':'none';
+  pop.style.display='block';
+  const cw=card.clientWidth, ch=card.clientHeight;
+  pop.style.left=Math.max(8,Math.min(cw-258,px-125))+'px';
+  pop.style.top=(py+14+110>ch? py-110 : py+14)+'px';
+  setTimeout(()=>$('popIn').focus(),0);
+}
+function closePop(){ $('pop').style.display='none'; popCtx=null; }
+function commit(){ if(!popCtx)return; const {v,year}=popCtx, t=$('popIn').value.trim();
+  if(t) S.lanes[v.id].notes[year]=t; else delete S.lanes[v.id].notes[year];
+  log('note',{v:v.id,year}); save(); closePop(); draw(); }
+$('popOk').onclick=commit; $('popX').onclick=()=>{closePop();draw()};
+$('popIn').onkeydown=e=>{ if(e.key==='Enter'){e.preventDefault();commit()} if(e.key==='Escape'){closePop();draw()} };
+$('popDel').onclick=()=>{ const {v,year}=popCtx; delete S.lanes[v.id].points[year]; delete S.lanes[v.id].notes[year]; log('remove',{v:v.id,year}); save(); closePop(); draw(); };
+
+/* ---------- 保存 ---------- */
+function download(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},0)}
+const stem=()=>`${CONFIG.studyId}_${(S.participant.id||'anon').replace(/[^\w-]/g,'_')}_${new Date().toISOString().slice(0,10)}`;
+$('sj').onclick=()=>{ if(!S.participant.id){toast('番号を入力してください');$('pid').focus();return}
+  log('export',{format:'json'}); download(stem()+'.json',JSON.stringify({...S,position:pos(),futureYears:fYears(),exportedAt:new Date().toISOString(),config:CONFIG},null,2),'application/json'); toast('保存しました'); };
+$('sc').onclick=()=>{ const q=v=>{const s=String(v??'');return /[",\n]/.test(s)?`"${s.replace(/"/g,'""')}"`:s};
+  const head=['study','participant_id','group','own_value','position','variable','role','pathway','record','year','value','rank','comment'];
+  const b=[CONFIG.studyId,S.participant.id,S.participant.group,S.participant.value,pos()];const rows=[];
+  VARS.forEach(v=>{const L=S.lanes[v.id],rk=S.rank.indexOf(v.id)+1||'',base=[...b,v.id,v.role,v.pathway];
+    hist(v).forEach(p=>rows.push([...base,'history',p.year,p.value,rk,L.notes[p.year]||'']));
+    fYears().forEach(yr=>rows.push([...base,'forecast',yr,L.points[yr]??'',rk,L.notes[yr]||'']));
+    if(L.template) rows.push([...base,'shape','','',rk,L.template.shape+' '+JSON.stringify(L.template.params)]);
+    if(L.bounds&&L.bounds.max!=null) rows.push([...base,'bound_max','',L.bounds.max,rk,'']);
+    if(L.bounds&&L.bounds.min!=null) rows.push([...base,'bound_min','',L.bounds.min,rk,'']);});
+  log('export',{format:'csv'}); download(stem()+'.csv','\uFEFF'+[head,...rows].map(r=>r.map(q).join(',')).join('\n'),'text/csv'); toast('CSVを保存しました'); };
+$('ld').onclick=()=>$('fileIn').click();
+$('fileIn').onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();
+  rd.onload=()=>{try{const o=JSON.parse(rd.result);if(o.schema!==SCHEMA||o.studyId!==CONFIG.studyId)throw new Error('形式が違います');
+    ['config','exportedAt','position','futureYears'].forEach(k=>delete o[k]);VARS.forEach(v=>{if(!o.lanes[v.id])o.lanes[v.id]={points:{},notes:{}}});S=o;log('import');draw();toast('読み込みました')}catch(err){toast('読み込めません：'+err.message)}e.target.value=''};rd.readAsText(f)};
+$('rs').onclick=()=>{
+  hpOpen(`<h3>やり直す</h3>
+   <div class="step"><b>描いた線を消す</b><br>このシートで描いた線・コメント・型の選択を消して、白紙から描き直します。表示や設定はそのままです。<br><button class="btn" id="rsLines" style="margin-top:6px">描いた線を消す</button></div>
+   <div class="step"><b>すべて最初の状態に戻す</b><br>描いた線に加えて、「かんたん／くわしく」の表示や、研究者が設定画面で変えた内容も、このファイルを最初に開いたときの状態に戻します。<br><button class="btn" id="rsAll" style="margin-top:6px;background:#B3261E;border-color:#B3261E">すべて最初の状態に戻す</button></div>
+   <p>※保存（JSON）していない線は、元に戻せません。</p>
+   <div class="ft"><button class="btn g" id="rsX">やめる</button></div>`);
+  $('rsX').onclick=hpClose;
+  $('rsLines').onclick=()=>{try{localStorage.removeItem(STORE)}catch(e){}S=fresh();save();hpClose();draw();toast('描いた線を消しました');};
+  $('rsAll').onclick=()=>{try{['tet-ui',OVR,STORE].forEach(k=>localStorage.removeItem(k));Object.keys(localStorage).filter(k=>/^tet_sheet_/.test(k)).forEach(k=>localStorage.removeItem(k));}catch(e){}location.reload();};
+};
+
+/* ---------- 設定（タイトル・縦軸・過去データ） ---------- */
+const OVR='tet_sheet_config';
+const dataText=v=> v.groups ? Object.entries(v.groups).flatMap(([g,a])=>a.map(([y,val])=>`${y},${val},${g}`)).join('\n') : (v.history||[]).map(([y,val])=>`${y},${val}`).join('\n');
+function parseData(text){
+  const rows=text.split(/\r?\n/).map(l=>l.trim()).filter(Boolean).map(l=>l.split(/[,\t;]/).map(c=>c.trim().replace(/^"|"$/g,'')));
+  const good=rows.filter(r=>r.length>=2 && isFinite(+r[0]) && r[0]!=='' && isFinite(+r[1]) && r[1]!=='');
+  if(!good.length) throw new Error('「年,値」の行が見つかりません');
+  const hasG=good.some(r=>r[2]);
+  const sortA=a=>a.sort((p,q)=>p[0]-q[0]);
+  if(!hasG) return {history:sortA(good.map(r=>[+r[0],+r[1]]))};
+  const groups={}; good.forEach(r=>{const k=r[2]||'全体';(groups[k]=groups[k]||[]).push([+r[0],+r[1]])}); Object.values(groups).forEach(sortA);
+  return {groups};
+}
+function autoRange(vals){ const mn=Math.min(...vals), mx=Math.max(...vals), pad=Math.max((mx-mn)*0.6,Math.abs(mx)*0.1,1);
+  const step=Math.pow(10,Math.floor(Math.log10(pad))); return [Math.max(mn>=0?0:-Infinity,Math.floor((mn-pad)/step)*step), Math.ceil((mx+pad)/step)*step]; }
+let csvTarget=null, focusVar=null;
+const LOCK=qs.get('lock')==='1';
+if(LOCK){ document.getElementById('st').style.display='none'; document.getElementById('toSum').style.display='none'; }
+function openSettings(vid){
+  if(LOCK) return;
+  focusVar=vid||null; $('mErr').textContent='';
+  $('cTitle').value=CONFIG.title; $('cOwnL').value=CONFIG.own.label; $('cOwnV').value=CONFIG.own.value; $('cOwnU').value=CONFIG.own.unit; $('cNow').value=CONFIG.nowYear;
+  $('cArch').innerHTML='<option value="">（使わない）</option>'+ARCH.map(q=>`<option value="${q.id}">${esc(q.nm)}</option>`).join('');$('cArch').value=(CONFIG.archetype&&CONFIG.archetype.id)||'';$('cArchLock').checked=!!CONFIG.archetypeLock;
+  $('mVars').innerHTML=CONFIG.variables.map(v=>`<div class="vbox ${v.role} ${v.id===vid?'hl':''}" id="vb-${v.id}">
+    <h3>${esc(v.pathway)}（${esc(v.id)}）</h3>
+    <div class="mrow">
+      <label>経路の名前<input data-k="pathway" value="${esc(v.pathway)}"></label>
+      <label>変数の名前<input data-k="name" value="${esc(v.name)}"></label>
+      <label>出典<input data-k="src" value="${esc(v.src)}"></label>
+      <label>単位<input data-k="unit" value="${esc(v.unit)}"></label>
+      <label>縦軸の下限<input data-k="min" type="number" value="${v.domain[0]}"></label>
+      <label>縦軸の上限<input data-k="max" type="number" value="${v.domain[1]}"></label>
+    </div>
+    <label>過去のデータ<textarea data-k="data" spellcheck="false">${esc(dataText(v))}</textarea>
+      <span class="mini-btns">${(()=>{const p=v.pathway||"";const td=/top/i.test(p),bu=/bottom/i.test(p),af=/afford/i.test(p),any=!(td||bu||af);return `<button type="button" data-a="csv">CSVを読み込む</button>`+(td?`<button type="button" data-a="wtab" class="rec">語の数え表（Excel）から作る</button><button type="button" data-a="pdf">PDFから語を数える</button>`:"")+(bu?`<button type="button" data-a="gt" class="rec">Googleトレンド</button>`:"")+(af?`<button type="button" data-a="ratio" class="rec">比で作る（所得÷価格）</button>`:"")+(any&&v.role!=="y"?`<button type="button" data-a="wtab">語の数え表（Excel）から作る</button><button type="button" data-a="pdf">PDFから語を数える</button><button type="button" data-a="gt">Googleトレンド</button><button type="button" data-a="ratio">比で作る（所得÷価格）</button>`:"");})()}<button type="button" data-a="auto">縦軸をデータに合わせる</button></span></label>
+  </div>`).join('');
+  document.querySelectorAll('.vbox').forEach(box=>{ const id=box.id.slice(3);
+    box.querySelector('[data-a=csv]').onclick=()=>{csvTarget=id;$('csvIn').click()};
+    if(box.querySelector('[data-a=gt]'))box.querySelector('[data-a=gt]').onclick=()=>helperTrends(id);
+    if(box.querySelector('[data-a=pdf]'))box.querySelector('[data-a=pdf]').onclick=()=>helperPdf(id);
+    if(box.querySelector('[data-a=ratio]'))box.querySelector('[data-a=ratio]').onclick=()=>helperRatio(id);
+    if(box.querySelector('[data-a=wtab]'))box.querySelector('[data-a=wtab]').onclick=()=>helperWordTable(id);
+    box.querySelector('[data-a=auto]').onclick=()=>{ try{ const d=parseData(box.querySelector('[data-k=data]').value);
+      const vals=(d.history||Object.values(d.groups).flat()).map(r=>r[1]); const [a,b]=autoRange(vals);
+      box.querySelector('[data-k=min]').value=a; box.querySelector('[data-k=max]').value=b; }catch(e){ $('mErr').textContent=e.message } };
+  });
+  $('modal').classList.add('open');
+  if(vid) setTimeout(()=>{ const b=$('vb-'+vid); b&&b.scrollIntoView({block:'center'}); const i=b&&b.querySelector('[data-k=min]'); i&&i.focus(); },30);
+}
+$('csvIn').onchange=e=>{ const f=e.target.files[0]; if(!f) return; const rd=new FileReader();
+  rd.onload=()=>{ const ta=document.querySelector(`#vb-${csvTarget} [data-k=data]`); try{ parseData(rd.result); ta.value=rd.result.trim(); $('mErr').textContent=''; }catch(err){ $('mErr').textContent=err.message } e.target.value=''; };
+  rd.readAsText(f); };
+function closeSettings(){ $('modal').classList.remove('open'); }
+
+/* ---------- データ作りの手助け（Googleトレンド／PDF／比） ---------- */
+const hp=$('hp'),hpc=$('hpc');
+const hpOpen=html=>{hpc.innerHTML=html;hp.classList.add('open');};
+const hpClose=()=>hp.classList.remove('open');
+hp.addEventListener('click',e=>{if(e.target===hp)hpClose();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&hp.classList.contains('open')){e.stopPropagation();hpClose();}},true);
+const r1=v=>Math.round(v*10)/10;
+// 年ごとにまとめる（年 / 年-月 / 年-月-日 の行に対応）
+function annualize(text){const g={};String(text||'').split(/\r?\n/).forEach(l=>{const m=l.replace(/"/g,'').match(/^\s*(\d{4})(?:[-\/年.](\d{1,2}))?(?:[-\/月.]\d{1,2})?[^,\t;]*[,\t;]\s*([<\d.\-]+)/);if(!m)return;
+  const v=m[3].startsWith('<')?0.5:parseFloat(m[3]);if(!isFinite(v))return;(g[m[1]]=g[m[1]]||[]).push(v);});
+  return Object.entries(g).map(([y,a])=>({year:+y,value:a.reduce((s,x)=>s+x,0)/a.length,n:a.length})).sort((a,b)=>a.year-b.year);}
+function fillVar(id,rows,unit,src){const box=$('vb-'+id);if(!box)return;
+  box.querySelector('[data-k=data]').value=rows.map(r=>`${r[0]},${r1(r[1])}`).join('\n');
+  if(unit!=null)box.querySelector('[data-k=unit]').value=unit;if(src!=null)box.querySelector('[data-k=src]').value=src;
+  const vals=rows.map(r=>r[1]);const [a,b]=autoRange(vals);box.querySelector('[data-k=min]').value=a;box.querySelector('[data-k=max]').value=b;
+  hpClose();toast('過去のデータを入れました。確かめて「適用」を押してください');}
+const rebase=(rows,by,bv)=>{const b=rows.find(r=>r[0]===by);if(!b||!b[1])throw new Error(`基準の年（${by}）のデータがありません`);return rows.map(r=>[r[0],r[1]/b[1]*bv]);};
+const vName=id=>{const v=CONFIG.variables.find(x=>x.id===id);return v?(v.name||v.pathway):'';};
+
+// 1) Googleトレンド
+function helperTrends(id){
+  hpOpen(`<h3>Googleトレンドから作る（ボトムアップ：人々の関心）</h3>
+  <p>Googleトレンドは外部から自動で数値を取り出す仕組みが公開されていないため、2ステップで入れます。</p>
+  <div class="r"><label>キーワード<input id="gtK" value="野菜 レシピ"></label><label>地域<select id="gtG"><option value="JP" selected>日本</option><option value="">全世界</option></select></label></div>
+  <div class="step">① 下のボタンでGoogleトレンドを開き、グラフの右上の「↓（CSV）」を押して <b>multiTimeline.csv</b> を保存します。<br>
+  <button class="btn" id="gtOpen" style="margin-top:6px">Googleトレンドを開く</button></div>
+  <div class="step">② 保存したCSVを選ぶと、月ごとの値を年の平均にして入れます。<br><input type="file" id="gtF" accept=".csv,.txt" style="margin-top:6px"></div>
+  <div class="r"><label>基準の年<input id="gtBY" type="number" value="2019"></label><label>基準の年の値<input id="gtBV" type="number" value="50"></label><label>途中の年<select id="gtPart"><option value="0">使わない</option><option value="1">使う</option></select></label></div>
+  <div id="gtOut"></div><p class="warn" id="gtErr"></p>
+  <div class="ft"><button class="btn g" id="gtX">やめる</button><button class="btn" id="gtOk" disabled>この値を入れる</button></div>`);
+  $('gtX').onclick=hpClose;
+  $('gtOpen').onclick=()=>{const k=$('gtK').value.trim();if(!k)return;window.open(`https://trends.google.co.jp/trends/explore?date=all${$('gtG').value?'&geo='+$('gtG').value:''}&q=${encodeURIComponent(k)}&hl=ja`,'_blank','noopener');};
+  let rows=null;
+  const calc=()=>{if(!rows)return;try{$('gtErr').textContent='';const mx=Math.max(...rows.map(r=>r.n));
+    let rs=rows.filter(r=>$('gtPart').value==='1'||r.n>=mx);const by=+$('gtBY').value,bv=+$('gtBV').value;
+    const out=rebase(rs.map(r=>[r.year,r.value]),by,bv);
+    $('gtOut').innerHTML=`<table><tr><th>年</th><th>平均（元の値）</th><th>入れる値</th><th>件数</th></tr>${out.map((r,i)=>`<tr><td>${r[0]}</td><td>${r1(rs[i].value)}</td><td><b>${r1(r[1])}</b></td><td>${rs[i].n}</td></tr>`).join('')}</table>`;
+    $('gtOk').disabled=false;$('gtOk').onclick=()=>fillVar(id,out,`${by}=${bv}`,`Googleトレンド「${$('gtK').value.trim()}」（${$('gtG').value?'日本':'全世界'}）`);}
+    catch(e){$('gtErr').textContent=e.message;$('gtOk').disabled=true;}};
+  $('gtF').onchange=async e=>{const f=e.target.files[0];if(!f)return;rows=annualize(await f.text());if(!rows.length){$('gtErr').textContent='CSVの中に「年-月,値」の行が見つかりません';return;}
+    if(!rows.some(r=>r.year===+$('gtBY').value))$('gtBY').value=rows[0].year;calc();};
+  ['gtBY','gtBV','gtPart'].forEach(k=>$(k).onchange=calc);
+}
+
+// 2) PDF から語の出現率
+let pdfLib=null;
+function loadPdf(){if(pdfLib)return pdfLib;const V='3.11.174',B=`https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${V}/`;
+  pdfLib=new Promise((res,rej)=>{const sc=document.createElement('script');sc.src=B+'pdf.min.js';
+    sc.onload=()=>{window.pdfjsLib.GlobalWorkerOptions.workerSrc=B+'pdf.worker.min.js';res({lib:window.pdfjsLib,B});};
+    sc.onerror=()=>{pdfLib=null;rej(new Error('PDFを読む部品を読み込めませんでした（インターネットにつながっているか確かめてください）'));};document.head.appendChild(sc);});return pdfLib;}
+const yearFromName=n=>{let m=n.match(/(19|20)\d{2}/);if(m)return +m[0];m=n.match(/令和\s*(\d+|元)/);if(m)return 2018+(m[1]==='元'?1:+m[1]);m=n.match(/平成\s*(\d+)/);if(m)return 1988+(+m[1]);m=n.match(/[Rr](\d{1,2})(?!\d)/);if(m)return 2018+(+m[1]);m=n.match(/[Hh](\d{1,2})(?!\d)/);if(m)return 1988+(+m[1]);return '';};
+function helperPdf(id){
+  let docs=[];
+  hpOpen(`<h3>PDFから語の出現率を作る（トップダウン：社会・制度）</h3>
+  <p>年ごとの文書（白書・計画・報告書など）のPDFを選び、数えたい語を入れると、1万字あたりの出現回数を年ごとに計算します。文字はこのパソコンの中だけで読み取り、外に送りません。</p>
+  <label>数える語（読点「、」かカンマで区切る。合計して数えます）<input id="pdK" value="野菜"></label>
+  <label>PDFを選ぶ（複数可）<input type="file" id="pdF" accept=".pdf,application/pdf" multiple></label>
+  <div id="pdList"></div>
+  <div class="r"><label>表し方<select id="pdMode"><option value="idx">基準の年＝100の指数</option><option value="raw">1万字あたりの回数</option></select></label><label>基準の年<input id="pdBY" type="number" value="2019"></label></div>
+  <div id="pdOut"></div><p class="warn" id="pdErr"></p>
+  <div class="ft"><button class="btn g" id="pdX">やめる</button><button class="btn g" id="pdRun">数える</button><button class="btn" id="pdOk" disabled>この値を入れる</button></div>`);
+  $('pdX').onclick=hpClose;
+  const list=()=>{$('pdList').innerHTML=docs.length?`<table><tr><th>ファイル</th><th>年</th><th>文字数</th></tr>${docs.map((d,i)=>`<tr><td>${esc(d.f.name)}</td><td><input data-y="${i}" type="number" value="${d.year}" style="width:80px"></td><td>${d.len??'—'}</td></tr>`).join('')}</table>`:'';
+    document.querySelectorAll('#pdList [data-y]').forEach(inp=>inp.onchange=()=>{docs[+inp.dataset.y].year=+inp.value;});};
+  $('pdF').onchange=e=>{docs=docs.concat([...e.target.files].map(f=>({f,year:yearFromName(f.name),text:null,len:null})));list();};
+  let result=null;
+  const show=()=>{if(!result)return;try{$('pdErr').textContent='';const raw=result.map(r=>[r.year,r.rate]);
+    const out=$('pdMode').value==='idx'?rebase(raw,+$('pdBY').value,100):raw;
+    $('pdOut').innerHTML=`<table><tr><th>年</th><th>文字数</th><th>回数</th><th>1万字あたり</th><th>入れる値</th></tr>${result.map((r,i)=>`<tr><td>${r.year}</td><td>${r.len.toLocaleString()}</td><td>${r.cnt}</td><td>${r1(r.rate)}</td><td><b>${r1(out[i][1])}</b></td></tr>`).join('')}</table>`;
+    $('pdOk').disabled=false;$('pdOk').onclick=()=>fillVar(id,out,$('pdMode').value==='idx'?`${$('pdBY').value}=100`:'回/1万字',`PDFの語「${$('pdK').value.trim()}」の出現率`);}
+    catch(e){$('pdErr').textContent=e.message;$('pdOk').disabled=true;}};
+  ['pdMode','pdBY'].forEach(k=>$(k).onchange=show);
+  $('pdRun').onclick=async()=>{
+    const kws=$('pdK').value.split(/[、,，]/).map(k=>k.normalize('NFKC').replace(/\s+/g,'')).filter(Boolean);
+    if(!kws.length){$('pdErr').textContent='数える語を入れてください';return;}
+    if(!docs.length){$('pdErr').textContent='PDFを選んでください';return;}
+    if(docs.some(d=>!d.year)){$('pdErr').textContent='すべてのファイルに年を入れてください';return;}
+    try{$('pdErr').textContent='';$('pdRun').disabled=true;
+      const {lib,B}=await loadPdf();
+      for(const [i,d] of docs.entries()){if(d.text!=null)continue;$('pdOut').innerHTML=`<p>読み取り中… ${i+1}/${docs.length}：${esc(d.f.name)}</p>`;
+        const pdf=await lib.getDocument({data:new Uint8Array(await d.f.arrayBuffer()),cMapUrl:B+'cmaps/',cMapPacked:true,standardFontDataUrl:B+'standard_fonts/'}).promise;
+        let t='';for(let p=1;p<=pdf.numPages;p++){const pg=await pdf.getPage(p);const c=await pg.getTextContent();t+=c.items.map(it=>it.str).join('');
+          if(p%10===0)$('pdOut').innerHTML=`<p>読み取り中… ${i+1}/${docs.length}：${esc(d.f.name)}（${p}/${pdf.numPages}ページ）</p>`;}
+        d.text=t.normalize('NFKC').replace(/\s+/g,'');d.len=d.text.length;}
+      list();
+      const by={};docs.forEach(d=>{const o=by[d.year]=by[d.year]||{year:d.year,len:0,cnt:0};o.len+=d.len;o.cnt+=kws.reduce((s,k)=>s+(d.text.split(k).length-1),0);});
+      result=Object.values(by).sort((a,b)=>a.year-b.year).map(o=>({...o,rate:o.len?o.cnt/o.len*10000:0}));
+      if(result.some(r=>r.len<200))$('pdErr').textContent='文字がほとんど読み取れないPDFがあります（画像だけのPDFは数えられません）';
+      if(!result.some(r=>r.year===+$('pdBY').value))$('pdBY').value=result[0].year;show();
+    }catch(e){$('pdErr').textContent=e.message||String(e);}finally{$('pdRun').disabled=false;}};
+}
+
+// 3) 比で作る（所得÷価格 など）
+// 語の数え表（年度ごとの出現回数の表）から、政策の訴求度の指数を作る。食育白書・エネルギー白書など、どの分野の表でも使える
+const wareki=s=>{s=String(s??'').replace(/\s/g,'');let m;
+  if((m=s.match(/^(\d{4})(年度|年)?$/)))return +m[1];
+  if((m=s.match(/^(平成|令和|昭和)(元|\d{1,2})年度?$/))){const n=m[2]==='元'?1:+m[2];return {平成:1988,令和:2018,昭和:1925}[m[1]]+n;}
+  return null;};
+async function loadXLSXLib(){if(window.XLSX)return;await new Promise((ok,ng)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=ok;s.onerror=()=>ng(new Error('Excelを読む部品を読み込めませんでした（インターネット接続が必要です）'));document.head.appendChild(s);});}
+function helperWordTable(id){
+  hpOpen(`<h3>語の数え表から作る（トップダウン：政策の訴求度）</h3>
+  <p>白書などの文書を年度ごとに数えた表（1行目に年度、1列目に指標名）を読み込み、「数えた語の数 ÷ 全体の語の数」を基準の年＝100の指数にします。食育白書の「野菜・栄養・健康」でも、エネルギー白書の「再エネ・省エネ」でも、同じ形の表なら使えます。</p>
+  <div class="step"><input type="file" id="wtF" accept=".xlsx,.xls,.csv"> <span id="wtMsg" style="font-size:12px;color:var(--ink-3)"></span></div>
+  <div id="wtSet" hidden>
+   <div class="step"><b>数える語（分子）</b>　複数えらぶと足し合わせます<div id="wtNum" style="display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:4px"></div></div>
+   <div class="r"><label>割る数（分母）<select id="wtDen"></select></label><label>基準の年<input id="wtBY" type="number" value="2019"></label></div>
+   <label>出典として入れる名前<input id="wtSrc" value=""></label>
+   <div class="step" style="font-size:12px;color:var(--ink-3)">年度（平成27年度など）は西暦（2015など）に直して使います。</div>
+   <table class="prev" id="wtOut"></table></div>
+  <div class="ft"><button class="btn g" id="wtX">やめる</button><button class="btn" id="wtOk" disabled>この値を入れる</button></div>`);
+  $('wtX').onclick=hpClose;let tab=null,out=[];
+  const calc=()=>{const nums=[...document.querySelectorAll('#wtNum input:checked')].map(x=>+x.value);const den=+$('wtDen').value;const by=+$('wtBY').value;
+    out=tab.years.map((y,j)=>{const n=nums.reduce((s,r)=>s+(+tab.rows[r].vals[j]||0),0);const d=den>=0?+tab.rows[den].vals[j]:1;return [y,d?n/d:null];}).filter(r=>r[0]!=null&&r[1]!=null);
+    const b=(out.find(r=>r[0]===by)||out[0]||[0,1])[1];out=out.map(([y,v])=>[y,b?v/b*100:v]);
+    $('wtOut').innerHTML='<tr><th>年</th><th>指数</th></tr>'+out.map(([y,v])=>`<tr><td>${y}</td><td>${r1(v)}</td></tr>`).join('');$('wtOk').disabled=!out.length||!nums.length;
+    if(!$('wtSrc').dataset.touched)$('wtSrc').value=`${f0}（${nums.map(r=>tab.rows[r].name).join('・')}${den>=0?'÷'+tab.rows[den].name:''}）`;};
+  let f0='';
+  $('wtSrc').oninput=()=>{$('wtSrc').dataset.touched=1;};
+  $('wtF').onchange=async e=>{const f=e.target.files[0];if(!f)return;f0=f.name.replace(/\.[^.]+$/,'').replace(/_+\d*$/,'');try{
+      let rows;if(/\.csv$/i.test(f.name)){rows=(await f.text()).split(/\r?\n/).map(l=>l.split(','));}
+      else{await loadXLSXLib();const wb=XLSX.read(await f.arrayBuffer(),{type:'array'});rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:true,defval:null});}
+      const hi=rows.findIndex(r=>r&&r.filter(c=>wareki(c)!=null).length>=3);if(hi<0)throw new Error('年度の並んだ行が見つかりませんでした');
+      const cols=rows[hi].map((c,i)=>[i,wareki(c)]).filter(x=>x[1]!=null);
+      const body=rows.slice(hi+1).filter(r=>r&&r[0]!=null&&String(r[0]).trim()&&cols.some(([i])=>typeof r[i]==='number'||(r[i]!==''&&!isNaN(+r[i]))));
+      tab={years:cols.map(x=>x[1]),rows:body.map(r=>({name:String(r[0]).trim(),vals:cols.map(([i])=>+r[i])}))};
+      const isRatio=n=>/比率|%|％|割合/.test(n);
+      $('wtNum').innerHTML=tab.rows.map((r,i)=>isRatio(r.name)||/全単語|名詞数|総数|全体/.test(r.name)?'':`<label style="display:inline-flex;gap:4px;align-items:center;font-weight:500"><input type="checkbox" value="${i}" ${/合計/.test(r.name)?'checked':''} style="width:auto">${esc(r.name)}</label>`).join('');
+      if(!document.querySelector('#wtNum input:checked')){const c=document.querySelector('#wtNum input');if(c)c.checked=true;}
+      $('wtDen').innerHTML=`<option value="-1">（割らない）</option>`+tab.rows.map((r,i)=>isRatio(r.name)?'':`<option value="${i}">${esc(r.name)}</option>`).join('');
+      const di=tab.rows.findIndex(r=>/全単語/.test(r.name));$('wtDen').value=di>=0?di:-1;
+      $('wtMsg').textContent=`${tab.years[0]}〜${tab.years[tab.years.length-1]}年の${tab.rows.length}行を読み込みました`;$('wtSet').hidden=false;
+      $('wtNum').onchange=calc;$('wtDen').onchange=calc;$('wtBY').oninput=calc;calc();
+    }catch(err){$('wtMsg').textContent=err.message||String(err);}};
+  $('wtOk').onclick=()=>{const now=+($('cNow')&&$('cNow').value)||CONFIG.nowYear;const o2=out.filter(([y])=>y<=now);fillVar(id,o2,`${$('wtBY').value}=100`,$('wtSrc').value.trim()||'語の数え表');};
+}
+function helperRatio(id){
+  hpOpen(`<h3>比で作る（アフォーダビリティ：買いやすさ）</h3>
+  <p>「所得」を「野菜の価格（消費者物価指数）」で割り、基準の年を100にした指数を作ります。数値は e-Stat などからCSVで落として、それぞれ読み込むか貼り付けてください。月ごとの値は年の平均にします。</p>
+  <div class="step">データの例：分子＝家計調査の可処分所得や実収入、分母＝消費者物価指数の「生鮮野菜」。<br>
+  <button class="btn g" id="raInc" style="margin-top:6px">e-Statで家計調査を開く</button> <button class="btn g" id="raCpi" style="margin-top:6px">e-Statで消費者物価指数を開く</button></div>
+  <div class="step"><b>よく使う組み合わせ（2019〜2024年の値を入れます）</b><br>
+   <button class="btn" id="raP1" style="margin-top:6px">Price Sensitivity（可処分所得 ÷ 生鮮野菜CPI）</button>
+   <button class="btn g" id="raP2" style="margin-top:6px">可処分所得 ÷ キャベツの値段</button></div>
+  <div class="step"><b>家計調査のExcelから所得を読む</b><br>e-Stat「家計調査 → 長期時系列表 → 表2 用途分類 → 二人以上の世帯のうち勤労者世帯」のExcel（kin-ts.xlsx）を選ぶと、年ごとの<b>可処分所得</b>（1か月あたり・年平均）が分子に自動で入ります。<br>
+   <input type="file" id="raXls" accept=".xlsx,.xls" style="margin-top:6px"><span id="raXlsMsg" style="font-size:12px;color:var(--ink-3);margin-left:6px"></span></div>
+  <div class="step"><b>消費者物価指数のCSVから価格を読む</b><br>e-Stat「消費者物価指数 → 2020年基準 → 長期時系列データ → 品目別価格指数 → 全国 → 年平均 → 中分類指数（1970年～最新年）」のCSV（zni2020s.csv）を選ぶと、<b>生鮮野菜</b>の年平均（2020年＝100）が分母に入ります。<br>
+   <input type="file" id="raCsv" accept=".csv" style="margin-top:6px"> <select id="raCol" hidden style="max-width:220px"></select><span id="raCsvMsg" style="font-size:12px;color:var(--ink-3);margin-left:6px"></span></div>
+  <div class="r"><label>分子（所得など）：年,値<textarea id="raN" placeholder="2019,450000&#10;2020,470000"></textarea><input type="file" id="raNF" accept=".csv,.txt"></label>
+  <label>分母（価格など）：年,値<textarea id="raD" placeholder="2019,100&#10;2020,104.2"></textarea><input type="file" id="raDF" accept=".csv,.txt"></label></div>
+  <div class="r"><label>基準の年<input id="raBY" type="number" value="2019"></label><label>基準の年の値<input id="raBV" type="number" value="100"></label></div>
+  <label>出典として入れる名前<input id="raSrc" value="所得÷価格（e-Statなど）"></label>
+  <div id="raOut"></div><p class="warn" id="raErr"></p>
+  <div class="ft"><button class="btn g" id="raX">やめる</button><button class="btn g" id="raRun">計算する</button><button class="btn" id="raOk" disabled>この値を入れる</button></div>`);
+  $('raX').onclick=hpClose;
+  // 家計調査（勤労者世帯）の長期時系列Excelから「可処分所得」の年平均を読む（ブラウザの中だけで処理）
+  $('raXls').onchange=async e=>{const f=e.target.files[0];if(!f)return;const msg=$('raXlsMsg');msg.textContent='読み込み中…';
+    try{if(!window.XLSX){await new Promise((ok,ng)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=ok;s.onerror=()=>ng(new Error('Excelを読む部品を読み込めませんでした（インターネット接続が必要です）'));document.head.appendChild(s);});}
+      const wb=XLSX.read(await f.arrayBuffer(),{type:'array'});
+      const names=wb.SheetNames.slice().sort((a,b)=>(/（年）/.test(b)?1:0)-(/（年）/.test(a)?1:0));let found=null;
+      for(const nm of names){const rows=XLSX.utils.sheet_to_json(wb.Sheets[nm],{header:1,raw:true,defval:null});
+        const hi=rows.findIndex(r=>r&&r.filter(v=>/^\s*\d{4}年\s*$/.test(String(v??''))).length>=3);if(hi<0)continue;
+        const ri=rows.findIndex(r=>r&&r.slice(0,20).some(v=>String(v??'').replace(/[\s\u3000]/g,'')==='可処分所得'));if(ri<0)continue;
+        const out=[];rows[hi].forEach((v,c)=>{const m=String(v??'').match(/^\s*(\d{4})年\s*$/);const x=rows[ri][c];if(m&&typeof x==='number')out.push([+m[1],x]);});
+        if(out.length){found={nm,out};break;}}
+      if(!found)throw new Error('「可処分所得」の行と年の並びが見つかりませんでした。家計調査の勤労者世帯のファイルか確かめてください');
+      $('raN').value=found.out.map(([y,v])=>`${y},${v}`).join('\n');
+      msg.textContent=`「${found.nm}」から${found.out.length}年分（${found.out[0][0]}〜${found.out[found.out.length-1][0]}年）を入れました`;
+      if(!$('raSrc').value||/所得÷価格/.test($('raSrc').value))$('raSrc').value='可処分所得（家計調査・勤労者世帯）÷価格';
+      if($('raD').value.trim())$('raRun').click();
+    }catch(err){msg.textContent=err.message||String(err);}};
+  const parseCSV=txt=>{const out=[];let row=[],cur='',q=false;for(let i=0;i<txt.length;i++){const ch=txt[i];
+      if(q){if(ch==='"'){if(txt[i+1]==='"'){cur+='"';i++;}else q=false;}else cur+=ch;}
+      else if(ch==='"')q=true;else if(ch===','){row.push(cur);cur='';}else if(ch==='\n'||ch==='\r'){if(ch==='\r'&&txt[i+1]==='\n')i++;row.push(cur);out.push(row);row=[];cur='';}else cur+=ch;}
+    if(cur!==''||row.length){row.push(cur);out.push(row);}return out;};
+  // 消費者物価指数の中分類指数CSV（Shift_JIS）：1行目が分類名、1列目が年。初めは「生鮮野菜」の列を使う
+  let cpiRows=null;
+  const fillCpi=()=>{const col=+$('raCol').value;const out=cpiRows.filter(r=>r&&/^\s*\d{4}\s*$/.test(r[0]||'')&&r[col]!==''&&!isNaN(+r[col])).map(r=>[+r[0].trim(),+r[col]]);
+    $('raD').value=out.map(([y,v])=>`${y},${v}`).join('\n');const nm=cpiRows[0][col].replace('（再掲）','');
+    $('raCsvMsg').textContent=`「${nm}」${out.length}年分（${out[0][0]}〜${out[out.length-1][0]}年）を入れました`;
+    $('raSrc').value=`可処分所得（家計調査・勤労者世帯）÷${nm}CPI（消費者物価指数）`;if($('raN').value.trim())$('raRun').click();};
+  $('raCsv').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const buf=await f.arrayBuffer();let txt;try{txt=new TextDecoder('shift_jis').decode(buf);}catch(_){txt=new TextDecoder().decode(buf);}
+      if(!/類・品目|総合/.test(txt))txt=new TextDecoder().decode(buf);
+      cpiRows=parseCSV(txt);const hdr=cpiRows[0]||[];const sel=$('raCol');
+      sel.innerHTML=hdr.map((h,i)=>i?`<option value="${i}">${esc(h)}</option>`:'').join('');
+      const def=hdr.findIndex(h=>/^生鮮野菜/.test(h));if(def<0)throw new Error('「生鮮野菜」の列が見つかりませんでした。中分類指数のCSVか確かめてください');
+      sel.value=def;sel.hidden=false;sel.onchange=fillCpi;fillCpi();}catch(err){$('raCsvMsg').textContent=err.message||String(err);}};
+  // 家計調査の可処分所得（円/月）と、消費者物価指数の生鮮野菜（2020=100）、キャベツの値段（円/kg）
+  const INC='2019,476645\n2020,498639\n2021,492681\n2022,500914\n2023,494668\n2024,522569';
+  $('raP1').onclick=()=>{$('raN').value=INC;$('raD').value='2019,95.5\n2020,100.0\n2021,97.2\n2022,102.3\n2023,108.4\n2024,119.4';$('raSrc').value='Price Sensitivity指数（可処分所得÷生鮮野菜CPI）';$('raRun').click();};
+  $('raP2').onclick=()=>{$('raN').value=INC;$('raD').value='2019,169\n2020,189\n2021,160\n2022,181\n2023,197\n2024,244';$('raSrc').value='可処分所得÷キャベツの値段（円/kg）';$('raRun').click();};
+  $('raInc').onclick=()=>window.open('https://www.e-stat.go.jp/stat-search/files?page=1&toukei=00200561','_blank','noopener');
+  $('raCpi').onclick=()=>window.open('https://www.e-stat.go.jp/stat-search/files?page=1&toukei=00200573','_blank','noopener');
+  [['raNF','raN'],['raDF','raD']].forEach(([f,t])=>$(f).onchange=async e=>{const x=e.target.files[0];if(!x)return;$(t).value=annualize(await x.text()).map(r=>`${r.year},${r1(r.value)}`).join('\n');});
+  $('raRun').onclick=()=>{try{$('raErr').textContent='';const N=annualize($('raN').value),D=annualize($('raD').value);
+    const rows=N.map(n=>{const d=D.find(x=>x.year===n.year);return d&&d.value?[n.year,n.value/d.value]:null;}).filter(Boolean);
+    if(!rows.length)throw new Error('分子と分母で、同じ年のデータがありません');
+    const out=rebase(rows,+$('raBY').value,+$('raBV').value);
+    $('raOut').innerHTML=`<table><tr><th>年</th><th>分子</th><th>分母</th><th>入れる値</th></tr>${out.map(r=>`<tr><td>${r[0]}</td><td>${r1(N.find(x=>x.year===r[0]).value)}</td><td>${r1(D.find(x=>x.year===r[0]).value)}</td><td><b>${r1(r[1])}</b></td></tr>`).join('')}</table>`;
+    $('raOk').disabled=false;$('raOk').onclick=()=>{const now=+($('cNow')&&$('cNow').value)||CONFIG.nowYear;const o2=out.filter(([y])=>y<=now);if(o2.length<out.length)toast(`「いま」の年（${now}年）より後の値は入れていません`);fillVar(id,o2,`${$('raBY').value}=${$('raBV').value}`,$('raSrc').value.trim()||'所得÷価格');}}
+    catch(e){$('raErr').textContent=e.message;$('raOk').disabled=true;}};
+}
+$('mClose').onclick=closeSettings;
+$('modal').onclick=e=>{ if(e.target.id==='modal') closeSettings(); };
+document.addEventListener('keydown',e=>{ if(e.key==='Escape' && $('modal').classList.contains('open')) closeSettings(); });
+function readSettings(){
+  const C=JSON.parse(JSON.stringify(CONFIG));
+  C.title=$('cTitle').value.trim()||C.title; C.own.label=$('cOwnL').value.trim()||C.own.label;
+  if($('cOwnV').value!=='') C.own.value=+$('cOwnV').value; C.own.unit=$('cOwnU').value.trim();
+  if($('cNow').value!=='') C.nowYear=+$('cNow').value;
+  { const ai=$('cArch').value; if(ai){ if(!C.archetype||C.archetype.id!==ai) C.archetype={id:ai}; } else delete C.archetype; C.archetypeLock=$('cArchLock').checked; }
+  C.variables.forEach(v=>{ const box=$('vb-'+v.id), val=k=>box.querySelector(`[data-k=${k}]`).value;
+    ['pathway','name','src','unit'].forEach(k=>v[k]=val(k).trim());
+    const mn=+val('min'), mx=+val('max'); if(!(isFinite(mn)&&isFinite(mx)&&mn<mx)) throw new Error(`${v.pathway}：縦軸の下限は上限より小さくしてください`);
+    v.domain=[mn,mx];
+    const d=parseData(val('data')); delete v.history; delete v.groups; Object.assign(v,d);
+    if(!(v.history||Object.values(v.groups).flat()).some(r=>r[0]<=C.nowYear)) throw new Error(`${v.pathway}：「いま」以前のデータがありません`);
+  });
+  return C;
+}
+$('mApply').onclick=()=>{ try{ CONFIG=readSettings(); try{localStorage.setItem(OVR,JSON.stringify(CONFIG))}catch(e){}
+    applyConfig(); closeSettings(); toast('設定を反映しました'); log('settings'); }catch(e){ $('mErr').textContent=e.message } };
+$('mExport').onclick=()=>{ try{ const C=readSettings(); download(`tet_config_${C.studyId}.json`,JSON.stringify(C,null,2),'application/json'); }catch(e){ $('mErr').textContent=e.message } };
+$('mDefault').onclick=()=>{ if(!confirm('設定を初期状態に戻しますか？（描いた線は残ります）')) return; try{localStorage.removeItem(OVR)}catch(e){} location.reload(); };
+function applyConfig(){
+  VARS=[...CONFIG.variables.filter(v=>v.role!=='y'),...CONFIG.variables.filter(v=>v.role==='y')];
+  VARS.forEach(v=>{ if(!S.lanes[v.id]) S.lanes[v.id]={points:{},notes:{}}; });
+  if(!S.collapsed) S.collapsed=defaultCollapsed();
+  const g=VARS.find(v=>v.groups); if(g && !g.groups[S.participant.group]) S.participant.group=Object.keys(g.groups)[0];
+  if(!CONFIG.horizons.includes(S.horizon)) S.horizon=CONFIG.horizon;
+  document.title=CONFIG.title; save(); draw();
+}
+
+/* ---------- 記入と集計の切り替え ---------- */
+window.TET={
+  config:()=>CONFIG,
+  answer:()=>({id:S.participant.id, group:S.participant.group, value:S.participant.value, pos:pos(), lanes:JSON.parse(JSON.stringify(S.lanes)), rank:[...S.rank]}),
+  mode:m=>{ const sum=m==='summary'&&!LOCK; $('sheetApp').hidden=sum; $('sumApp').hidden=!sum;
+    const u=new URL(location.href); if(sum) u.searchParams.set('mode','summary'); else u.searchParams.delete('mode'); history.replaceState(null,'',u);
+    if(sum){ window.TET_SUM&&window.TET_SUM.render(); } else draw(); }
+};
+let UI=(()=>{try{return localStorage.getItem('tet-ui')||'simple'}catch(e){return 'simple'}})();
+function setUI(m){UI=m;try{localStorage.setItem('tet-ui',m)}catch(e){}document.body.classList.toggle('simple',m==='simple');$('uiS').setAttribute('aria-pressed',m==='simple');$('uiA').setAttribute('aria-pressed',m!=='simple');if($('arP').style.display==='block')openArch();if(typeof S!=='undefined'&&S)draw();}
+$('uiS').onclick=()=>setUI('simple');$('uiA').onclick=()=>setUI('adv');setUI(UI);
+$('tplMore').onclick=()=>{const t=$('tpl');t.classList.toggle('det');$('tplMore').textContent=t.classList.contains('det')?'▾ 数字で細かく調整する':'▸ 数字で細かく調整する';};
+$('arB').onclick=()=>{const p=$('arP');if(p.style.display==='block')p.style.display='none';else openArch();};
+$('toSum').onclick=()=>window.TET.mode('summary');
+
+/* ---------- 起動 ---------- */
+function start(){
+  // 因果ループ図ツールから作ったシート：埋め込まれた設定を使う（研究者が設定画面で直したものは、同じシートの間は優先）
+  const P=window.TET_CONFIG;
+  if(P&&Array.isArray(P.variables)){
+    let o=null; try{o=JSON.parse(localStorage.getItem(OVR))}catch(e){}
+    CONFIG=(o&&Array.isArray(o.variables)&&o.presetId&&o.presetId===P.presetId)?o:JSON.parse(JSON.stringify(P));
+  } else {
+  try{ const o=JSON.parse(localStorage.getItem(OVR)); if(o&&Array.isArray(o.variables)) CONFIG=o; }catch(e){}
+  }
+  migrateCfg(CONFIG);
+  VARS=[...CONFIG.variables.filter(v=>v.role!=='y'),...CONFIG.variables.filter(v=>v.role==='y')];
+  STORE='tet_sheet_'+CONFIG.studyId;
+  try{const o=JSON.parse(localStorage.getItem(STORE));S=(o&&o.schema===SCHEMA)?o:fresh()}catch(e){S=fresh()}
+  applyConfig(); if(qs.get('mode')==='summary'&&!LOCK) setTimeout(()=>window.TET.mode('summary'),0);
+  let tm; new ResizeObserver(()=>{clearTimeout(tm);tm=setTimeout(draw,80)}).observe($('chart').parentNode);
+}
+const cfg=qs.get('config');
+if(cfg&&/^[\w.\-\/]+\.json$/.test(cfg)) fetch(cfg).then(r=>r.json()).then(c=>{CONFIG=Object.assign({},CONFIG,c);start()}).catch(()=>{toast('設定ファイルを読めません');start()});
+else start();
+</script>
+<script>
+(()=>{
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const toast=m=>{const e=$('sm_toast');e.textContent=m;e.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('show'),2200)};
+let CFG=null;            // 最初のファイルの設定（変数・過去データ・縦軸）
+let P=[];                // 参加者 {id, group, value, pos, lanes:{vid:{points:{}, notes:{}}}, rank:[]}
+let tab='types';
+
+/* ---------- 読み込み ---------- */
+function fromJSON(o){
+  if(!o.lanes) throw new Error('回答ファイルではありません');
+  if(o.config && !CFG) CFG=o.config;
+  return {id:o.participant?.id||'anon', group:o.participant?.group||'', value:o.participant?.value??'', pos:o.position||null,
+          lanes:o.lanes, rank:o.rank||[]};
+}
+function fromCSV(text){
+  const rows=d3.csvParse(text.replace(/^\uFEFF/,''));
+  const by=d3.group(rows,r=>r.participant_id);
+  const out=[];
+  by.forEach((rs,id)=>{
+    const p={id, group:rs[0].group, value:rs[0].own_value, pos:rs[0].position||null, lanes:{}, rank:[]};
+    const rk={};
+    rs.forEach(r=>{ const L=p.lanes[r.variable]=p.lanes[r.variable]||{points:{},notes:{}};
+      if(r.record==='forecast' && r.value!=='') L.points[r.year]=+r.value;
+      if(r.comment) L.notes[r.year]=r.comment;
+      if(r.rank) rk[r.variable]=+r.rank; });
+    p.rank=Object.entries(rk).sort((a,b)=>a[1]-b[1]).map(e=>e[0]);
+    if(!CFG){ // CSV だけの場合は、履歴行から最低限の設定を作る
+      const vars=[...d3.group(rs,r=>r.variable)].map(([vid,vr])=>{ const h=vr.filter(r=>r.record==='history').map(r=>[+r.year,+r.value]);
+        const vals=[...h.map(d=>d[1]),...vr.filter(r=>r.record==='forecast'&&r.value!=='').map(r=>+r.value)];
+        return {id:vid, role:vr[0].role, pathway:vr[0].pathway, name:'', unit:'', src:'', history:h, domain:[Math.min(0,d3.min(vals)), d3.max(vals)*1.15]}; });
+      CFG={title:'TET 集計', nowYear:d3.max(rows.filter(r=>r.record==='history'),r=>+r.year), own:{label:'',value:null,unit:''}, variables:vars};
+    }
+    out.push(p);
+  });
+  return out;
+}
+async function loadFiles(list){
+  let n=0, bad=0;
+  for(const f of list){
+    const text=await f.text();
+    try{
+      const add = f.name.toLowerCase().endsWith('.csv') ? fromCSV(text) : [fromJSON(JSON.parse(text))];
+      add.forEach(p=>{ const i=P.findIndex(q=>q.id===p.id); if(i>=0) P[i]=p; else P.push(p); n++; });
+    }catch(e){ bad++; }
+  }
+  toast(`${n}人を読み込みました${bad?`（読めなかったファイル ${bad}）`:''}`);
+  render();
+}
+$('sm_files').onchange=e=>{ loadFiles([...e.target.files]); e.target.value=''; };
+$('sm_add').onclick=$('sm_add2').onclick=()=>$('sm_files').click();
+const drop=$('sm_drop');
+const inSum=()=>!document.getElementById('sumApp').hidden;
+['dragenter','dragover'].forEach(t=>document.addEventListener(t,e=>{if(!inSum())return;e.preventDefault();drop.classList.add('over')}));
+['dragleave','drop'].forEach(t=>document.addEventListener(t,e=>{if(!inSum())return;e.preventDefault();drop.classList.remove('over')}));
+document.addEventListener('drop',e=>{ if(!inSum())return; const fs=[...e.dataTransfer.files].filter(f=>/\.(json|csv)$/i.test(f.name)); if(fs.length) loadFiles(fs); });
+$('sm_clr').onclick=()=>{ if(!P.length||confirm('読み込んだ回答をすべて消しますか？')){ P=[]; CFG=null; render(); } };
+
+/* ---------- サンプル ---------- */
+$('sm_demo').onclick=$('sm_demo2').onclick=()=>{
+  CFG={title:'野菜を食べる未来を描く（サンプル）',nowYear:2024,own:{label:'野菜 g/日',value:350,unit:'g'},variables:[
+    {id:'x1',role:'x',pathway:'Top-down',name:'社会・制度',unit:'2019=100',domain:[40,160],history:[[2019,100],[2020,92.3],[2021,105.6],[2022,113.2],[2023,92.3],[2024,92.7]]},
+    {id:'x2',role:'x',pathway:'Bottom-up',name:'人々の関心',unit:'2019=50',domain:[0,100],history:[[2019,50],[2020,70.8],[2021,78.1],[2022,79.1],[2023,76.8],[2024,69.8]]},
+    {id:'x3',role:'x',pathway:'Affordability',name:'買いやすさ',unit:'2019=100',domain:[40,160],history:[[2019,100],[2020,100.4],[2021,119.6],[2022,114.6],[2023,99.6],[2024,88.1]]},
+    {id:'y',role:'y',pathway:'Variable of interest',name:'350g以上の人',unit:'%',domain:[0,50],groups:{'女性':[[2014,29.2],[2015,31.4],[2016,27.2],[2017,29],[2018,27],[2019,26.5],[2022,24.8],[2023,21.9],[2024,22]],'男性':[[2014,33.2],[2015,33.7],[2016,29.3],[2017,32.3],[2018,30.7],[2019,30.1],[2022,28.9],[2023,25.2],[2024,26.2]]}}]};
+  const yrs=[2025,2030,2035,2040,2045,2050], rnd=d3.randomNormal.source(d3.randomLcg(7));
+  const shapes=[t=>t*1, t=>0, t=>-t, t=>Math.sin(t*Math.PI)*1.2-0.3*t, t=>-Math.sin(t*Math.PI)+0.4*t];
+  const reasons={x1:['政策は出尽くし','健康経営が広がる','予算が減る'],x2:['SNSのレシピで伸びる','ブームが去る','料理する人が減る'],x3:['物価高が続く','所得が戻る','輸入野菜が増える'],y:['自炊が増える','高齢化で増える','若者が食べない']};
+  P=d3.range(17).map(i=>{
+    const g=i%2?'男性':'女性', val=Math.round(i%3===0?380+Math.abs(rnd(0,40)()):260+rnd(0,40)()), lanes={};
+    CFG.variables.forEach(v=>{ const H=v.groups?v.groups[g]:v.history, v0=H.at(-1)[1], sp=v.domain[1]-v.domain[0];
+      const sh=shapes[(i*3+v.id.length+ (v.id==='x2'?i:0))%5], amp=(0.1+Math.abs(rnd(0,0.12)()))*sp;
+      const pts={}; yrs.forEach((yr,k)=>{ const t=(k+1)/yrs.length; pts[yr]=Math.round(Math.max(v.domain[0],Math.min(v.domain[1],v0+sh(t)*amp+rnd(0,sp*0.02)()))*10)/10; });
+      lanes[v.id]={points:pts,notes:{[yrs[2+i%3]]:reasons[v.id][i%3]}}; });
+    const perm=[['x3','x2','x1'],['x2','x3','x1'],['x3','x1','x2'],['x2','x1','x3']][i%4];
+    return {id:`S-${String(i+1).padStart(2,'0')}`, group:g, value:String(val), pos:val>=350?'hi':'lo', lanes, rank:i%7===6?perm.slice(0,2):perm};
+  });
+  toast('サンプル（17人）を表示しています'); render();
+};
+
+/* ---------- 集計 ---------- */
+const posLabel=p=>p==='hi'?`${CFG?.own?.value??''}${CFG?.own?.unit??''}以上`:(p==='lo'?`${CFG?.own?.value??''}${CFG?.own?.unit??''}未満`:'不明');
+function filtered(){ const f=$('sm_flt').value||'all';
+  return P.filter(p=> f==='all' || (f.startsWith('pos:') && p.pos===f.slice(4)) || (f.startsWith('grp:') && p.group===f.slice(4))); }
+function fillFilter(){
+  const cur=$('sm_flt').value||'all', groups=[...new Set(P.map(p=>p.group).filter(Boolean))];
+  const opts=[['all','全員'],['pos:hi',posLabel('hi')],['pos:lo',posLabel('lo')],...groups.map(g=>['grp:'+g,g])];
+  $('sm_flt').innerHTML=opts.map(([v,l])=>`<option value="${esc(v)}" ${v===cur?'selected':''}>${esc(l)}</option>`).join('');
+}
+$('sm_flt').onchange=render; $('sm_mode').onchange=render;
+const hist=(v,group)=>(v.groups?(v.groups[group]||Object.values(v.groups)[0]):v.history).map(([year,value])=>({year,value}));
+// 各参加者の線を、共通の年（全員の点の年の和集合）に直線で補間する
+function lineOf(p,v){
+  const H=hist(v,p.group), last=H.at(-1), pts=Object.entries(p.lanes[v.id]?.points||{}).map(([y,val])=>({year:+y,value:+val})).filter(d=>isFinite(d.value)).sort((a,b)=>a.year-b.year);
+  if(!pts.length) return null; return [last,...pts];
+}
+function interp(line,yr){ if(!line||yr<line[0].year||yr>line.at(-1).year) return null;
+  for(let i=0;i<line.length-1;i++){ const a=line[i],b=line[i+1]; if(yr>=a.year&&yr<=b.year) return a.value+(b.value-a.value)*(yr-a.year)/((b.year-a.year)||1); } return line.at(-1).year===yr?line.at(-1).value:null; }
+function stats(v,people){
+  const now=CFG.nowYear, yrsSet=new Set(); people.forEach(p=>Object.keys(p.lanes[v.id]?.points||{}).forEach(y=>yrsSet.add(+y)));
+  const yrs=[...yrsSet].sort((a,b)=>a-b);
+  const lines=people.map(p=>({p,l:lineOf(p,v)})).filter(d=>d.l);
+  const rows=yrs.map(yr=>{ const vals=lines.map(d=>interp(d.l,yr)).filter(x=>x!=null).sort(d3.ascending);
+    return {year:yr,n:vals.length,p10:d3.quantileSorted(vals,.1),p25:d3.quantileSorted(vals,.25),med:d3.quantileSorted(vals,.5),p75:d3.quantileSorted(vals,.75),p90:d3.quantileSorted(vals,.9),min:vals[0],max:vals.at(-1)}; });
+  // 出発点（いま）：全員の最終実績の中央値
+  const start=d3.median(lines,d=>d.l[0].value);
+  if(rows.length && start!=null) rows.unshift({year:now,n:lines.length,p10:start,p25:start,med:start,p75:start,p90:start,min:start,max:start});
+  return {rows,lines};
+}
+// 線の型（論文ステップ5の「型」）：いまからの変化を縦軸の幅に対する割合で判定
+const TYPES=['上昇','横ばい','下降','上がって下がる','下がって上がる'];
+function shapeOf(line,v){
+  const sp=v.domain[1]-v.domain[0], v0=line[0].value, rel=line.slice(1).map(d=>(d.value-v0)/sp), end=rel.at(-1), mx=d3.max(rel), mn=d3.min(rel), th=0.06;
+  if(Math.max(Math.abs(mx),Math.abs(mn))<th) return '横ばい';
+  if(mx>th && end<mx-th && rel.indexOf(mx)<rel.length-1 && Math.abs(mx)>=Math.abs(mn)) return '上がって下がる';
+  if(mn<-th && end>mn+th && rel.indexOf(mn)<rel.length-1) return '下がって上がる';
+  return end>th?'上昇':(end<-th?'下降':'横ばい');
+}
+function kendallW(people,items){
+  const full=people.filter(p=>items.every(id=>p.rank.includes(id))); const m=full.length, n=items.length; if(m<2||n<2) return {W:null,m};
+  const R=items.map(id=>d3.sum(full,p=>p.rank.indexOf(id)+1)), mean=m*(n+1)/2, S=d3.sum(R,r=>(r-mean)**2);
+  return {W:12*S/(m*m*(n**3-n)), m};
+}
+
+/* ---------- 描画 ---------- */
+function render(){
+  fillFilter(); const people=filtered();
+  $('sm_count').textContent=`${people.length}人${people.length!==P.length?` / ${P.length}人`:''}`;
+  $('sm_drop').style.display=P.length?'none':'flex';
+  if(CFG) $('sm_title').textContent='集計｜'+(CFG.title||'TET');
+  drawChart(people); drawPane(people);
+}
+const VARS=()=>CFG?(migrateCfg(CFG),[...CFG.variables.filter(v=>v.role!=='y'),...CFG.variables.filter(v=>v.role==='y')]):[];
+function drawChart(people){
+  const box=$('sm_chart'); box.innerHTML=''; if(!CFG||!people.length) return;
+  const W=box.clientWidth,H=box.clientHeight, LW=150, RW=78, TOP=30, BOT=26, GAP=8, V=VARS(), n=V.length, sep=10;
+  const laneH=(H-TOP-BOT-GAP*(n-1)-sep)/n, mode=$('sm_mode').value, grp=people[0]?.group;
+  const first=d3.min(V,v=>hist(v,grp)[0].year), lastY=d3.max(people,p=>d3.max(Object.values(p.lanes).flatMap(L=>Object.keys(L.points||{}).map(Number))))||CFG.nowYear+10;
+  const x=d3.scaleLinear().domain([first,lastY]).range([LW+34,W-RW-8]), nowX=x(CFG.nowYear), X0=x.range()[0], X1=x.range()[1];
+  const svg=d3.select(box).append('svg').attr('xmlns','http://www.w3.org/2000/svg').attr('viewBox',`0 0 ${W} ${H}`).attr('font-family',"'Zen Kaku Gothic New',sans-serif");
+  svg.append('rect').attr('width',W).attr('height',H).attr('fill','#fff');
+  svg.append('rect').attr('x',X0).attr('y',4).attr('width',nowX-X0-3).attr('height',22).attr('rx',6).attr('fill','#23263A');
+  fitText(svg.append('text').attr('x',(X0+nowX)/2).attr('y',19).attr('text-anchor','middle').attr('fill','#fff').attr('font-size',12).attr('font-weight',700).text('データに基づく過去'), nowX-X0-3, '過去');
+  svg.append('rect').attr('x',nowX+3).attr('y',4).attr('width',X1-nowX-3).attr('height',22).attr('rx',6).attr('fill','#E8790C');
+  svg.append('text').attr('x',(nowX+X1)/2).attr('y',19).attr('text-anchor','middle').attr('fill','#fff').attr('font-size',12).attr('font-weight',700).text(`参加者が描いた将来（${people.length}人）`); fitText(svg.select('text:last-of-type'), X1-nowX-3, `将来（${people.length}人）`);
+  const X=V.filter(v=>v.role==='x').map(v=>v.id);
+  V.forEach((v,i)=>{
+    const y0=TOP+i*(laneH+GAP)+(v.role==='y'?sep:0), y=d3.scaleLinear().domain(v.domain).range([y0+laneH-6,y0+8]);
+    const g=svg.append('g'), {rows,lines}=stats(v,people);
+    if(v.role==='y') svg.append('line').attr('x1',8).attr('x2',W-8).attr('y1',y0-GAP/2-sep/2).attr('y2',y0-GAP/2-sep/2).attr('stroke','#C3C7D9');
+    g.append('rect').attr('x',8).attr('y',y0).attr('width',LW-12).attr('height',laneH).attr('rx',10).attr('fill',v.role==='y'?'#FFF1DC':'#ECECFD');
+    { const wAll=LW-12-14, lim=y0+laneH-24; let cy=y0+22;
+      cy=svgWrap(g,v.pathway,18,cy,wAll,{fs:v.pathway.length>14?12.5:14,fw:900,fill:v.role==='y'?'#E8790C':'#5B5BD6',lh:15,maxLines:2})+2;
+      if(cy<lim) cy=svgWrap(g,v.name||'',18,cy,wAll,{fs:12.5,fw:700,lh:15,maxLines:2});
+      if(cy<lim) svgWrap(g,v.unit||'',18,cy,wAll,{fs:10.5,fill:'#858BA3',lh:13,maxLines:1}); }
+    g.append('text').attr('x',18).attr('y',y0+laneH-10).attr('font-size',11).attr('fill','#555B73').text(`回答 ${lines.length}人`);
+    g.append('rect').attr('x',X0).attr('y',y0).attr('width',nowX-X0).attr('height',laneH).attr('fill','#EEF0F7');
+    g.append('rect').attr('x',nowX).attr('y',y0).attr('width',X1-nowX).attr('height',laneH).attr('fill','#FFFDF8');
+    g.append('g').attr('class','ax').attr('transform',`translate(${X0},0)`).call(d3.axisLeft(y).ticks(3).tickSizeOuter(0));
+    const H0=hist(v,$('sm_flt').value.startsWith('grp:')?$('sm_flt').value.slice(4):grp);
+    const ln=d3.line().x(d=>x(d.year)).y(d=>y(d.value));
+    if(mode!=='fan') lines.forEach(d=>g.append('path').datum(d.l).attr('fill','none').attr('stroke','#B7A57F').attr('stroke-width',1).attr('stroke-opacity',.55).attr('d',ln));
+    if(mode!=='lines' && rows.length){
+      const area=(a,b)=>d3.area().x(d=>x(d.year)).y0(d=>y(d[a])).y1(d=>y(d[b]));
+      g.append('path').datum(rows).attr('fill','#F6DDB0').attr('opacity',.75).attr('d',area('p10','p90'));
+      g.append('path').datum(rows).attr('fill','#EDB86A').attr('opacity',.8).attr('d',area('p25','p75'));
+      g.append('path').datum(rows).attr('fill','none').attr('stroke','#B35C00').attr('stroke-width',2.6).attr('d',d3.line().x(d=>x(d.year)).y(d=>y(d.med)));
+      // 幅が最も広い年
+      const wide=rows.slice(1).reduce((a,b)=>(b.p75-b.p25)>(a.p75-a.p25)?b:a, rows[1]||rows[0]);
+      if(wide && wide.year!==rows.at(-1).year){ g.append('line').attr('x1',x(wide.year)).attr('x2',x(wide.year)).attr('y1',y(wide.p90)).attr('y2',y(wide.p10)).attr('stroke','#B35C00').attr('stroke-dasharray','2 3');
+        g.append('text').attr('x',x(wide.year)).attr('y',Math.max(y0+11,y(wide.p90)-4)).attr('text-anchor','middle').attr('font-size',10.5).attr('font-weight',700).attr('fill','#B35C00').text(`幅が最大 ${wide.year}`); }
+      const endR=rows.at(-1); g.append('text').attr('x',x(endR.year)-4).attr('y',y(endR.med)-7).attr('text-anchor','end').attr('font-size',11).attr('font-weight',700).attr('fill','#B35C00').text(d3.format('.1f')(endR.med));
+    }
+    if(v.groups){ const gs=[...new Set(people.map(p=>p.group))].filter(k=>v.groups[k]);
+      (gs.length?gs:[Object.keys(v.groups)[0]]).forEach((k,j)=>{ const hh=hist(v,k);
+        g.append('path').datum(hh).attr('fill','none').attr('stroke','#23263A').attr('stroke-width',2.2).attr('stroke-dasharray',j?'5 3':null).attr('d',ln);
+        if(gs.length>1){ const L0=hh.at(-1), up=hh.at(-1).value>=d3.max(gs,kk=>hist(v,kk).at(-1).value); g.append('text').attr('x',x(L0.year)-6).attr('y',y(L0.value)+(up?-7:14)).attr('text-anchor','end').attr('font-size',10).attr('font-weight',700).attr('fill','#23263A').text(k); } });
+    } else g.append('path').datum(H0).attr('fill','none').attr('stroke','#23263A').attr('stroke-width',2.6).attr('d',ln);
+    const rx=W-RW+6;
+    if(v.role==='x'){ const firsts=people.filter(p=>p.rank[0]===v.id).length, withR=people.filter(p=>p.rank.length).length;
+      const pc=withR?Math.round(firsts/withR*100):0, cy=y0+laneH/2;
+      g.append('circle').attr('cx',rx+30).attr('cy',cy).attr('r',22).attr('fill','#fff').attr('stroke','#FF8A3D').attr('stroke-width',2);
+      g.append('text').attr('x',rx+30).attr('y',cy+1).attr('text-anchor','middle').attr('font-size',13).attr('font-weight',900).attr('fill','#E8790C').text(pc+'%');
+      g.append('text').attr('x',rx+30).attr('y',cy+14).attr('text-anchor','middle').attr('font-size',9).attr('fill','#555B73').text('1位'); }
+  });
+  svg.append('g').attr('class','ax').attr('transform',`translate(0,${H-BOT})`).call(d3.axisBottom(x).tickValues(d3.range(Math.ceil(first/5)*5,lastY+1,5)).tickFormat(d3.format('d')).tickSizeOuter(0));
+  svg.append('line').attr('x1',nowX).attr('x2',nowX).attr('y1',TOP-2).attr('y2',H-BOT).attr('stroke','#23263A').attr('stroke-dasharray','4 4');
+  svg.append('text').attr('x',W-RW+36).attr('y',TOP+10).attr('text-anchor','middle').attr('font-size',10.5).attr('font-weight',700).attr('fill','#E8790C').text('効く（1位）');
+}
+function drawPane(people){
+  const pane=$('sm_pane'); document.querySelectorAll('#sumApp .tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.t===tab));
+  if(!CFG||!people.length){ pane.innerHTML='<p class="note">回答を読み込むと、ここに集計が表示されます。</p>'; return; }
+  const V=VARS(), X=V.filter(v=>v.role==='x');
+  if(tab==='types'){
+    pane.innerHTML=V.map(v=>{ const {rows,lines}=stats(v,people), cnt=d3.rollup(lines,a=>a.length,d=>shapeOf(d.l,v));
+      const wide=rows.slice(1).reduce((a,b)=>(b.p75-b.p25)>(a.p75-a.p25)?b:a, rows[1]||rows[0]), end=rows.at(-1);
+      return `<h3 style="color:var(--${v.role})">${esc(v.pathway)}　${esc(v.name||'')}</h3>
+        <div class="note">回答 ${lines.length}人／${end?end.year+'年の中央値 '+d3.format('.1f')(end.med)+'（真ん中50%：'+d3.format('.1f')(end.p25)+'〜'+d3.format('.1f')(end.p75)+'）':''}${wide?`／幅が最大：${wide.year}年`:''}</div>
+        <table>${TYPES.map(t=>`<tr><td>${t}</td><td style="width:45%"><div class="bar" style="width:${lines.length?(cnt.get(t)||0)/lines.length*100:0}%"></div></td><td class="num">${cnt.get(t)||0}人</td></tr>`).join('')}</table>`; }).join('')
+      + '<p class="note">型は「いま」からの変化を縦軸の幅の6%を目安に判定しています。</p>';
+  } else if(tab==='rank'){
+    const ids=X.map(v=>v.id), {W,m}=kendallW(people,ids), withR=people.filter(p=>p.rank.length);
+    pane.innerHTML=`<h3>順位のそろい具合</h3><div class="big">${W==null?'—':'W = '+d3.format('.2f')(W)}</div>
+      <div class="note">Kendall の一致係数（0＝ばらばら、1＝完全に一致）。3つとも順位をつけた ${m}人で計算</div>
+      <h3>要因ごとの結果</h3><table><tr><th>経路</th><th>1位の割合</th><th class="num">平均順位</th></tr>
+      ${X.map(v=>{ const f=withR.filter(p=>p.rank[0]===v.id).length, rs=withR.filter(p=>p.rank.includes(v.id)).map(p=>p.rank.indexOf(v.id)+1);
+        return `<tr><td><b>${esc(v.pathway)}</b><br><span class="note">${esc(v.name||'')}</span></td><td><div class="bar" style="width:${withR.length?f/withR.length*100:0}%"></div>${withR.length?Math.round(f/withR.length*100):0}%</td><td class="num">${rs.length?d3.format('.2f')(d3.mean(rs)):'—'}</td></tr>`; }).join('')}</table>
+      <p class="note">「対象」を切り替えると、立ち位置別・区分別の違いを比べられます。</p>`;
+  } else if(tab==='notes'){
+    pane.innerHTML=V.map(v=>{ const items=people.flatMap(p=>Object.entries(p.lanes[v.id]?.notes||{}).filter(([,t])=>t&&t.trim()).map(([yr,t])=>({yr:+yr,t,id:p.id,pos:p.pos}))).sort((a,b)=>a.yr-b.yr);
+      return `<h3 style="color:var(--${v.role})">${esc(v.pathway)}（${items.length}件）</h3>${items.map(c=>`<div class="cm ${c.yr>CFG.nowYear?'f':''}">${esc(c.t)}<div class="m">${c.yr}年・${esc(c.id)}・${esc(posLabel(c.pos))}</div></div>`).join('')||'<div class="note">なし</div>'}`; }).join('');
+  } else {
+    pane.innerHTML=`<table><tr><th>番号</th><th>区分</th><th>自分の値</th><th>立ち位置</th><th>順位</th></tr>${people.map(p=>`<tr><td>${esc(p.id)}</td><td>${esc(p.group)}</td><td class="num">${esc(p.value)}</td><td>${esc(posLabel(p.pos))}</td><td>${p.rank.map(id=>esc((V.find(v=>v.id===id)||{}).pathway||id)).join(' > ')}</td></tr>`).join('')}</table>`;
+  }
+}
+document.querySelectorAll('#sumApp .tabs button').forEach(b=>b.onclick=()=>{ tab=b.dataset.t; drawPane(filtered()); });
+
+/* ---------- 書き出し ---------- */
+function download(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},0)}
+$('sm_csv').onclick=()=>{ if(!P.length) return; const people=filtered(), f=$('sm_flt').selectedOptions[0]?.textContent||'全員', q=d3.format('.2f');
+  const rows=[['filter','variable','pathway','year','n','median','p10','p25','p75','p90','min','max']];
+  VARS().forEach(v=>stats(v,people).rows.forEach(r=>rows.push([f,v.id,v.pathway,r.year,r.n,q(r.med),q(r.p10),q(r.p25),q(r.p75),q(r.p90),q(r.min),q(r.max)])));
+  rows.push([]); rows.push(['filter','variable','pathway','type','count']);
+  VARS().forEach(v=>{ const {lines}=stats(v,people), c=d3.rollup(lines,a=>a.length,d=>shapeOf(d.l,v)); TYPES.forEach(t=>rows.push([f,v.id,v.pathway,t,c.get(t)||0])); });
+  const X=VARS().filter(v=>v.role==='x').map(v=>v.id), {W,m}=kendallW(people,X);
+  rows.push([]); rows.push(['filter','kendall_W','n_full_rank']); rows.push([f,W==null?'':q(W),m]);
+  const csv='\uFEFF'+rows.map(r=>r.map(c=>{const s=String(c??'');return /[",\n]/.test(s)?`"${s.replace(/"/g,'""')}"`:s}).join(',')).join('\n');
+  download(`tet_summary_${new Date().toISOString().slice(0,10)}.csv`,csv,'text/csv'); toast('集計CSVを保存しました'); };
+$('sm_svg').onclick=()=>{ const s=document.querySelector('#sm_chart svg'); if(!s) return; download(`tet_summary_${new Date().toISOString().slice(0,10)}.svg`, new XMLSerializer().serializeToString(s),'image/svg+xml'); toast('図（SVG）を保存しました'); };
+
+let tm; new ResizeObserver(()=>{clearTimeout(tm);tm=setTimeout(()=>drawChart(filtered()),80)}).observe(document.querySelector('#sumApp .card'));
+// この画面（記入）の回答を集計に加える
+$('sm_self').onclick=()=>{ if(!CFG) CFG=JSON.parse(JSON.stringify(window.TET.config()));
+  const me=window.TET.answer(); if(!me.id){ toast('記入画面で参加者番号を入力してください'); return; }
+  const i=P.findIndex(q=>q.id===me.id); if(i>=0) P[i]=me; else P.push(me); toast(`${me.id} の回答を加えました`); render(); };
+$('sm_back').onclick=()=>window.TET.mode('sheet');
+window.TET_SUM={render};
+render();
+
+})();
+</script>
+
+<script>
+/* ===== 日本語 ⇄ English 切り替え（表示の文字だけを置きかえる。描いた線・保存データは変わりません） ===== */
+(()=>{
+const DICT={"TET ワークシート（記入と集計）": "TET Worksheet (Entry & Summary)", "型の典型": "Typical pattern", "参加者番号": "Participant ID", "かんたん": "Simple", "くわしく": "Detailed", "将来": "Future", "間隔": "Interval", "5年": "5 yrs", "1年": "1 yr", "型": "Patterns", "集計": "Summary", "設定": "Settings", "保存": "Save", "読込": "Load", "やり直す": "Start over", "⠿ ドラッグで移動": "⠿ Drag to move", "▸ 数字で細かく調整する": "▸ Fine-tune with numbers", "▾ 数字で細かく調整する": "▾ Fine-tune with numbers", "やめる": "Cancel", "この形で描く": "Draw this shape", "点を消す": "Delete point", "閉じる": "Close", "データ": "Data", "あなたの将来": "Your future", "クリック：点を置く ／ 点をクリック：コメント ／ ドラッグ：上下に調整 ／ ▾で経路を閉じる（描かなくてOK）／ 右の ○：効く順": "Click: add a point / Click a point: comment / Drag: adjust up or down / ▾ closes a pathway (optional) / ○ on the right: rank by impact", "クリックで点を置く ／ 点をドラッグで上下に動かす ／ 点をクリックでコメント": "Click to add a point / Drag a point up or down / Click a point to comment", "TET 集計": "TET Summary", "0人": "0 people", "対象": "Group", "表示": "View", "中心と幅": "Median & range", "中心と幅＋個人の線": "Median & range + individual lines", "個人の線": "Individual lines", "← 記入": "← Entry", "回答を読込": "Load responses", "＋自分": "+ Me", "サンプル": "Sample", "図": "Figure", "クリア": "Clear", "回答ファイルをここにドラッグ": "Drag response files here", "tet_sheet.html で保存した JSON・CSV（複数まとめて可）": "JSON/CSV saved from tet_sheet.html (multiple files OK)", "ファイルを選ぶ": "Choose files", "サンプルで試す": "Try with sample data", "順位": "Rank", "コメント": "Comment", "参加者": "Participant", "設定（研究者用）": "Settings (for researchers)", "タイトル": "Title", "自分の値の名前": "Name of your own value", "目標値": "Target value", "単位": "Unit", "「いま」の年": "\"Now\" year", "システムの原型（初期値）": "System archetype (default)", "（使わない）": "(none)", "参加者が型を変えられないようにする": "Prevent participants from changing the pattern", "過去のデータは「年,値」を1行ずつ（Excelから貼り付け可）。男女などの区分があるときは「年,値,区分」。CSVファイルも読み込めます。": "Enter past data as \"year,value\", one per line (you can paste from Excel). If there are groups such as sex, use \"year,value,group\". CSV files can also be loaded.", "適用": "Apply", "設定を書き出す（JSON）": "Export settings (JSON)", "初期設定に戻す": "Reset to defaults", "野菜を食べる未来を描く": "Drawing a future of eating vegetables", "野菜 g/日": "Vegetables g/day", "社会・制度": "Society & policy", "食育白書": "Shokuiku White Paper", "人々の関心": "People's interest", "Google トレンド": "Google Trends", "Googleトレンド": "Google Trends", "買いやすさ": "Affordability", "可処分所得（家計調査・勤労者世帯）÷生鮮野菜CPI（消費者物価指数）": "Disposable income (Family Income and Expenditure Survey, worker households) ÷ fresh vegetable CPI", "350g以上の人": "People eating 350 g+", "（統計名を記入）": "(enter statistics name)", "女性": "Women", "男性": "Men", "あなたの": "Your ", "完了": "Done", "線を消して切り替えますか？": "Clear the lines and switch?", "目標": "Target", "（線）": " (line)", "✓ 目標以上": "✓ At or above target", "データに基づく過去": "Past, based on data", "過去": "Past", "あなたが描く将来": "The future you draw", "・開く ▸": " · open ▸", "開いて描く ▸": "Open and draw ▸", "開いて描く（任意）▸": "Open and draw (optional) ▸", "クリックで範囲・データを設定": "Click to set range and data", "閉じる（この経路は描かなくても大丈夫です）": "Close (you do not have to draw this pathway)", "形：": "Shape: ", "形から描く ▸": "Draw from a shape ▸", "クリックで縦軸の範囲を変更": "Click to change the vertical range", "上限": "Max", "下限": "Min", "（クリックでコメント）": "(click to comment)", "ここをクリックして点を置く": "Click here to add a point", "クリックして将来の点を置く": "Click to add future points", "効く順": "Impact rank", "y 行動": "y Behavior", "横ばい": "Flat", "いまと同じ": "Same as now", "いまの値がそのまま続く": "The current value continues", "ゼロへ": "To zero", "なくなる": "Disappears", "すぐに0（または下限）になる": "Drops to 0 (or the minimum) right away", "直線": "Linear", "一定のペース": "Steady pace", "一定のペースで増える／減る": "Increases or decreases at a steady pace", "だんだん速く": "Accelerating", "後で急に": "Sudden later", "はじめはゆっくり、後になるほど速く変わる": "Slow at first, then faster and faster", "はじめ速く": "Fast at first", "だんだん落ち着く": "Settles down", "はじめに大きく変わり、だんだん落ち着く": "Changes a lot at first, then gradually settles", "S字": "S-curve", "頭打ちになる": "Levels off", "ゆっくり→速く→ゆっくり。最後は到達値で頭打ち": "Slow → fast → slow, leveling off at the end value", "山型": "Peak", "上がって下がる": "Up, then down", "いったん山まで上がり、その後下がる": "Rises to a peak, then falls", "谷型": "Valley", "下がって戻る": "Down, then back", "いったん谷まで下がり、その後戻る": "Falls to a valley, then recovers", "波": "Wave", "上下をくり返す": "Goes up and down", "上がり下がりをくり返しながら到達値へ向かう": "Moves toward the end value while going up and down", "トップダウン": "Top-down", "ボトムアップ": "Bottom-up", "アフォーダビリティ": "Affordability", "強まる ↑": "Stronger ↑", "変わらない →": "No change →", "弱まる ↓": "Weaker ↓", "政策や情報だけが強まり、関心や買いやすさが追いつかないと、一時的に良くなっても戻りやすい": "If only policy and information get stronger while interest and affordability lag, any improvement is likely to slip back", "即効性のある働きかけに頼り、地域や家庭の取り組みが弱まると、根本的な解決から離れていく": "Relying on quick-acting measures while community and household efforts weaken moves us away from a fundamental solution", "周りの関心や習慣が弱まると、「無理だ」と目標や基準が少しずつ下がっていく": "When interest and habits around us weaken, people say \"it's impossible\" and goals and standards slowly slip", "関心や習慣が広がって伸びるが、やがて何かの制約で頭打ちになる": "Interest and habits spread and grow, but eventually level off because of some constraint", "関心は高まっても買いやすさが下がると、買える人だけが伸びて差が広がる": "If interest rises but affordability falls, only those who can afford it improve and the gap widens", "買いやすさが下がり、供給や環境への手当ても弱いと、伸びが止まる": "If affordability falls and support for supply and the environment is weak, growth stops", "その場しのぎの手当てが、あとで別の問題を生み、かえって困ってしまう。": "A quick fix creates a new problem later and makes things worse.", "宿題を友だちに写させてもらう → その日は助かるけど、分からないまま次へ進み、もっと分からなくなる。": "Copying a friend's homework → it helps that day, but you move on without understanding and fall further behind.", "空腹を安いお菓子でしのぐ → 栄養がかたよって体調をくずす。": "Getting through hunger with cheap snacks → an unbalanced diet makes you feel unwell.", "その場しのぎの効き目が切れたあとに何が起きるか、先に考えてみる。": "Think ahead about what happens when the quick fix wears off.", "すぐ効く方法に頼っているうちに、根本から直す力が弱っていく。": "While relying on a quick fix, the ability to solve the root problem weakens.", "眠いので毎日エナジードリンク → 生活リズムを直す力が落ちて、ますます頼るようになる。": "Drinking energy drinks every day because you're sleepy → your ability to fix your daily rhythm weakens, and you rely on them even more.", "野菜不足をサプリでおぎなう → 野菜を料理して食べる習慣が育たない。": "Making up for too few vegetables with supplements → the habit of cooking and eating vegetables never develops.", "すぐ効く方法と並行して、根本の解決にも少しずつ力を回す。": "Alongside the quick fix, gradually put effort into the fundamental solution too.", "目標になかなか届かないと、目標のほうを少しずつ下げてしまう。": "When we keep missing a goal, we gradually lower the goal itself.", "「毎日1時間勉強」のはずが、30分、15分…と目標がいつのまにか下がる。": "\"Study one hour a day\" quietly becomes 30 minutes, then 15…", "「野菜350g」は無理だからと、目標をだんだん低くしていく。": "Saying \"350 g of vegetables is impossible\" and gradually lowering the goal.", "目標を下げる前に、届かない理由を確かめる。": "Before lowering the goal, check why it is not being reached.", "うまく伸びていたのに、ある時からブレーキがかかって伸びなくなる。": "Things were growing well, but at some point a brake kicks in and growth stops.", "部員が増えて部活が強くなる → 練習場所や道具が足りなくなり、伸びが止まる。": "A club gains members and gets stronger → practice space and equipment run short, and growth stops.", "野菜を食べる人が増える → 値段の高さや料理の手間がブレーキになる。": "More people eat vegetables → high prices and cooking effort become a brake.", "もっとがんばるより、ブレーキ（制約）をゆるめるほうに目を向ける。": "Rather than pushing harder, focus on loosening the brake (the constraint).", "人気が出て求められているのに、準備（設備や人）が追いつかず、人が離れていく。": "Demand grows, but preparation (facilities, people) cannot keep up, and people drift away.", "人気のパン屋に行列 → 店を広げないまま待ち時間がのび、お客さんが減る。": "A popular bakery has a line → without expanding, wait times grow and customers drop off.", "野菜の人気が上がっても、産地や運ぶしくみへの投資が遅れ、値段が上がる。": "Even as vegetables become popular, investment in farms and distribution lags and prices rise.", "伸びているうちに、先回りして準備（能力）に投資する。": "While growing, invest ahead of time in capacity.", "相手に負けまいと張り合ううちに、お互いにどんどんエスカレートする。": "Competing so as not to lose, both sides keep escalating.", "SNSでの言い合いや、お店どうしの値下げ合戦。": "Arguments on social media, or price wars between shops.", "お店どうしが安さを競い、品質や生産者の暮らしが追いつめられる。": "Shops compete on low prices, squeezing quality and farmers' livelihoods.", "どちらかが一歩引くか、両方にとっての共通の目標を見つける。": "One side steps back, or both find a shared goal.", "みんなが自分の得だけを考えて使うと、みんなの資源がなくなり、全員が困る。": "When everyone uses a shared resource only for their own gain, it runs out and everyone suffers.", "学校の共有スペースを好き勝手に使って散らかる／海の魚のとりすぎ。": "A shared school space gets messy when everyone uses it as they like / overfishing in the sea.", "みんなが同じ土地や水を使いすぎて、畑がやせ、収穫が減る。": "Everyone overuses the same land and water, the soil wears out, and harvests fall.", "使う人みんなで、使い方のルールを決める。": "Everyone who uses it agrees on rules for using it.", "最初に少しうまくいった方に、チャンスや資源がどんどん集まり、差が広がる。": "Chances and resources keep flowing to whoever did a little better at first, and the gap widens.", "試合に出られる選手ばかり上達し、出られない選手との差が広がる。": "Only players who get game time improve, and the gap with those on the bench widens.", "野菜を買いやすい地域ほど食生活がよくなり、地域の差が広がる。": "Areas where vegetables are easier to buy eat better, and the gap between areas widens.", "チャンスや資源の配り方を見直して、かたよらないようにする。": "Rethink how chances and resources are shared so they are not lopsided.", "その場しのぎが、あとで裏目に": "Quick fixes backfire later", "宿題を写させてもらう → あとでもっと分からなくなる": "Copying homework → you understand even less later", "すぐ効く方法に、頼りきり": "Relying on the quick fix", "眠いからエナジードリンク → 生活リズムがくずれる": "Sleepy, so energy drinks → your daily rhythm breaks down", "目標が、だんだん下がっていく": "The goal slowly slips down", "毎日1時間の勉強 → 30分 → 15分…": "Study 1 hour a day → 30 min → 15 min…", "伸びたあと、頭打ち": "Grows, then hits a ceiling", "部員が増える → 練習場所が足りなくなる": "More club members → not enough practice space", "人気に、準備が追いつかない": "Demand outpaces preparation", "人気のパン屋 → 行列が長すぎて客が減る": "Popular bakery → lines too long, customers drop off", "張り合うほど、エスカレート": "The more they compete, the more it escalates", "SNSの言い合いが、どんどん激しくなる": "Social media arguments keep getting fiercer", "みんなで使いすぎて、なくなる": "Overused by all, until it's gone", "海の魚を、みんながとりすぎる": "Everyone overfishes the sea", "勝つほど有利になり、差が開く": "Winners keep winning; the gap widens", "試合に出る人ばかり、上手になる": "Only those who play get better", "応急処置の失敗": "Fixes that fail", "問題の転嫁": "Shifting the burden", "目標のなし崩し": "Drifting goals", "成功の限界": "Limits to success", "成長と投資不足": "Growth and underinvestment", "エスカレーション": "Escalation", "共有地の悲劇": "Tragedy of the commons", "成功には成功を": "Success to the successful", "テストの間違いの数": "Number of test mistakes", "一夜漬けの時間": "Hours of cramming", "すぐ忘れる量": "Amount quickly forgotten", "テストの間違いが多い": "Many mistakes on tests", "一夜漬けの時間を増やす": "Cram for more hours", "その場は間違いが減る": "Mistakes drop for now", "でもすぐ忘れて、次のテストでまた間違いが増える": "But you forget fast, and mistakes rise again on the next test", "昼間の眠さ": "Daytime sleepiness", "エナジードリンクの本数": "Energy drinks per day", "夜ねむれない時間": "Time unable to sleep at night", "早寝できた日数": "Days going to bed early", "昼間に眠い": "Sleepy during the day", "エナジードリンクの本数が増える": "Energy drinks increase", "その場は眠気が減る": "Sleepiness drops for now", "でも夜ねむれず、早寝の日が減って、また眠くなる": "But you can't sleep at night, early nights decrease, and you get sleepy again", "目標の野菜の量（g）": "Target vegetable amount (g)", "実際に食べた野菜の量（g）": "Vegetables actually eaten (g)", "目標との差（g）": "Gap from target (g)", "「無理だよ」という声": "\"It's impossible\" voices", "野菜を食べる工夫の数": "Number of tricks to eat vegetables", "目標350gに、実際は250gで届かない": "Target is 350 g, but actual intake is 250 g", "差が大きくて「無理だよ」という声が増える": "The gap is big, so more people say \"it's impossible\"", "目標を300gに下げる": "The target is lowered to 300 g", "差は小さくなるが、工夫も減って、食べる量も少しずつ減る": "The gap shrinks, but effort drops and intake slowly falls", "部員を誘う回数": "Times inviting new members", "部員の数": "Number of members", "体育館の混みぐあい": "How crowded the gym is", "体育館のせまさ": "Gym space limit", "部員を誘う": "Invite new members", "部員が増えて、もっと誘える": "More members can invite even more", "でも体育館が混んで、練習しにくくなる": "But the gym gets crowded and practice gets harder", "やめる人も出て、部員が増えなくなる": "Some quit, and membership stops growing", "お店の評判": "The shop's reputation", "お客さんの数": "Number of customers", "待ち時間（分）": "Wait time (min)", "席を増やす計画": "Plan to add seats", "席の数": "Number of seats", "評判が良くて、お客さんが増える": "Good reputation brings more customers", "口コミで、もっと増える": "Word of mouth brings even more", "待ち時間が長くなり、お客さんが減り始める": "Waits get longer and customers start to drop off", "席を増やす計画が遅れて、間に合わない": "The plan to add seats is late and cannot catch up", "A店の値下げ": "Price cuts at Shop A", "A店がB店より安い分": "How much cheaper Shop A is than B", "B店の値下げ": "Price cuts at Shop B", "A店の売上の落ちこみ": "Drop in Shop A's sales", "B店の売上の落ちこみ": "Drop in Shop B's sales", "A店が値下げする": "Shop A cuts prices", "B店のお客さんが減る": "Shop B loses customers", "B店がもっと値下げする": "Shop B cuts prices even more", "今度はA店のお客さんが減り、A店がさらに値下げする": "Now Shop A loses customers and cuts prices further", "Aさんがとる魚の量": "A's catch", "Bさんがとる魚の量": "B's catch", "とった魚の合計": "Total catch", "1回の漁でとれる量": "Catch per fishing trip", "海の魚の数": "Fish in the sea", "みんなが魚をたくさんとる": "Everyone catches a lot of fish", "海の魚が減っていく": "Fish in the sea decline", "1回の漁でとれる量が減る": "Catch per trip falls", "もっととろうとして、さらに減る": "People try to catch more, so fish decline further", "Aさんの得点": "A's points", "Aさんの出場回数": "A's games played", "監督がAさんを選ぶ割合": "How often the coach picks A", "Bさんの得点": "B's points", "Bさんの出場回数": "B's games played", "Aさんが少し多く点を取る": "A scores a little more", "監督がAさんを選ぶことが増える": "The coach picks A more often", "Aさんは出場が増えてもっと点を取り、Bさんは出場が減る": "A plays more and scores more, while B plays less", "2人の差がどんどん広がる": "The gap between the two keeps widening", "問題の症状が、結局なくならない": "The problem symptom never goes away", "テストの間違いが、結局減らない": "Test mistakes never really decrease", "問題の症状が、根本から解決しない": "The problem symptom is never solved at the root", "昼間の眠さが、いつまでもなくならない": "Daytime sleepiness never goes away", "実際のレベルが、少しずつ下がっていく": "The actual level slowly falls", "食べる野菜の量が、少しずつ減っていく": "Vegetable intake slowly falls", "成果が、あるところで伸びなくなる": "Results stop growing at some point", "部員の数が、それ以上増えなくなる": "Membership stops growing", "需要が、途中から減ってしまう": "Demand drops off partway", "お客さんの数が、途中から減ってしまう": "Customers drop off partway", "おたがいの行動が、どんどん激しくなる": "Both sides' actions keep intensifying", "値下げ合戦が止まらない": "The price war never stops", "みんなの資源が減り、1回あたりの得が減る": "The shared resource shrinks, and each gain gets smaller", "海の魚が減り、1回の漁でとれる量が減る": "Fish decline, and each trip catches less", "負けた側の努力や成果が、どんどん小さくなる": "The losing side's efforts and results keep shrinking", "Bさんが活躍できず、差が広がる": "B can't shine, and the gap widens", "時間 →": "time →", "AとBが張り合う": "A and B compete", "勝つ側": "winner", "負ける側": "loser", "型の図かん": "Pattern guide", "世の中によくある": "We collected common ", "「くり返しのパターン」": "\"repeating patterns\"", "を集めました。知っておくと「次に何が起きそう？」が考えやすくなります。": " found in the world. Knowing them makes it easier to ask \"what will happen next?\"", "くわしく見る ▾": "See details ▾", "たとえば": "Example", "しくみ": "How it works", "⚠ 問題：": "⚠ Problem: ", "⚠ 問題": "⚠ Problem", "↺ はじめにもどって、くり返す": "↺ Back to the start, and it repeats", "グラフは": "The graph tends to be ", "になりやすい": "", "もっとくわしく": "More details", "研究者の方へ：設定ファイル（JSON）の": "For researchers: you can add patterns by writing them in the same format in ", "に同じ形で書くと、型を追加できます。": " of the settings file (JSON).", "ドラッグして動かせます": "You can drag to move it", "これからどう動きそう？": "how will it move from here?", "この変数は": "This variable is", "増えると良い": "better when higher", "減ると良い": "better when lower", "上の3つの札は、トップダウン・ボトムアップ・アフォーダビリティの見通しです（描いた線から自動で入ります）。": "The three tags above show the outlook for top-down, bottom-up, and affordability (filled in automatically from the lines you draw).", "この形で描いてみる ▸": "Try drawing this shape ▸", "型の変数に名前を書く・変数を足す": "Name the pattern variables / add variables", "が影響する →": " affects →", "← から影響を受ける": "← affected by", "足す": "Add", "型どおりでなくてOK。違うと思ったら、理由をコメントに書こう。": "It doesn't have to match the pattern. If you think it's different, write why in a comment.", "型で考える": "Think with patterns", "：形を選んで描く": ": choose a shape to draw", "形を選ぶと、線が下書きされます。後から点をドラッグして直せます。": "Choose a shape to sketch a line. You can drag the points to adjust it later.", "いちばん速く変わる年": "Year of fastest change", "波の大きさ": "Wave size", "波の回数": "Number of waves", "上限（これ以上は上がらない）": "Upper limit (cannot go higher)", "下限（これ以下にはならない）": "Lower limit (cannot go lower)", "下書きしました。点をドラッグして直せます": "Sketched. Drag the points to adjust", "なぜこうなる？": "Why does this happen?", "このとき何があった？": "What happened at this time?", "番号を入力してください": "Please enter an ID", "保存しました": "Saved", "CSVを保存しました": "CSV saved", "形式が違います": "Wrong format", "読み込みました": "Loaded", "読み込めません：": "Cannot load: ", "描いた線を消す": "Clear drawn lines", "このシートで描いた線・コメント・型の選択を消して、白紙から描き直します。表示や設定はそのままです。": "Clears the lines, comments, and pattern choice on this sheet so you can start fresh. Display and settings stay the same.", "すべて最初の状態に戻す": "Reset everything", "描いた線に加えて、「かんたん／くわしく」の表示や、研究者が設定画面で変えた内容も、このファイルを最初に開いたときの状態に戻します。": "In addition to the drawn lines, this resets the Simple/Detailed view and any changes researchers made in Settings to the state when this file was first opened.", "※保存（JSON）していない線は、元に戻せません。": "* Lines that have not been saved (JSON) cannot be recovered.", "描いた線を消しました": "Drawn lines cleared", "「年,値」の行が見つかりません": "No \"year,value\" lines found", "全体": "All", "経路の名前": "Pathway name", "変数の名前": "Variable name", "出典": "Source", "縦軸の下限": "Vertical axis min", "縦軸の上限": "Vertical axis max", "過去のデータ": "Past data", "縦軸をデータに合わせる": "Fit axis to data", "過去のデータを入れました。確かめて「適用」を押してください": "Past data added. Check it and press \"Apply\"", "基準の年（": "Base year (", "）のデータがありません": ") has no data", "Googleトレンドから作る（ボトムアップ：人々の関心）": "Build from Google Trends (bottom-up: people's interest)", "Googleトレンドは外部から自動で数値を取り出す仕組みが公開されていないため、2ステップで入れます。": "Google Trends has no public way to pull numbers automatically, so this takes two steps.", "キーワード": "Keyword", "地域": "Region", "日本": "Japan", "全世界": "Worldwide", "① 下のボタンでGoogleトレンドを開き、グラフの右上の「↓（CSV）」を押して": "① Open Google Trends with the button below, press \"↓ (CSV)\" at the top right of the chart, and", "を保存します。": " save it.", "Googleトレンドを開く": "Open Google Trends", "② 保存したCSVを選ぶと、月ごとの値を年の平均にして入れます。": "② Choose the saved CSV, and monthly values are averaged by year.", "基準の年": "Base year", "基準の年の値": "Base year value", "途中の年": "Years in between", "使わない": "Do not use", "使う": "Use", "この値を入れる": "Use these values", "平均（元の値）": "Average (original)", "入れる値": "Value to enter", "件数": "Count", "Googleトレンド「": "Google Trends \"", "CSVの中に「年-月,値」の行が見つかりません": "No \"year-month,value\" lines found in the CSV", "PDFを読む部品を読み込めませんでした（インターネットにつながっているか確かめてください）": "Could not load the PDF reader (check your internet connection)", "元": "Original", "PDFから語の出現率を作る（トップダウン：社会・制度）": "Build word frequency from PDFs (top-down: society & policy)", "PDFから語を数える": "Count words in PDFs", "年ごとの文書（白書・計画・報告書など）のPDFを選び、数えたい語を入れると、1万字あたりの出現回数を年ごとに計算します。文字はこのパソコンの中だけで読み取り、外に送りません。": "Choose PDFs of yearly documents (white papers, plans, reports), enter words to count, and the number of occurrences per 10,000 characters is calculated by year. Text is read only on this computer and never sent anywhere.", "数える語（読点「、」かカンマで区切る。合計して数えます）": "Words to count (separate with \"、\" or commas; counted together)", "PDFを選ぶ（複数可）": "Choose PDFs (multiple OK)", "表し方": "Show as", "基準の年＝100の指数": "Index (base year = 100)", "1万字あたりの回数": "Count per 10,000 characters", "数える": "Count", "ファイル": "File", "文字数": "Characters", "回数": "Count", "1万字あたり": "Per 10,000 chars", "回/1万字": "per 10,000 chars", "PDFの語「": "PDF words \"", "」の出現率": "\" frequency", "数える語を入れてください": "Please enter words to count", "PDFを選んでください": "Please choose PDFs", "すべてのファイルに年を入れてください": "Please enter a year for every file", "読み取り中…": "Reading…", "ページ）": " pages)", "Excelを読む部品を読み込めませんでした（インターネット接続が必要です）": "Could not load the Excel reader (an internet connection is required)", "語の数え表から作る（トップダウン：政策の訴求度）": "Build from a word-count table (top-down: policy emphasis)", "語の数え表（Excel）から作る": "Build from a word-count table (Excel)", "白書などの文書を年度ごとに数えた表（1行目に年度、1列目に指標名）を読み込み、「数えた語の数 ÷ 全体の語の数」を基準の年＝100の指数にします。食育白書の「野菜・栄養・健康」でも、エネルギー白書の「再エネ・省エネ」でも、同じ形の表なら使えます。": "Load a table of word counts by fiscal year (years in row 1, indicator names in column 1), and \"counted words ÷ total words\" becomes an index with base year = 100. Any table in the same format works, e.g., \"vegetables, nutrition, health\" in the Shokuiku White Paper or \"renewables, energy saving\" in the Energy White Paper.", "数える語（分子）": "Words to count (numerator)", "複数えらぶと足し合わせます": "Selecting several adds them together", "割る数（分母）": "Divide by (denominator)", "出典として入れる名前": "Name to use as the source", "年度（平成27年度など）は西暦（2015など）に直して使います。": "Japanese fiscal years (e.g., Heisei 27) are converted to Western years (e.g., 2015).", "指数": "Index", "（割らない）": "(do not divide)", "行を読み込みました": " rows loaded", "比で作る（アフォーダビリティ：買いやすさ）": "Build from a ratio (affordability)", "比で作る（所得÷価格）": "Build from a ratio (income ÷ price)", "「所得」を「野菜の価格（消費者物価指数）」で割り、基準の年を100にした指数を作ります。数値は e-Stat などからCSVで落として、それぞれ読み込むか貼り付けてください。月ごとの値は年の平均にします。": "Divides \"income\" by \"vegetable prices (CPI)\" to make an index with the base year = 100. Download the numbers as CSV from e-Stat or similar, then load or paste each. Monthly values are averaged by year.", "データの例：分子＝家計調査の可処分所得や実収入、分母＝消費者物価指数の「生鮮野菜」。": "Example: numerator = disposable or actual income from the Family Income and Expenditure Survey; denominator = \"fresh vegetables\" in the CPI.", "e-Statで家計調査を開く": "Open the Family Income and Expenditure Survey on e-Stat", "e-Statで消費者物価指数を開く": "Open the CPI on e-Stat", "よく使う組み合わせ（2019〜2024年の値を入れます）": "Common combinations (enters 2019–2024 values)", "Price Sensitivity（可処分所得 ÷ 生鮮野菜CPI）": "Price Sensitivity (disposable income ÷ fresh vegetable CPI)", "可処分所得 ÷ キャベツの値段": "Disposable income ÷ cabbage price", "家計調査のExcelから所得を読む": "Read income from the Family Income and Expenditure Survey Excel file", "e-Stat「家計調査 → 長期時系列表 → 表2 用途分類 → 二人以上の世帯のうち勤労者世帯」のExcel（kin-ts.xlsx）を選ぶと、年ごとの": "Choose the e-Stat Excel file \"Family Income and Expenditure Survey → long-term time series → Table 2 by purpose → worker households (2+ persons)\" (kin-ts.xlsx) to enter yearly ", "可処分所得": "disposable income", "（1か月あたり・年平均）が分子に自動で入ります。": " (per month, annual average) as the numerator automatically.", "消費者物価指数のCSVから価格を読む": "Read prices from the CPI CSV", "e-Stat「消費者物価指数 → 2020年基準 → 長期時系列データ → 品目別価格指数 → 全国 → 年平均 → 中分類指数（1970年～最新年）」のCSV（zni2020s.csv）を選ぶと、": "Choose the e-Stat CSV \"CPI → 2020 base → long-term time series → price indices by item → national → annual average → subgroup indices (1970–latest)\" (zni2020s.csv), and the annual average of ", "生鮮野菜": "fresh vegetables", "の年平均（2020年＝100）が分母に入ります。": " (2020 = 100) is entered as the denominator.", "分子（所得など）：年,値": "Numerator (e.g., income): year,value", "分母（価格など）：年,値": "Denominator (e.g., price): year,value", "計算する": "Calculate", "読み込み中…": "Loading…", "「可処分所得」の行と年の並びが見つかりませんでした。家計調査の勤労者世帯のファイルか確かめてください": "Could not find the \"disposable income\" row and years. Check that this is the worker-household file of the Family Income and Expenditure Survey", "可処分所得（家計調査・勤労者世帯）÷価格": "Disposable income (FIES, worker households) ÷ price", "（再掲）": "(repeated)", "可処分所得（家計調査・勤労者世帯）÷": "Disposable income (FIES, worker households) ÷ ", "CPI（消費者物価指数）": "CPI", "Price Sensitivity指数（可処分所得÷生鮮野菜CPI）": "Price Sensitivity index (disposable income ÷ fresh vegetable CPI)", "可処分所得÷キャベツの値段（円/kg）": "Disposable income ÷ cabbage price (yen/kg)", "分子と分母で、同じ年のデータがありません": "Numerator and denominator have no matching years", "分子": "Numerator", "分母": "Denominator", "設定を反映しました": "Settings applied", "設定を初期状態に戻しますか？（描いた線は残ります）": "Reset settings to defaults? (Drawn lines will be kept)", "設定ファイルを読めません": "Cannot read the settings file", "回答ファイルではありません": "Not a response file", "人を読み込みました": " people loaded", "読み込んだ回答をすべて消しますか？": "Delete all loaded responses?", "野菜を食べる未来を描く（サンプル）": "Drawing a future of eating vegetables (sample)", "政策は出尽くし": "Policies have run their course", "健康経営が広がる": "Health-focused management spreads", "予算が減る": "Budgets shrink", "SNSのレシピで伸びる": "Grows with social media recipes", "ブームが去る": "The boom fades", "料理する人が減る": "Fewer people cook", "物価高が続く": "High prices continue", "所得が戻る": "Incomes recover", "輸入野菜が増える": "More imported vegetables", "自炊が増える": "More home cooking", "高齢化で増える": "Increases with aging", "若者が食べない": "Young people do not eat them", "サンプル（17人）を表示しています": "Showing sample (17 people)", "以上": "At/above", "未満": "Below", "不明": "Unknown", "全員": "Everyone", "上昇": "Rising", "下降": "Falling", "下がって上がる": "Down, then up", "人": " people", "集計｜": "Summary | ", "参加者が描いた将来（": "Futures drawn by participants (", "人）": " people)", "将来（": "Future (", "幅が最大": "Widest range", "1位": "Rank 1", "効く（1位）": "Most effective (rank 1)", "回答を読み込むと、ここに集計が表示されます。": "Load responses to see the summary here.", "回答": "Responses", "人／": " people / ", "型は「いま」からの変化を縦軸の幅の6%を目安に判定しています。": "Shapes are classified using a change from \"now\" of about 6% of the vertical range as the threshold.", "順位のそろい具合": "Rank agreement", "Kendall の一致係数（0＝ばらばら、1＝完全に一致）。3つとも順位をつけた": "Kendall's coefficient of concordance (0 = no agreement, 1 = full agreement). Calculated with ", "人で計算": " people who ranked all three", "要因ごとの結果": "Results by factor", "経路": "Pathway", "1位の割合": "Share ranked 1st", "平均順位": "Average rank", "「対象」を切り替えると、立ち位置別・区分別の違いを比べられます。": "Switch \"Group\" to compare by position or by category.", "件）": " items)", "年・": " · ", "なし": "None", "番号": "ID", "区分": "Category", "自分の値": "Your value", "立ち位置": "Position", "集計CSVを保存しました": "Summary CSV saved", "図（SVG）を保存しました": "Figure (SVG) saved", "記入画面で参加者番号を入力してください": "Enter a participant ID on the entry screen", "の回答を加えました": "'s responses added", "tet_tool.html で保存した回答（JSON・CSV、複数可）": "Responses saved from tet_tool.html (JSON/CSV, multiple OK)", "この端末の記入内容を加える": "Add entries from this device", "なぜ？ 何が起きる？": "Why? What will happen?", "システムの原型": "System archetype", "システムの原型（型）と、変数の役割": "System archetype (pattern) and variable roles", "名前の代わりの番号。保存ファイル名と集計で使います": "A number instead of your name. Used in the saved file name and the summary", "比べる行動データ": "Behavior data to compare", "目標は350g": "Target is 350 g", "食事記録ツールなどで測った自分の値。目標と比べて「以上／未満」を記録し、集計で立ち位置別に比べます": "Your own value measured with a food-record tool, etc. Recorded as \"at/above\" or \"below\" the target and compared by position in the summary", "CSVを読み込む": "Load CSV", "動きをえらぶ": "Choose a movement", "型を見て描く": "Draw from patterns", "多い": "More", "少ない": "Less", "食育白書の語の数え表（野菜・栄養・健康の合計÷全単語数、令和元年度＝100）": "Shokuiku White Paper word counts (vegetables + nutrition + health ÷ all words, FY2019 = 100)", "国民健康・栄養調査": "National Health and Nutrition Survey", "（開いている変数）": " (open variables)", "型：": "Pattern: ", "あなた：": "You: ", "以上の側 ✓": "At/above side ✓", "未満の側 △": "Below side △", "✓ 完了": "✓ Done", "点": " pts", "・コメント": " · comment", "：形から描く": ": draw from a shape", "応急処置が長期的に意図せざる結果をうみ、問題がかえって悪化する。": "A quick fix produces unintended long-term consequences, and the problem gets worse.", "問題の症状": "Problem symptom", "いったん良くなり、また悪くなる": "Improves, then worsens again", "応急処置": "Quick fix", "だんだん増える": "Gradually increases", "意図しない結果": "Unintended consequence", "遅れて増える": "Increases after a delay", "即効性のある対処療法を繰り返し、根本的な解決から離れていく。": "Repeating quick symptomatic fixes moves us away from a fundamental solution.", "対処療法": "Symptomatic fix", "副作用": "Side effect", "根本的解決策": "Fundamental solution", "だんだん減る": "Gradually decreases", "実際のレベルに合わせて目標が少しずつ下がっていく。": "The goal gradually drops to match the actual level.", "目標のレベル": "Goal level", "少しずつ下がる": "Slowly falls", "実際のレベル": "Actual level", "下がっていく": "Keeps falling", "ギャップ": "Gap", "あまり変わらない": "Stays about the same", "目標を引き下げる圧力": "Pressure to lower the goal", "強まってから弱まる": "Strengthens, then weakens", "是正措置": "Corrective action", "いったん増えて減る": "Rises, then falls", "成長が続くと、それを抑える動きが強まり、頭打ちになる。": "As growth continues, forces that hold it back strengthen, and it levels off.", "努力": "Effort", "増えて頭打ち": "Rises, then levels off", "成果": "Results", "S字に増えて頭打ち": "S-shaped rise, then levels off", "成功を妨げる動き": "Forces blocking success", "遅れて強まる": "Strengthens after a delay", "制約": "Constraint", "成長に見合う能力への投資が足りず、成長が止まる。": "Investment in capacity does not keep up with growth, so growth stops.", "成長への努力": "Growth effort", "需要": "Demand", "増えてから減る": "Rises, then falls", "制約要因の影響": "Effect of constraint", "だんだん強まる": "Gradually strengthens", "投資の必要性の認識": "Perceived need to invest", "遅れて高まる": "Rises after a delay", "能力への投資": "Investment in capacity", "少しだけ・遅れて": "A little, and late", "強く押せば押すほど、相手も強く押し返す。": "The harder one side pushes, the harder the other pushes back.", "Aの行動": "A's action", "だんだん速く増える": "Increases faster and faster", "Aの相対的な優位": "A's relative advantage", "行ったり来たり": "Goes back and forth", "Bの行動": "B's action", "Aにとっての脅威": "Threat to A", "増える": "Increases", "Bにとっての脅威": "Threat to B", "それぞれの当事者の最適化が、全体の破壊につながる。": "Each party optimizing for itself leads to the destruction of the whole.", "増えてから急に減る": "Rises, then suddenly falls", "行動の総量": "Total activity", "行動あたりの利益": "Gain per activity", "遅れて減る": "Falls after a delay", "資源の限界": "Resource limit", "変わらない": "No change", "勝者がすべてを手に入れ、差が広がっていく。": "The winner takes all, and the gap widens.", "Aの努力・成果": "A's effort & results", "Aへの資源": "Resources to A", "BではなくAへの配分": "Allocation to A over B", "増えて偏る": "Increases and tilts", "Bの努力・成果": "B's effort & results", "Bへの資源": "Resources to B", "減る": "Decreases", "政策や情報の働きかけが強いほど、応急処置（キャンペーンなど）が強くなる": "The stronger the push from policy and information, the stronger the quick fix (e.g., campaigns)", "人々の関心が低いと、効果が定着せず症状が戻りやすい": "When people's interest is low, effects don't stick and the symptom tends to return", "買いにくいほど、費用負担などの意図しない結果が大きくなる": "The harder it is to afford, the larger the unintended consequences such as cost burdens", "即効性のある対処（啓発など）に頼るほど、この矢印が太くなる": "The more we rely on quick fixes (e.g., awareness campaigns), the thicker this arrow gets", "地域や家庭の取り組みが弱いと、根本的な解決が育たない": "When community and household efforts are weak, the fundamental solution cannot grow", "買いにくさが副作用（あきらめ・依存）を強める": "Poor affordability strengthens side effects (giving up, dependence)", "政策の目標（350gなど）を掲げ続けるかどうか": "Whether policy keeps its target (e.g., 350 g)", "周りの習慣が弱いと、「無理だ」と目標を下げる圧力が強まる": "When habits around us are weak, \"it's impossible\" pressure to lower the goal grows", "買いやすいほど、目標に近づける行動（是正措置）を取りやすい": "The more affordable, the easier it is to take action toward the goal (corrective action)", "政策が努力を後押しする": "Policy supports the effort", "関心や習慣の広がりが、伸びを生む強化ループを回す": "Spreading interest and habits drive the reinforcing loop of growth", "買いにくさが、伸びを止める制約になる": "Poor affordability becomes the constraint that stops growth", "供給や環境への投資を政策が支えるかどうか": "Whether policy supports investment in supply and the environment", "関心の高まりが需要を伸ばす": "Rising interest boosts demand", "価格や手間の制約が、伸びを抑える": "Price and effort constraints hold back growth", "一方の働きかけが強まるほど": "The stronger one side's push", "もう一方の反応が強まるほど": "The stronger the other side's response", "負担感が脅威として受け止められる": "The sense of burden is felt as a threat", "資源のルールづくり（政策）": "Rules for the resource (policy)", "それぞれが自分の得を優先するほど": "The more each puts their own gain first", "一人あたりの得（買いやすさ）が下がる": "Gain per person (affordability) falls", "資源の配り方を政策が変えられるか": "Whether policy can change how resources are shared", "関心の高い人・地域がさらに伸びる": "People and areas with high interest grow even more", "買いにくい人・地域ほど資源が減る": "People and areas with poor affordability get fewer resources", "良くなったり悪くなったりをくり返す": "Keeps getting better and worse", "少しずつ悪くなっていく": "Slowly gets worse", "良くなるが、やがて頭打ちになる": "Improves, but eventually levels off", "良くなってから、また悪くなる": "Improves, then worsens again", "張り合ううちに、おたがいに悪くなる": "Competing makes both worse", "しばらく良くなったあと、急に悪くなる": "Improves for a while, then suddenly worsens", "一方に偏っていく": "Tilts to one side", "どんな型？": "What pattern?", "食では": "In food", "ヒント": "Hint", "あなたの線に近い": "Close to your line", "具体的には？": "In concrete terms?", "消す": "Delete", "野菜 レシピ": "vegetable recipes", "野菜": "vegetables", "所得÷価格（e-Statなど）": "Income ÷ price (e-Stat, etc.)", "所得÷価格": "Income ÷ price", "語の数え表": "Word-count table", "（開いている変数）　順位": " (open variables)  Rank", "栄養": "nutrition", "あなたの野菜 g/日": "Your vegetables (g/day)", "健康": "health", "の合…": " total…", "年の中央値": " median", "の中央値": " median", "真ん中50%": "middle 50%"};
+const RULES=[["^完了 (\\d+)/(\\d+)（開いている変数）\\s*順位 (\\d+)/(\\d+)$", "Done \\1/\\2 (open variables)  Rank \\3/\\4"], ["^△ あと\\s*(.+?)\\s*で目標$", "△ \\1 to target"], ["^✓ 目標以上\\s*\\+?\\s*(.*)$", "✓ Above target +\\1"], ["^目標は\\s*(.+)$", "Target: \\1"], ["^あなたは\\s*(.+)$", "You: \\1"], ["^✓ 「(.+)」を描けました！$", "✓ \"\\1\" done!"], ["^「(.+)」は、$", "\"\\1\" —"], ["^「(.+)」は$", "\"\\1\" is"], ["^カードの線は「(.+)」の値の動きです（上＝多い／下＝少ない）。「減ると良い」を選ぶと、線の形が上下に反転します。$", "The card lines show how \"\\1\" moves (up = more, down = less). Choosing \"better when lower\" flips the shape upside down."], ["^(.+?)\\s*を開く$", "Open \\1"], ["^(.+?)\\s*を閉じる$", "Close \\1"], ["^(.+?)\\s*の順位$", "\\1 rank"], ["^(\\d{4})年の値（到達値）$", "Value in \\1 (end value)"], ["^(\\d{4})年の値$", "Value in \\1"], ["^（いま\\s*(\\d{4})）$", "(now \\1)"], ["^「(.+)」から(\\d+)年分（(.+?)年）を入れました$", "Added \\2 years (\\3) from \"\\1\""], ["^サンプル（(\\d+)人）を表示しています$", "Showing sample (\\1 people)"], ["^(\\d+)人を読み込みました(.*)$", "\\1 people loaded\\2"], ["^(.+) の回答を加えました$", "Added \\1's responses"], ["^(\\d+)人$", "\\1 people"], ["点 (\\d+)/(\\d+)", "Points \\1/\\2"], ["(\\d{4})年の中央値", "\\1 median"], ["^(\\d{4})年$", "\\1"], ["^(\\d+)年$", "\\1 yrs"], ["(\\d{4})年", "\\1"], ["(\\d+)人", "\\1 people"]].map(([r,t])=>[new RegExp(r),t]);
+const J=/[\u3040-\u30ff\u3400-\u9fff]/;
+const PHR=Object.keys(DICT).filter(k=>k.length>=2&&J.test(k)&&!/^[0-9]+[年人位]$/.test(k)).sort((a,b)=>b.length-a.length);
+const qs=new URLSearchParams(location.search);
+let LANG=qs.get('lang')||(()=>{try{return localStorage.getItem('tet-lang')}catch(e){return null}})()||'ja';
+if(LANG!=='en')LANG='ja';
+const PUN=[[/（/g,' ('],[/）/g,')'],[/：/g,': '],[/／/g,' / '],[/、/g,', '],[/。/g,'. '],[/「/g,'"'],[/」/g,'"'],[/・/g,' · '],[/〜|～/g,'–'],[/＋/g,'+'],[/　/g,' '],[/([A-Za-z0-9)"])の(?=[A-Za-z0-9("])/g,'$1 '],[/ {2,}/g,' '],[/\( /g,'('],[/ \)/g,')']];
+const punct=s=>{PUN.forEach(([r,t])=>s=s.replace(r,t));return s.trim();};
+const phrase=s=>{if(DICT[s]!=null)return DICT[s];for(const k of PHR){if(s.indexOf(k)>=0)s=s.split(k).join(DICT[k]);if(!J.test(s))break;}return s;};
+function tr(t){
+  if(t==null)return t;t=String(t);if(!J.test(t))return t;
+  const lead=t.match(/^\s*/)[0],trail=t.match(/\s*$/)[0];let s=t.trim();
+  if(DICT[s]!=null)return lead+DICT[s]+trail;
+  for(const [re,tp] of RULES){const m=s.match(re);if(m){
+    if(re.source.startsWith('^')){s=tp.replace(/\\(\d)/g,(_,i)=>phrase(m[+i]||''));break;}
+  }}
+  if(J.test(s))s=phrase(s);
+  for(const [re,tp] of RULES){if(!re.source.startsWith('^'))s=s.replace(new RegExp(re.source,'g'),tp.replace(/\\(\d)/g,'$$$1'));}
+  if(s!==t.trim())s=punct(s);
+  return lead+s+trail;
+}
+window.TET_tr=tr;
+const ORIG=new WeakMap(),MINE=new WeakMap(),AORIG=new WeakMap();
+const SKIP='script,style,textarea,[contenteditable="true"],.no-i18n';
+function doText(n){
+  const p=n.parentElement;if(!p||p.closest(SKIP))return;
+  const cur=n.data;
+  if(MINE.has(n)&&MINE.get(n)===cur){if(LANG==='ja'){n.data=ORIG.get(n);MINE.delete(n);}return;}
+  if(!J.test(cur)){MINE.delete(n);return;}
+  ORIG.set(n,cur);MINE.delete(n);
+  if(LANG==='en'){const t=tr(cur);if(t!==cur){MINE.set(n,t);n.data=t;}}
+}
+const ATTRS=['title','placeholder','aria-label'];
+function doAttr(el,a){
+  if(el.closest&&el.closest('.no-i18n'))return;
+  const v=el.getAttribute(a);if(v==null)return;let m=AORIG.get(el);if(!m){m={};AORIG.set(el,m);}
+  const r=m[a];
+  if(r&&r.mine===v){if(LANG==='ja'){el.setAttribute(a,r.orig);delete m[a];}return;}
+  if(!J.test(v)){delete m[a];return;}
+  if(LANG==='en'){const t=tr(v);if(t!==v){m[a]={orig:v,mine:t};el.setAttribute(a,t);}}
+}
+function walk(root){
+  if(root.nodeType===3){doText(root);return;}
+  if(root.nodeType!==1)return;
+  if(root.closest&&root.closest(SKIP))return;
+  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let n;const list=[];while(n=w.nextNode())list.push(n);list.forEach(doText);
+  [root,...root.querySelectorAll('[title],[placeholder],[aria-label]')].forEach(el=>ATTRS.forEach(a=>el.hasAttribute&&el.hasAttribute(a)&&doAttr(el,a)));
+}
+const mo=new MutationObserver(ms=>{for(const m of ms){
+  if(m.type==='characterData')doText(m.target);
+  else if(m.type==='attributes')doAttr(m.target,m.attributeName);
+  else m.addedNodes.forEach(walk);
+}});
+// SVGの2行分け：英語のときは、単語の切れ目で分ける
+if(typeof window.jpSplit==='function'){const jp=window.jpSplit;window.jpSplit=function(t){
+  if(LANG!=='en')return jp(t);const e=tr(t);if(J.test(e))return jp(e);if(e.length<=14)return [e];
+  const w=e.split(' ');if(w.length<2)return [e];let best=1,bs=1e9,acc=0;
+  for(let i=1;i<w.length;i++){acc=w.slice(0,i).join(' ').length;const sc=Math.abs(acc-e.length/2);if(sc<bs){bs=sc;best=i;}}
+  return [w.slice(0,best).join(' '),w.slice(best).join(' ')];};}
+const oc=window.confirm.bind(window);window.confirm=m=>oc(LANG==='en'?tr(m):m);
+const oa=window.alert.bind(window);window.alert=m=>oa(LANG==='en'?tr(m):m);
+const T0=document.title;
+function rerender(){try{if(typeof draw==='function'&&!document.getElementById('sheetApp')?.hidden)draw();}catch(e){}
+  try{if(window.TET_SUM&&!document.getElementById('sumApp')?.hidden)window.TET_SUM.render();}catch(e){}}
+function apply(){
+  document.documentElement.lang=LANG;document.title=LANG==='en'?tr(T0):T0;
+  mo.disconnect();rerender();walk(document.body);
+  mo.observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:ATTRS});
+  document.querySelectorAll('.langB').forEach(b=>{b.textContent=LANG==='en'?'🌐 日本語':'🌐 English';b.lang=LANG==='en'?'ja':'en';b.title=LANG==='en'?'日本語に切り替え':'Switch to English';});
+}
+function addBtn(after){if(!after)return;const b=document.createElement('button');b.className='btn g langB no-i18n';b.type='button';
+  b.onclick=()=>{LANG=LANG==='en'?'ja':'en';try{localStorage.setItem('tet-lang',LANG)}catch(e){};apply();};after.after(b);}
+addBtn(document.getElementById('rs'));addBtn(document.getElementById('sm_back'));
+apply();
+})();
+</script>
+</body>
+</html>
