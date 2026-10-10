@@ -167,6 +167,29 @@ body.is-dragging .card{cursor:grabbing}
 .btn:disabled{opacity:.4;cursor:default}
 #lang{margin-left:0}
 .card .face{box-shadow:0 8px 0 -3px rgba(23,58,115,.10)}
+
+.drawer{position:fixed;top:0;right:0;bottom:0;z-index:50;width:min(400px,92vw);overflow:auto;background:rgba(255,255,255,.96);
+  backdrop-filter:blur(6px);box-shadow:-12px 0 30px rgba(23,58,115,.18);padding:calc(14px + env(safe-area-inset-top,0px)) 16px calc(18px + env(safe-area-inset-bottom,0px));
+  border-left:4px solid #A9C8EE;animation:slidein .25s ease-out}
+.drawer[hidden]{display:none}
+@keyframes slidein{from{transform:translateX(30px);opacity:0}to{transform:none;opacity:1}}
+.dhd{display:flex;justify-content:space-between;align-items:center}
+.dhd b{font-size:19px;color:#173A73}
+.drawer p{margin:2px 0 0;font-size:13px;font-weight:700;color:#3B5683}
+@media (min-width:1100px){body.drawer-open .wrap{margin-right:400px}}
+.tgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+.tcard{font:inherit;color:var(--ink);text-align:center;background:#fff;border:2px solid var(--rule);border-bottom-width:4px;border-radius:16px;
+  padding:12px 10px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;transition:transform .15s,border-color .15s}
+.tcard:hover{transform:translateY(-2px);border-color:var(--c)}
+.tcard.on{border-color:var(--c);box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 30%,transparent)}
+.tcard b{font-size:16px;font-weight:800;line-height:1.3}
+.tcard .tg{font-size:12px;color:var(--ink-3);min-height:2.6em;line-height:1.3}
+.tcard svg{width:100%;max-width:210px;height:auto;margin-top:auto}
+.tcard .te{font-size:12.5px;font-weight:800;color:var(--c)}
+.tcard .tn{font-size:11px;font-weight:700;color:var(--ink-3);background:#F1F3F9;border-radius:999px;padding:1px 9px;margin-top:3px}
+.card{transition:opacity .2s,filter .2s}
+.card.dim{opacity:.22;filter:grayscale(.7)}
+.card.hit .face{outline:4px solid var(--c);outline-offset:3px}
 @media (prefers-reduced-motion:reduce){
   .inner{transition:none}
 }
@@ -181,12 +204,18 @@ body.is-dragging .card{cursor:grabbing}
 <div class="bar">
   <button class="btn" id="guess" aria-pressed="false">🙈 あてっこモード（名前をかくす）</button>
   <button class="btn" id="reset">ぜんぶ表にもどす</button>
+  <button class="btn" id="typesBtn" aria-expanded="false" aria-controls="drawer">📘 型の一覧</button>
   <span class="zoomctl"><button class="btn" id="zout" aria-label="小さく">🔍−</button><span id="cols">3列</span><button class="btn" id="zin" aria-label="大きく">🔍＋</button></span>
   <button class="btn" id="lang" lang="en">English</button>
   <button class="btn" id="order">並びを元にもどす</button>
   <span class="note" id="note">クリックでめくる・ドラッグで並びかえ</span>
 </div>
 <div class="grid" id="grid"></div>
+<aside class="drawer" id="drawer" aria-labelledby="typesT" hidden>
+  <div class="dhd"><b id="typesT">型の一覧</b><button class="btn" type="button" id="drawerX" aria-label="閉じる">✕</button></div>
+  <p id="typesN">押すと、その型のカードが光るよ</p>
+  <div class="tgrid" id="tgrid"></div>
+</aside>
 <dialog id="dlg"><button class="btn close" type="button" id="dlgx">閉じる</button><div id="dlgc"></div></dialog>
 </div>
 
@@ -336,6 +365,7 @@ const CARDS=[
 // 型の典型の形（tet_tool の botSVG2 と同じ線）
 const TYP={
  drift:[[[0,.8],[.35,.68],[.65,.48],[1,.22]]],
+ escalation:[[[0,.9],[.2,.74],[.4,.72],[.6,.54],[.8,.52],[1,.12]],[[0,.82],[.2,.84],[.4,.62],[.6,.64],[.8,.42],[1,.1]]],
  commons:[[[0,.4],[.4,.7],[.65,.82],[.82,.55],[1,.08]]],
  fixes:[[[0,.5],[.15,.74],[.28,.76],[.5,.45],[.75,.25],[1,.12]]],
  success:[[[0,.5],[.35,.62],[.65,.8],[1,.92]],[[0,.48],[.35,.36],[.65,.2],[1,.08]]],
@@ -561,10 +591,61 @@ function applyLang(){
   document.getElementById('guess').textContent=u('guess');document.getElementById('reset').textContent=u('reset');
   document.getElementById('note').textContent=u('note');document.getElementById('order').textContent=u('order');['zout','zin'].forEach(k=>{const b=document.getElementById(k);b.title=u(k);b.setAttribute('aria-label',u(k));});layout();document.getElementById('dlgx').textContent=u('close');
   const lb=document.getElementById('lang');lb.textContent=u('lang');lb.lang=LANG==='en'?'ja':'en';
-  render();
+  render();renderTypes();applyFilter();
 }
 
 
+
+// ===== 型の一覧 =====
+const TYPES=[
+ {id:'fixes',c:'#E5533D',ja:['応急処置の失敗','その場しのぎが、あとで裏目に'],en:['Fixes that fail','Quick fixes backfire later']},
+ {id:'burden',c:'#E8790C',ja:['問題の転嫁','すぐ効く方法に、頼りきり'],en:['Shifting the burden','Relying on the quick fix']},
+ {id:'drift',c:'#7A4EAB',ja:['目標のなし崩し','目標が、だんだん下がっていく'],en:['Drifting goals','The goal slowly slips down']},
+ {id:'limits',c:'#14A37F',ja:['成功の限界','伸びたあと、頭打ち'],en:['Limits to success','Grows, then hits a ceiling']},
+ {id:'under',c:'#00879A',ja:['成長と投資不足','人気に、準備が追いつかない'],en:['Growth and underinvestment','Demand outpaces preparation']},
+ {id:'escalation',c:'#B83A2E',ja:['エスカレーション','はり合うほど、エスカレート'],en:['Escalation','The more they compete, the worse it gets']},
+ {id:'commons',c:'#2E86C1',ja:['共有地の悲劇','みんなで使いすぎて、なくなる'],en:['Tragedy of the commons',"Overused by all, until it's gone"]},
+ {id:'success',c:'#C2457E',ja:['成功には成功を','勝つほど有利になり、差が開く'],en:['Success to the successful','Winners keep winning; the gap widens']}
+];
+const TXT={ja:{btn:'📘 型の一覧',t:'型の一覧',n:'押すと、その型のカードが光るよ',ng:'あてっこ中は、カードは光りません',good:'良い',bad:'悪い',time:'時間 →',cnt:'データカード',mai:'枚',none:'データカードはまだありません',
+  esc:'AとBがはり合う',win:'勝つ側',lose:'負ける側',all:'すべて表示'},
+ en:{btn:'📘 Pattern guide',t:'Pattern guide',n:'Tap a pattern to highlight its cards',ng:'No highlighting in guess mode',good:'Good',bad:'Bad',time:'time →',cnt:'Data cards: ',mai:'',none:'No data cards yet',
+  esc:'A and B compete',win:'winner',lose:'loser',all:'Show all'}};
+const tt=k=>TXT[LANG][k];
+let FILTER=null;
+function typeSVG(T){
+  const W=200,H=112,x0=34,x1=W-10,yT=12,y0=H-28,X=t=>x0+(x1-x0)*t,Y=v=>yT+(y0-yT)*(1-v);
+  const curve=P=>{let d=`M${X(P[0][0])},${Y(P[0][1])}`;for(let i=1;i<P.length;i++){const[a,b]=P[i-1],[c,e]=P[i],mx=(a+c)/2;d+=` C${X(mx)},${Y(b)} ${X(mx)},${Y(e)} ${X(c)},${Y(e)}`;}return d;};
+  const lines=TYP[T.id];let g=`<path d="M${x0},${yT-4}V${y0}H${x1+4}" fill="none" stroke="#23263A" stroke-opacity=".3" stroke-width="1.5" stroke-dasharray="2 4"/>
+   <text x="${x0-5}" y="${yT+4}" font-size="10" text-anchor="end" fill="#6B7088" font-weight="700">${tt('good')}</text>
+   <text x="${x0-5}" y="${y0}" font-size="10" text-anchor="end" fill="#6B7088" font-weight="700">${tt('bad')}</text>
+   <text x="${x1+4}" y="${H-10}" font-size="10" text-anchor="end" fill="#6B7088">${tt('time')}</text>`;
+  lines.forEach((P,i)=>{const col=i?`color-mix(in srgb, ${T.c} 45%, #B9A0A8)`:T.c;
+    g+=`<path d="${curve(P)}" fill="none" stroke="${col}" stroke-width="7" stroke-linecap="round"/>`;
+    const f=P[0],l=P[P.length-1];g+=`<circle cx="${X(f[0])}" cy="${Y(f[1])}" r="3.5" fill="#23263A"/><circle cx="${X(l[0])}" cy="${Y(l[1])}" r="3.5" fill="#23263A"/>`;});
+  if(T.id==='escalation')g+=`<text x="${x0+6}" y="${yT+2}" font-size="9.5" fill="#6B7088">${tt('esc')}</text>`;
+  if(T.id==='success'){const P=lines[0],Q=lines[1];g+=`<text x="${X(1)-4}" y="${Y(P[P.length-1][1])-7}" font-size="9.5" text-anchor="end" fill="#6B7088">${tt('win')}</text><text x="${X(1)-4}" y="${Y(Q[Q.length-1][1])-7}" font-size="9.5" text-anchor="end" fill="#6B7088">${tt('lose')}</text>`;}
+  return `<svg viewBox="0 0 ${W} ${H}" aria-hidden="true">${g}</svg>`;
+}
+function renderTypes(){
+  document.getElementById('typesT').textContent=tt('t');document.getElementById('typesBtn').textContent=tt('btn');
+  document.getElementById('typesN').textContent=document.body.classList.contains('guess')?tt('ng'):tt('n');
+  document.getElementById('tgrid').innerHTML=TYPES.map(T=>{const [nm,tag]=T[LANG],other=T[LANG==='en'?'ja':'en'][0],n=CARDS.filter(c=>c.id===T.id).length;
+    return `<button type="button" class="tcard${FILTER===T.id?' on':''}" data-t="${T.id}" style="--c:${T.c}" aria-pressed="${FILTER===T.id}">
+      <b>${esc(nm)}</b><span class="tg">${esc(tag)}</span>${typeSVG(T)}<span class="te">${esc(other)}</span>
+      <span class="tn">${n?tt('cnt')+n+tt('mai'):tt('none')}</span></button>`;}).join('');
+  document.querySelectorAll('.tcard').forEach(b=>b.addEventListener('click',()=>{FILTER=FILTER===b.dataset.t?null:b.dataset.t;applyFilter();renderTypes();const h=document.querySelector('#grid .card.hit');if(h)h.scrollIntoView({behavior:'smooth',block:'center'});}));
+}
+function openDrawer(open){const d=document.getElementById('drawer'),b=document.getElementById('typesBtn');
+  d.hidden=!open;b.setAttribute('aria-expanded',open);b.setAttribute('aria-pressed',open);document.body.classList.toggle('drawer-open',open);layout();}
+document.getElementById('typesBtn').addEventListener('click',()=>openDrawer(document.getElementById('drawer').hidden));
+document.getElementById('drawerX').addEventListener('click',()=>openDrawer(false));
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.getElementById('drawer').hidden)openDrawer(false);});
+function applyFilter(){
+  const on=FILTER&&!document.body.classList.contains('guess');
+  document.querySelectorAll('#grid .card').forEach(el=>{const c=CARDS[+el.dataset.ix];
+    el.classList.toggle('dim',!!on&&c.id!==FILTER);el.classList.toggle('hit',!!on&&c.id===FILTER);});
+}
 // ===== カードの大きさ（列の数）を変える =====
 const BASE_W=370;           // カードのもとの幅
 let COLS=null;              // null＝画面の幅に合わせる
@@ -621,12 +702,12 @@ const endDrag=e=>{
   justDragged=true;setTimeout(()=>justDragged=false,60);
 };
 window.addEventListener('pointerup',endDrag);window.addEventListener('pointercancel',endDrag);
-document.getElementById('order').addEventListener('click',()=>{ORDER.splice(0,ORDER.length,...ORIG_ORDER);render();});
+document.getElementById('order').addEventListener('click',()=>{ORDER.splice(0,ORDER.length,...ORIG_ORDER);render();applyFilter();});
 applyLang();
 document.getElementById('lang').addEventListener('click',()=>{LANG=LANG==='en'?'ja':'en';applyLang();});
 document.getElementById('dlgx').addEventListener('click',()=>document.getElementById('dlg').close());
 document.getElementById('dlg').addEventListener('click',e=>{if(e.target.id==='dlg')e.target.close();});
-document.getElementById('guess').addEventListener('click',e=>{const on=document.body.classList.toggle('guess');e.currentTarget.setAttribute('aria-pressed',on);});
+document.getElementById('guess').addEventListener('click',e=>{const on=document.body.classList.toggle('guess');e.currentTarget.setAttribute('aria-pressed',on);renderTypes();applyFilter();});
 document.getElementById('reset').addEventListener('click',()=>document.querySelectorAll('.card.flipped').forEach(el=>{el.classList.remove('flipped');el.setAttribute('aria-pressed','false');}));
 </script>
 </body>
