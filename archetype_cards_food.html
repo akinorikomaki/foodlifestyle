@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>めくって発見！ 食のシステムの振る舞いカード</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 48 48%27 fill=%27none%27 stroke-width=%275%27 stroke-linecap=%27round%27%3E%3Cpath d=%27M24 24c-6-10-18-8-18 0s12 10 18 0%27 stroke=%27%23D0336B%27/%3E%3Cpath d=%27M24 24c6 10 18 8 18 0s-12-10-18 0%27 stroke=%27%231E88C8%27/%3E%3C/svg%3E">
+<title>システムの振る舞いカード｜食のシステム編</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
@@ -13,10 +14,10 @@
   box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
 *,*::before,*::after{box-sizing:inherit}
-body{margin:0;background-color:#CFE6FF;background-image:radial-gradient(rgba(255,255,255,.55) 1.6px,transparent 1.8px),linear-gradient(160deg,#BFE0FF 0%,#D7EBFF 40%,#E4E2FF 100%);background-size:22px 22px,100% 100%;background-attachment:fixed;color:var(--ink);
+body{margin:0;background-color:#F6F5F0;background-image:linear-gradient(rgba(90,140,200,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(90,140,200,.10) 1px,transparent 1px);background-size:24px 24px;background-attachment:fixed;color:var(--ink);
   font-family:'M PLUS Rounded 1c','Hiragino Maru Gothic ProN','Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,sans-serif;line-height:1.55}
 .wrap{max-width:1600px;margin:0 auto;padding:28px 24px 48px}
-header h1{font-size:clamp(22px,3.2vw,32px);font-weight:800;margin:0 0 6px;letter-spacing:.02em;color:#173A73;display:inline-block;background:#fff;border-radius:18px;padding:8px 18px;border-bottom:5px solid #8FB8EC;box-shadow:0 6px 0 -2px rgba(23,58,115,.08)}
+header h1{margin:0;font-size:clamp(24px,3vw,34px);font-weight:800;letter-spacing:.02em;color:#1F2A44;line-height:1.2}
 header p{margin:0;color:var(--ink-2);font-size:14.5px;max-width:46em}
 .bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:18px 0 22px}
 .btn{font:inherit;font-size:14px;font-weight:700;border:2px solid var(--rule);border-bottom-width:4px;background:#fff;color:var(--ink);
@@ -27,7 +28,7 @@ header p{margin:0;color:var(--ink-2);font-size:14.5px;max-width:46em}
 .bar .note{margin-left:auto;font-size:13px;color:#3B5683;font-weight:700}
 
 .grid{display:grid;grid-template-columns:repeat(var(--cols,3),minmax(0,1fr));gap:var(--gap,22px)}
-.card{zoom:var(--z,1)}
+.card{zoom:var(--z,1);width:400px;justify-self:center}
 .card{position:relative;aspect-ratio:1/1.48;cursor:pointer;border-radius:20px;outline:none}
 .inner{position:absolute;inset:0}
 .back{visibility:hidden}
@@ -241,6 +242,32 @@ dialog .cld{width:100%;max-height:68vh;height:auto}
 .btn.ib{display:inline-flex;align-items:center;gap:7px}
 .btn.ib svg{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .btn.sq{padding:6px 8px}
+/* ===== 案A：図鑑・フィールドノート風 ===== */
+.brand{display:flex;align-items:center;gap:16px}
+.brand .logo{width:48px;height:48px;flex:none}
+.brand .eyebrow{display:block;font-size:12px;font-weight:800;letter-spacing:.22em;color:#5F6478}
+.bar{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px;margin:20px 0 24px;padding:4px;background:#fff;border:1.5px solid #E4E1D6;border-radius:14px;box-shadow:0 2px 0 rgba(31,42,68,.04)}
+.bar .btn{height:40px;border:none;border-radius:10px;background:transparent;color:#1F2A44;padding:0 13px;font-size:13.5px}
+.bar .btn.sq{width:40px;padding:0;justify-content:center}
+.bar .btn:hover{background:#F1EFE7;border:none}
+.bar .btn[aria-pressed="true"],.bar .btn[aria-expanded="true"]{background:#1F2A44;color:#fff}
+.bar .btn:active{transform:translateY(1px)}
+.bar .btn:disabled{opacity:.35;background:transparent}
+.bar .sep{width:1px;height:26px;background:#DAD8CF;margin:0 4px}
+.zoomctl{background:transparent!important;padding:0!important;gap:2px!important}
+.zoomctl #cols{color:#1F2A44!important;min-width:2.8em}
+.helpw{position:relative;display:inline-flex}
+.brand .logo{width:54px;height:54px}
+@media (max-width:640px){.bar{display:flex;flex-wrap:nowrap;justify-content:space-between;gap:0}.bar .btn.sq,.bar .btn.ib{width:36px!important}.zoomctl #cols{min-width:2.2em!important;font-size:12px!important}.bar .sep{display:none}
+  .bar .btn .bl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .bar .btn.ib{width:40px;padding:0;justify-content:center}.brand .logo{width:42px;height:42px}}
+.helppop{position:absolute;top:calc(100% + 8px);right:0;z-index:20;white-space:nowrap;background:#1F2A44;color:#fff;font-size:12.5px;font-weight:700;border-radius:10px;padding:8px 12px;box-shadow:0 10px 24px -10px rgba(31,42,68,.5)}
+.helppop[hidden]{display:none}
+.drawer{border-left-color:#E4E1D6!important;background:rgba(255,255,255,.97)!important}
+.dhd b{color:#1F2A44!important}
+.drawer p{color:#5F6478!important}
+body.en .ebj{display:none}
+@media (max-width:640px){.ebj{display:none}}
 @media (prefers-reduced-motion:reduce){
   .inner{transition:none}
 }
@@ -249,16 +276,18 @@ dialog .cld{width:100%;max-height:68vh;height:auto}
 </head>
 <body>
 <div class="wrap">
-<header>
-  <h1 id="h1">めくって発見！ 食のシステムの振る舞いカード</h1>
-</header>
-<div class="bar">
+<header class="brand"><svg class="logo" viewBox="0 0 48 48" fill="none" stroke-width="4" stroke-linecap="round" aria-hidden="true"><path d="M24 24c-6-10-18-8-18 0s12 10 18 0" stroke="#D0336B"/><path d="M24 24c6 10 18 8 18 0s-12-10-18 0" stroke="#1E88C8"/><path d="M10 14l-4 2 1 4" stroke="#D0336B"/><path d="M38 34l4-2-1-4" stroke="#1E88C8"/></svg><div><span class="eyebrow" id="eyebrow">SYSTEM BEHAVIOR CARDS<span class="ebj"> ・ システムの振る舞いカード</span></span><h1 id="h1">食のシステム編</h1></div></header>
+<div class="bar" role="toolbar" aria-label="操作">
   <button class="btn ib" id="typesBtn" aria-expanded="false" aria-controls="drawer"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg><span class="bl">型の一覧</span></button>
   <button class="btn ib" id="guess" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 6.1A9.6 9.6 0 0 1 12 6c5 0 9 4.6 10 6-.5.8-1.5 2.1-3 3.4"/><path d="M6.6 6.6C4.5 8 3 10 2 12c1 1.4 5 6 10 6 1.7 0 3.3-.5 4.6-1.3"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg><span class="bl">あてっこモード</span></button>
+  <span class="sep" aria-hidden="true"></span>
   <span class="zoomctl"><button class="btn ib sq" id="zout" aria-label="小さく"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/><path d="M7.5 10.5h6"/></svg></button><span id="cols">3列</span><button class="btn ib sq" id="zin" aria-label="大きく"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/><path d="M7.5 10.5h6M10.5 7.5v6"/></svg></button></span>
+  <span class="sep" aria-hidden="true"></span>
   <button class="btn ib" id="reset"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3.5 4v5h5"/></svg><span class="bl">もとにもどす</span></button>
   <button class="btn ib" id="lang" lang="en"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span class="bl">English</span></button>
-  <span class="note" id="note">クリックでめくる・ドラッグで並びかえ</span>
+  <span class="sep" aria-hidden="true"></span>
+  <span class="helpw"><button class="btn ib sq" id="help" aria-expanded="false" aria-controls="helpPop" aria-label="使い方"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .8-1 1.5v.7"/><path d="M12 17h.01"/></svg></button>
+  <span class="helppop" id="helpPop" role="status" hidden><span id="note">クリックでめくる・ドラッグで並びかえ</span></span></span>
 </div>
 <div class="grid" id="grid"></div>
 <aside class="drawer" id="drawer" aria-labelledby="typesT" hidden>
@@ -439,20 +468,20 @@ const icon=id=>`<svg viewBox="0 0 40 40" fill="none" stroke="#fff" stroke-width=
 // ===== 日本語／English =====
 let LANG=(new URLSearchParams(location.search).get('lang')==='en')?'en':'ja';
 const UI={
- ja:{title:'めくって発見！ 食のシステムの振る舞いカード',guess:'あてっこモード',guessT:'型の名前をかくす',reset:'もとにもどす',resetT:'カードを表にもどし、並びも最初にもどす',note:'クリックでめくる・ドラッグで並びかえ',lang:'English',
+ ja:{title:'システムの振る舞いカード｜食のシステム編',guess:'あてっこモード',guessT:'型の名前をかくす',reset:'もとにもどす',resetT:'カードを表にもどし、並びも最初にもどす',note:'クリックでめくる・ドラッグで並びかえ',lang:'English',
   graph:'📊 このグラフは…',stats:'🔢 数字で見ると…',data:'データ：',sep:'、',typ:'この型の<br>よくある形',typBad:'上ほど困る向き',flip:'めくってみよう ↻',back:'表にもどす ↻',
   same:'同じ向き',opp:'反対向き',delay:'時間がかかる',front:'表のグラフ',loop:'🔄 ぐるっと一周すると…',again:'↺ 1へ',hint:'💡 ぬけ出すヒント：3つの力をどうかける？',
   levT:['トップダウン','政策・規制'],levB:['ボトムアップ','口コミ・周りの意識'],levA:['アフォーダビリティ','お金の余裕・感覚'],
   src:'出典：',srcSep:'／',zoom:'図を大きく',close:'閉じる',probL:'⚠ 問題：',point:'📊 データのポイント：',jp:'日本',world:'世界',
   infoJp:'野菜を食べることのデータ',infoW:'健康的な食事を買うお金がない人のデータ',infoSofa:'FAO 世界食料農業白書2025',infoStat:'FAO（FAOSTAT）のデータ',
-  probTag:'⚠ 問題',cols:'列',zout:'小さく（列をふやす）',zin:'大きく（列をへらす）',grip:'移動',gripT:'ドラッグして並びかえ',order:'並びを元にもどす',base:'2019年＝',yr:'年',dec:'年代',about:'約',cardAria:'のカード。めくると因果ループ図',loopAria:'の因果ループ図'},
- en:{title:'Flip & Discover: Food System Behavior Cards',guess:'Guess mode',guessT:'Hide pattern names',reset:'Reset',resetT:'Flip all cards back and restore the original order',note:'Click to flip, drag to rearrange',lang:'日本語',
+  probTag:'⚠ 問題',h1:'食のシステム編',help:'使い方',cols:'列',zout:'小さく（列をふやす）',zin:'大きく（列をへらす）',grip:'移動',gripT:'ドラッグして並びかえ',order:'並びを元にもどす',base:'2019年＝',yr:'年',dec:'年代',about:'約',cardAria:'のカード。めくると因果ループ図',loopAria:'の因果ループ図'},
+ en:{title:'System Behavior Cards | Food Systems',guess:'Guess mode',guessT:'Hide pattern names',reset:'Reset',resetT:'Flip all cards back and restore the original order',note:'Click to flip, drag to rearrange',lang:'日本語',
   graph:'📊 This graph shows…',stats:'🔢 By the numbers…',data:'Data: ',sep:', ',typ:'Typical shape<br>of this pattern',typBad:'up = worse',flip:'Flip me ↻',back:'Back to front ↻',
   same:'same direction',opp:'opposite direction',delay:'delay',front:'graph on the front',loop:'🔄 Going around the loop…',again:'↺ back to 1',hint:'💡 Ways out: how to use the three levers?',
   levT:['Top-down','Policy & regulation'],levB:['Bottom-up','Word of mouth & awareness'],levA:['Affordability','Financial room & money sense'],
   src:'Sources: ',srcSep:' / ',zoom:'Enlarge',close:'Close',probL:'⚠ Problem: ',point:'📊 Data point: ',jp:'Japan',world:'World',
   infoJp:'Data on eating vegetables',infoW:"Data on people who can't afford a healthy diet",infoSofa:'FAO, The State of Food and Agriculture 2025',infoStat:'FAO (FAOSTAT) data',
-  probTag:'⚠ Problem',cols:' cols',zout:'Smaller (more columns)',zin:'Larger (fewer columns)',grip:'Move',gripT:'Drag to rearrange',order:'Reset order',base:'2019 = ',yr:'',dec:'s',about:'~',cardAria:' card. Flip to see the causal loop diagram',loopAria:' causal loop diagram'}
+  probTag:'⚠ Problem',h1:'Food Systems',help:'How to use',cols:' cols',zout:'Smaller (more columns)',zin:'Larger (fewer columns)',grip:'Move',gripT:'Drag to rearrange',order:'Reset order',base:'2019 = ',yr:'',dec:'s',about:'~',cardAria:' card. Flip to see the causal loop diagram',loopAria:' causal loop diagram'}
 };
 const u=k=>UI[LANG][k];
 const EN=[{"tag": "The goal slowly slips down", "ttl": "Fewer people are eating enough vegetables", "read": "Over 10 years, both women and men dropped about 7 points.", "prob": "The share eating enough vegetables slowly falls", "names": {"G": "Target\n(350 g/day)", "A": "Share eating\n350 g+", "Gp": "Gap to target", "Pr": "\"Too hard\"\nfeeling", "C": "Efforts to\neat more veg"}, "story": ["Few people reach 350 g", "People feel \"that's impossible\"", "The target quietly slips lower", "Less effort, so the share falls further"], "lev": {"t": "Keep the 350 g target of Health Japan 21; set vegetable standards for school and work meals", "b": "Share \"today's veggie dish\" on social media to raise the norm", "a": "Vegetable coupons or discounts give room for one more dish"}}, {"tag": "Grows, then hits a ceiling", "ttl": "Interest in vegetables stalled in 2022", "read": "Interest rose fast, then began to fall from 2022. Around the same time, vegetables became harder to afford (see the \"Vegetable affordability\" graph). Is price the brake?", "prob": "Interest stops growing partway", "names": {"E": "People trying\nvegetables", "S": "Interest in\nvegetables", "B": "\"Too pricey\"\nbrake", "C": "Rising veg\nprices"}, "story": ["More people try vegetables", "Word spreads and interest rises", "But people feel \"too expensive!\"", "The brake kicks in and growth stops"], "lev": {"t": "Stabilize vegetable prices through support for growers and stockpiles", "b": "Spread cheap, tasty ways to eat vegetables by word of mouth", "a": "Coupons or points so people can still buy when prices rise"}}, {"tag": "Demand outpaces preparation", "ttl": "Vegetables were most affordable until 2021", "read": "After that, vegetable prices outpaced wage growth, and by 2024 affordability was back to about the 2015 level. Did farming and distribution keep up?", "prob": "Would-be buyers drop off partway", "names": {"Eg": "Promoting\nvegetables", "D": "Would-be\nveg buyers", "Lm": "Veg shortage\n(higher prices)", "N": "Noticing\n\"not enough\"", "I": "Building\nsupply chains"}, "dataNote": " (opposite of affordability)", "story": ["Promotion increases would-be buyers", "Vegetables run short and prices rise", "People notice and start building supply", "Too late: high prices drive buyers away"], "lev": {"t": "Use policy to invest early in farms and distribution", "b": "Spread the word about seasonal, local vegetables to support growers", "a": "Temporary subsidies during price spikes keep room to buy"}}, {"tag": "Relying on the quick fix", "ttl": "Government messaging goes up and down", "read": "Messaging rises and falls like waves, while the share eating enough vegetables keeps falling (see the \"eating enough vegetables\" graph).", "prob": "The vegetable shortfall never really gets fixed", "names": {"S": "People eating\ntoo little veg", "Q": "Government\nmessaging", "E": "\"We campaigned,\njob done\"", "F": "Easy ways to\neat vegetables"}, "story": ["Low vegetable intake becomes a topic", "\"Eat your vegetables!\" campaigns help a little", "A \"we campaigned, job done\" feeling sets in", "Easy, cheap ways to eat veg never grow; the shortfall returns"], "lev": {"t": "Shift from campaigns to systems, e.g., veg standards for school meals", "b": "Share cooking and eating experiences with friends and family", "a": "Think \"cost per meal\" instead of \"vegetables are expensive\""}}, {"tag": "Quick fixes backfire later", "ttl": "Brazil: it fell, then rose higher than before", "read": "It improved temporarily in 2020 (26.0% → 19.4%), then worsened (29.8%). 2020 was the year of COVID emergency cash aid. Short-term measures alone may not bring lasting improvement.", "prob": "People struggling to eat well don't really decrease", "names": {"P": "Can't afford a\nhealthy diet", "F": "Temporary\ncash aid", "U": "Aid can't last,\nso it is cut"}, "story": ["COVID threatens more people's food", "The government rushes out cash, and numbers fall", "The money runs out and aid shrinks", "More people struggle than before"], "lev": {"t": "Plan how aid ends, and pair it with job and income policies", "b": "Spread and keep local food-sharing networks", "a": "Help households keep room in the budget for food after aid ends"}}, {"tag": "Winners keep winning; the gap widens", "ttl": "The gap between regions keeps widening", "read": "East Asia & Pacific fell from 29.3% to 17.8%, while Sub-Saharan Africa stayed around 70%. The gap grew from 41 to 53 points.", "prob": "Struggling regions get left behind", "names": {"Ae": "East Asia\ndiet gains", "Ar": "Money into\nEast Asia", "Al": "Investment\nfavoring E. Asia", "Be": "Africa\ndiet gains", "Br": "Money into\nAfrica"}, "dataNote": " (opposite of 'can't afford')", "story": ["Investment flows to the region that did a bit better", "More jobs and factories make it richer", "The other region gets little money", "The gap keeps growing"], "lev": {"t": "Target international aid and investment to regions left behind", "b": "Spread local success stories among farmers", "a": "Small loans that give people financial room"}}, {"tag": "Grows, then hits a ceiling", "ttl": "Lithuania: a fast drop, then stuck around 9%", "read": "It improved a lot at first (21.3% → 8.8%), then the gains got smaller. As progress is made, reaching the remaining people may become harder and more costly.", "prob": "Improvement stalls at some point", "names": {"E": "Rising\nwages", "S": "People who can\nafford meals", "B": "Hard-to-reach\nbarrier", "C": "Older people\non pensions"}, "dataNote": " (opposite of 'can't afford')", "story": ["Wages rise and more people can afford meals", "Money circulates and wages rise further", "But hard-to-reach people, like pension-only elders, remain", "It barely falls any further"], "lev": {"t": "Design programs aimed at hard-to-reach people, such as older adults", "b": "Community check-ins let people know support exists", "a": "Food allowances for pension-only households"}}, {"tag": "Demand outpaces preparation", "ttl": "World farming: gains from innovation nearly halved in the 2010s", "bars": {"name": "Extra kg, 10 years later, from a field that yielded 100 kg", "what": "Gains from new crop varieties and technology alone, with the same land and fertilizer (world average)"}, "read": "In the 2000s, innovation added +22 kg per decade; in the 2010s only +12 kg, almost half. Output didn't fall; the gain from innovation got smaller. Causes include land degradation and climate change (FAO).", "prob": "Gains from innovation weaken partway", "names": {"Eg": "New varieties\n& technology", "D": "Output gained\nby innovation", "Lm": "Degraded land\n& climate", "N": "Calls for\nmore research", "I": "Investment in\nfarm research"}, "story": ["New varieties and technology raise output", "Profits spread new technology further", "But degraded land and poorer fields act as a brake", "Research investment lags, and growth weakens"], "lev": {"t": "Increase public investment in farm research and soil health while growth lasts", "b": "Spread new techniques from farmer to farmer", "a": "Grants or loans give farmers room to try new technology"}}, {"tag": "Overused by all, until it's gone", "ttl": "World oceans: overfished stocks rose from 1 in 10 to about 3.5 in 10", "pict": {"name": "If the world's fish were \"10 groups\"…", "what": "Red fish = overfished groups (caught faster than they can recover). From FAO assessments of fish stocks such as \"Atlantic cod\"."}, "read": "In 1974 only 1 in 10 groups was overfished; by 2021 about 3.5 in 10. Fish in the open sea belong to no one, so the more everyone catches, the fewer remain.", "prob": "Fish decline, and each trip catches less", "names": {"Aa": "Country A's\ncatch", "Ba": "Country B's\ncatch", "T": "Total\ncatch", "G": "Catch per\nfishing trip", "Lm": "Fish stocks'\nrecovery"}, "story": ["Each country and fisher catches more", "The total catch grows too large", "Fish can't recover, and each trip catches less", "Yet the race to catch continues"], "lev": {"t": "Countries agree on catch limits (quotas)", "b": "Spread \"choose fish that aren't overfished\" by word of mouth", "a": "Compensate fishers' income during closed seasons"}}, {"tag": "Relying on the quick fix", "ttl": "China: fertilizer use rose 45×, then began to fall", "read": "5 kg (1961) → 235 kg (2014), about 45 times. In 2015 the government launched a plan to stop increasing fertilizer use; 192 kg in 2023. FAO notes that overuse can \"hide\" soil damage.", "prob": "Falling yields (poor soil) are never fixed at the root", "names": {"S": "Poor soil,\nlower yields", "Q": "More chemical\nfertilizer", "E": "Damaged soil\n(acid, salt)", "F": "Soil-building\npractices"}, "story": ["Soil wears out and yields fall", "More fertilizer brings yields back", "But overuse damages the soil further", "Soil care is put off, so even more fertilizer is needed"], "lev": {"t": "Rules and support to cut fertilizer overuse", "b": "Spread soil-building successes from farmer to farmer", "a": "Subsidies that protect income while using less fertilizer"}}, {"tag": "Winners keep winning; the gap widens", "ttl": "Fertilizer access: the gap between regions widened", "read": "Asia rose from 4.5 kg to 113 kg; Africa from 2.1 kg to 14 kg (1961 → 2023). FAO cites very limited fertilizer use as one reason for low yields in Africa.", "prob": "Low-yield regions get left behind", "names": {"Ae": "Yields in\nAsia", "Ar": "Fertilizer\nused in Asia", "Al": "Money\nfavoring Asia", "Be": "Yields in\nAfrica", "Br": "Fertilizer used\nin Africa"}, "story": ["Higher-yield regions use profits to buy fertilizer and machines", "Yields rise more, attracting money and investment", "Low-yield regions can't afford fertilizer", "The gap keeps growing"], "lev": {"t": "Support for fertilizer and seeds in low-yield regions", "b": "Farmer groups share know-how", "a": "Easier loans and subsidies to buy fertilizer"}}];
@@ -639,10 +668,10 @@ function render(){
 }
 function applyLang(){
   document.documentElement.lang=LANG;document.body.classList.toggle('en',LANG==='en');
-  document.title=u('title');document.getElementById('h1').textContent=u('title');
+  document.title=u('title');document.getElementById('h1').textContent=u('h1');
   const bl=(id,t,ti)=>{const b=document.getElementById(id);b.querySelector('.bl').textContent=t;if(ti)b.title=ti;};
   bl('guess',u('guess'),u('guessT'));bl('reset',u('reset'),u('resetT'));
-  document.getElementById('note').textContent=u('note');['zout','zin'].forEach(k=>{const b=document.getElementById(k);b.title=u(k);b.setAttribute('aria-label',u(k));});layout();document.getElementById('dlgx').textContent=u('close');
+  document.getElementById('note').textContent=u('note');document.getElementById('help').setAttribute('aria-label',u('help'));document.getElementById('help').title=u('help');['zout','zin'].forEach(k=>{const b=document.getElementById(k);b.title=u(k);b.setAttribute('aria-label',u(k));});layout();document.getElementById('dlgx').textContent=u('close');
   const lb=document.getElementById('lang');lb.querySelector('.bl').textContent=u('lang');lb.lang=LANG==='en'?'ja':'en';
   render();renderTypes();applyFilter();
 }
@@ -689,6 +718,8 @@ function renderTypes(){
       <span class="tn">${n?tt('cnt')+n+tt('mai'):tt('none')}</span></button>`;}).join('');
   document.querySelectorAll('.tcard').forEach(b=>b.addEventListener('click',()=>{FILTER=FILTER===b.dataset.t?null:b.dataset.t;applyFilter();renderTypes();const h=document.querySelector('#grid .card.hit');if(h)h.scrollIntoView({behavior:'smooth',block:'center'});}));
 }
+document.getElementById('help').addEventListener('click',e=>{e.stopPropagation();const p=document.getElementById('helpPop'),on=p.hidden;p.hidden=!on;e.currentTarget.setAttribute('aria-expanded',on);});
+document.addEventListener('click',e=>{if(!e.target.closest('.helpw')){const p=document.getElementById('helpPop');if(!p.hidden){p.hidden=true;document.getElementById('help').setAttribute('aria-expanded',false);}}});
 function openDrawer(open){const d=document.getElementById('drawer'),b=document.getElementById('typesBtn');
   d.hidden=!open;b.setAttribute('aria-expanded',open);b.setAttribute('aria-pressed',open);document.body.classList.toggle('drawer-open',open);layout();}
 document.getElementById('typesBtn').addEventListener('click',()=>openDrawer(document.getElementById('drawer').hidden));
@@ -707,11 +738,11 @@ function layout(){
   const W=g.clientWidth,auto=Math.max(1,Math.min(6,Math.floor((W+22)/350)));
   const maxC=Math.max(1,Math.min(8,Math.floor((W+10)/170)));
   let c=COLS==null?auto:Math.max(1,Math.min(maxC,COLS));
-  const gap=c>=5?14:c===4?18:22,z=Math.min(1.15,((W-gap*(c-1))/c)/BASE_W);
+  const gap=c>=5?14:c===4?18:22,z=Math.min(2,((W-gap*(c-1))/c)/BASE_W);
   g.style.setProperty('--cols',c);g.style.setProperty('--gap',gap+'px');g.style.setProperty('--z',z.toFixed(4));
   ZOOM=z;CUR=c;
   document.getElementById('cols').textContent=c+u('cols');
-  document.getElementById('zout').disabled=c>=maxC;document.getElementById('zin').disabled=c<=1;
+  document.getElementById('zout').disabled=c>=maxC;document.getElementById('zin').disabled=c<=1||z>=1.999;
 }
 let ZOOM=1,CUR=3;
 document.getElementById('zout').addEventListener('click',()=>{COLS=CUR+1;layout();});
