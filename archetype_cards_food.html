@@ -268,6 +268,27 @@ dialog .cld{width:100%;max-height:68vh;height:auto}
 .drawer p{color:#5F6478!important}
 body.en .ebj{display:none}
 @media (max-width:640px){.ebj{display:none}}
+.hyp{font-size:11px;font-weight:800;color:#8A4B00;background:#FFF1DC;border:1.5px solid #F2C27E;border-radius:999px;padding:1px 8px}
+.cnote{font-size:11px;line-height:1.45;color:#8A4B00;background:#FFF7EA;border-radius:8px;padding:4px 8px}
+.cnote b{margin-right:4px}
+.thq{font-size:34px;font-weight:800;color:var(--c);width:96px;text-align:center;line-height:1}
+.prob.tq{background:#EEF0F7;color:#2F3A5C}
+.cands{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.cand{display:flex;flex-direction:column;align-items:center;gap:2px;border:2px dashed color-mix(in srgb,var(--c) 45%,#fff);border-radius:12px;padding:5px 4px}
+.cand svg{width:92px;height:auto}.cand b{font-size:12px;color:var(--c)}
+.others{margin:0;padding-left:18px;font-size:12.5px;line-height:1.5}
+.drawbox{border:2px dashed #B9BCD3;border-radius:12px;min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-align:center}
+.drawbox b{font-size:13px;color:#2F3A5C}.drawbox span{font-size:11px;color:var(--ink-3)}
+body.en .others{font-size:11.5px}
+body.en .drawbox{min-height:42px}
+body.en .cand svg{width:76px}
+body.en .cand{padding:3px 4px}
+button.cand{font:inherit;background:#fff;cursor:pointer;transition:transform .15s,background .15s}
+button.cand:hover{background:color-mix(in srgb,var(--c) 8%,#fff);transform:translateY(-1px)}
+button.cand:focus-visible{outline:3px solid #1C6FD1;outline-offset:2px}
+.cand .cgo{font-size:10.5px;font-weight:800;color:#fff;background:var(--c);border-radius:999px;padding:1px 8px;margin-top:2px}
+dialog .dstory{margin:10px 0 0}
+dialog .dstory li{font-size:14px}
 @media (prefers-reduced-motion:reduce){
   .inner{transition:none}
 }
@@ -342,7 +363,7 @@ const CARDS=[
   series:[{k:'y_f'},{k:'y_m',dash:1}],shared:1,
   read:'10年で、女性も男性も約7ポイントダウン。「350gなんて無理〜」って思ってない？',
   prob:'野菜を食べる人が、少しずつへっていく',
-  names:{G:'目指す量\n（350g）',A:'野菜を食べる\n人の割合',Gp:'目標との差',Pr:'「無理」と\n思う気持ち',C:'野菜を\nふやす工夫'},
+  names:{G:'目指す量\n（350g）',A:'野菜を食べる\n人の割合',Gp:'目標との差',Pr:'「無理」と思う\n気持ちの強さ',C:'野菜を食べる\n工夫の数'},
   pr:['A'],data:['A'],
   story:['350gに、なかなか届かない','「無理かも…」と思う','目標をこっそり下げる','工夫しなくなって、もっとへる'],
   lev:{t:'健康日本21の350g目標を保ち、給食・社食に野菜の基準を',b:'SNSで「今日の一皿」を見せ合い、周りのふつうを上げる',a:'野菜クーポンや割引で、もう一皿ふやす余裕を',key:'b'}},
@@ -351,7 +372,7 @@ const CARDS=[
   series:[{k:'x2'}],
   read:'ぐんぐん伸びたのに、2022年から下がり始めた。同じころ、野菜は買いにくくなっていた（「野菜の買いやすさ」のグラフ）。ブレーキは値段かも？',
   prob:'関心が、途中で伸びなくなる',
-  names:{E:'野菜を\n試す人',S:'野菜への\n関心',B:'「高い！」\nのブレーキ',C:'野菜の\n値上がり'},
+  names:{E:'野菜を試す\n人の数',S:'野菜への\n関心',B:'「高い」と\n感じる度合い',C:'野菜の値段'},
   pr:['S'],data:['S'],
   story:['野菜を試す人がふえる','「いいね」が広がって、関心アップ','でも「高い！」と感じる','ブレーキがかかって、ストップ'],
   lev:{t:'産地支援や備蓄で、野菜の値段を安定させる政策',b:'「安くておいしい食べ方」を口コミで広める',a:'野菜クーポン・ポイントで、値上がりしても買える余裕を',key:'a'}},
@@ -360,7 +381,7 @@ const CARDS=[
   series:[{k:'x3'}],
   read:'そのあと野菜の値上がりがお給料の伸びを追いこして、2024年には2015年ごろと同じくらい買いにくく…。野菜を作る・運ぶしくみは、間に合ってた？',
   prob:'買いたい人が、途中でへってしまう',
-  names:{Eg:'野菜を\nすすめる',D:'野菜を\n買いたい人',Lm:'野菜の不足\n（値上がり）',N:'「足りない」\nと気づく',I:'作る・運ぶ\nしくみづくり'},
+  names:{Eg:'野菜をすすめる\n取り組み',D:'野菜を買いたい\n人の数',Lm:'野菜の\n品薄さ',N:'投資が必要と\nいう認識',I:'流通・産地\nへの投資'},
   pr:['D'],data:['Lm'],dataNote:'（買いやすさの反対）',
   story:['野菜をすすめて、買いたい人がふえる','野菜が足りなくなり、値段が上がる','「足りない」と気づき、作る・運ぶしくみづくりを始める','でも間に合わず、高いままで人がはなれる'],
   lev:{t:'人気のうちに、産地・流通への投資を政策で先回り',b:'旬・地元の野菜を口コミで広め、産地を応援する空気に',a:'値上がりの時期だけ補助して、買う余裕を保つ',key:'t'}},
@@ -369,7 +390,7 @@ const CARDS=[
   series:[{k:'x1'}],
   read:'呼びかけは波のように上下。そのあいだも、野菜を食べる人はへり続けた（「野菜をしっかり食べる人」のグラフ）…。',
   prob:'野菜不足が、ちっとも直らない',
-  names:{S:'野菜が\n足りない人',Q:'国の\n呼びかけ',E:'呼びかけで\nやった気に',F:'野菜を手軽に\n食べるしくみ'},
+  names:{S:'野菜が足りない\n人の割合',Q:'国の呼びかけ\nの量',E:'「呼びかけた」\nという安心感',F:'手軽に野菜を\n食べるしくみ'},
   pr:['S'],data:['Q'],
   story:['野菜不足が話題になる','「野菜を食べよう！」と呼びかけて、少し良くなる','「呼びかけたからOK」と、やった気になる','手軽に食べるしくみ（安い・すぐ食べられる）が育たず、また不足'],
   lev:{t:'呼びかけより、給食・社食の野菜基準など「しくみ」の政策へ',b:'友だち・家族で作って食べた体験をシェアし合う',a:'「高い」より「1食分いくら」で見る金銭感覚に',key:'b'}},
@@ -378,7 +399,7 @@ const CARDS=[
   series:[{k:'bra'}],
   read:'2020年に一時的に改善（26.0%→19.4%）したあと、また悪化（29.8%）。この年はコロナで国の緊急給付があった年。短期的な対策だけでは、長く続く改善につながらないのかも？',
   prob:'食事に困る人が、結局へらない',
-  names:{P:'健康な食事を\n買えない人',F:'一時的な\nお金の支援',U:'支援が続かず\n打ち切り'},
+  names:{P:'健康な食事を\n買えない割合',F:'緊急の\n現金給付',U:'財政の\n負担'},
   pr:['P'],data:['P'],
   story:['コロナで、食事に困る人がふえそう','国が急いでお金を配る → いったん減る','でもお金が続かず、支援が小さくなる','前より多くの人が困ることに'],
   lev:{t:'給付の終わり方を決め、仕事・収入の政策とセットに',b:'地域の食の助け合いを口コミで広げ、残しておく',a:'給付が終わっても、食費に回せる家計の余裕を',key:'t'}},
@@ -387,7 +408,7 @@ const CARDS=[
   series:[{k:'eap'},{k:'ssa',dash:1}],shared:1,
   read:'東アジア・太平洋は29.3%→17.8%に減ったのに、サハラ以南アフリカは70%前後のまま。差は41→53ポイントに広がった。',
   prob:'うまくいかない地域が、取り残される',
-  names:{Ae:'東アジアの\n食の改善',Ar:'東アジアに\n来るお金',Al:'東アジアを\n選ぶ投資',Be:'アフリカの\n食の改善',Br:'アフリカに\n来るお金'},
+  names:{Ae:'東アジアの\n食の豊かさ',Ar:'東アジアへの\n投資額',Al:'東アジアへの\nかたより',Be:'アフリカの\n食の豊かさ',Br:'アフリカへの\n投資額'},
   pr:['Be'],data:['Ae','Be'],dataNote:'（買えない人の反対）',
   story:['少しうまくいった地域に、投資が集まる','仕事や工場がふえて、もっと豊かに','もう一方の地域には、お金が回らない','差がどんどん広がる'],
   lev:{t:'国際支援や投資を、取り残された地域へ重点的に',b:'地域の成功例を、農家どうしの口コミで広げる',a:'少額でも借りられるしくみで、お金の余裕を',key:'t'}},
@@ -396,7 +417,7 @@ const CARDS=[
   series:[{k:'ltu'}],
   read:'最初は大きく改善（21.3%→8.8%）。でもそのあとは、改善の幅が小さくなった。取り組みが進むほど、残った人に届けるのがむずかしく（お金や手間がかかるように）なるのかも？',
   prob:'改善が、あるところで止まる',
-  names:{E:'給料アップ',S:'食事を\n買える人',B:'届きにくい\n人の壁',C:'年金だけの\n高齢者など'},
+  names:{E:'給料の水準',S:'食事を買える\n人の割合',B:'支援の届き\nにくさ',C:'年金だけで\n暮らす人の数'},
   pr:['S'],data:['S'],dataNote:'（買えない人の反対）',
   story:['給料が上がり、食事を買える人がふえる','お金が回って、さらに給料が上がる','でも、年金だけの高齢者など届きにくい人が残る','それ以上、なかなか減らない'],
   lev:{t:'届きにくい人（高齢者など）にしぼった制度を',b:'地域の見守り・声かけで、支えがあることを伝える',a:'年金だけの人に食費の手当を出し、健康な食事の余裕を',key:'a'}},
@@ -406,7 +427,7 @@ const CARDS=[
     what:'土地や肥料はそのままで、新しい品種や技術の工夫だけで増えた分（世界の平均）'},
   read:'2000年代は10年で＋22kg。2010年代は＋12kgと、ほぼ半分に。とれる量が減ったのではなく、工夫で増える分が小さくなった。理由は土地の劣化や気候変動など（FAO）。',
   prob:'工夫で作れる量の増え方が、途中で弱まる',
-  names:{Eg:'新しい\n品種や技術',D:'工夫で\n増える量',Lm:'土地の劣化\n気候変動',N:'「研究が\n必要」の声',I:'農業研究\nへの投資'},
+  names:{Eg:'新しい品種・\n技術の広がり',D:'工夫による\n収穫の伸び',Lm:'土地の劣化・\n気候の影響',N:'研究が必要\nという認識',I:'農業研究\nへの投資額'},
   pr:['D'],data:['D'],
   story:['新しい品種や技術で、たくさん作れるようになる','もうかるので、さらに新しい技術が広がる','でも、やせた土地への広がりや土地の劣化がブレーキに','研究への投資が遅れて、伸びが弱まる'],
   lev:{t:'農業研究・土づくりへの公的投資をふやす',b:'新しい技術を、農家どうしの口コミで広める',a:'新しい技術を試す資金（補助・融資）で余裕を',key:'t'}},
@@ -417,7 +438,7 @@ const CARDS=[
     what:'赤い魚＝とりすぎのグループ（魚がふえるより速く、人がとっている）。FAOが「大西洋のタラ」のような魚のまとまりを調べた結果'},
   read:'1974年は10グループのうち1つだけだったのが、2021年は約3つ半がとりすぎに。だれのものでもない海の魚は、みんながとるほど減っていく。',
   prob:'海の魚が減り、1回の漁でとれる量が減る',
-  names:{Aa:'A国が\nとる魚',Ba:'B国が\nとる魚',T:'とる魚の\n合計',G:'1回の漁で\nとれる量',Lm:'海の魚が\nふえる力'},
+  names:{Aa:'A国の\n漁獲量',Ba:'B国の\n漁獲量',T:'漁獲量の\n合計',G:'1回の漁で\nとれる量',Lm:'魚の資源量'},
   pr:['G'],data:[],
   story:['それぞれの国や漁師が、もっと魚をとる','海全体で、とる量がふえすぎる','魚が回復できず、1回でとれる量が減る','それでも、とり合いが続く'],
   lev:{t:'とってよい量の上限（漁獲枠）を、国どうしで決める',b:'「とりすぎていない魚を選ぼう」を口コミで広める',a:'漁を休む間の収入を補い、守れる余裕を',key:'t'}},
@@ -426,7 +447,7 @@ const CARDS=[
   series:[{k:'chnN'}],
   read:'5kg（1961年）→235kg（2014年）と約45倍に。2015年、国が「肥料をもうふやさない」計画を始め、192kg（2023年）に。FAOは、肥料の使いすぎが土の傷みを「かくす」と指摘。',
   prob:'収穫の減り（土のやせ）が、根本から直らない',
-  names:{S:'土がやせて\n収穫が減る',Q:'化学肥料を\nふやす',E:'土が傷む\n（酸性・塩）',F:'土を元気に\nする工夫'},
+  names:{S:'収穫の\n少なさ',Q:'化学肥料\nの量',E:'土の傷み\n（酸性・塩）',F:'土づくりの\n取り組み'},
   pr:['S'],data:['Q'],
   story:['土がやせて、収穫が減る','肥料をふやすと、収穫がもどる','でも使いすぎで、土がさらに傷む','土を元気にする工夫が後回しになり、もっと肥料が必要に'],
   lev:{t:'肥料の使いすぎを減らすルールづくり',b:'土づくりの成功例を、農家どうしの口コミで広める',a:'肥料を減らしても収入が守られる補助を',key:'b'}},
@@ -435,10 +456,36 @@ const CARDS=[
   series:[{k:'asiaN'},{k:'afrN'}],shared:1,
   read:'アジアは4.5kg→113kg、アフリカは2.1kg→14kg（1961→2023年）。FAOは、アフリカの収穫が少ない理由の一つに、肥料などをほとんど使えないことを挙げている。',
   prob:'収穫の少ない地域が、取り残される',
-  names:{Ae:'アジアの\n収穫',Ar:'アジアで\n使える肥料',Al:'アジアに\n向くお金',Be:'アフリカ\nの収穫',Br:'アフリカで\n使える肥料'},
+  names:{Ae:'アジアの\n収穫量',Ar:'アジアで使う\n肥料の量',Al:'アジアへの\nかたより',Be:'アフリカの\n収穫量',Br:'アフリカで\n使う肥料の量'},
   pr:['Be'],data:['Ar','Br'],
   story:['収穫がふえた地域は、もうけで肥料や機械を買える','さらに収穫がふえ、お金や投資も集まる','収穫の少ない地域には、肥料を買うお金が回らない','差がどんどん広がる'],
-  lev:{t:'収穫の少ない地域への、肥料・種の支援政策',b:'使い方のコツを、農家グループで教え合う',a:'肥料を買うお金を借りやすく・補助して余裕を',key:'a'}}
+  lev:{t:'収穫の少ない地域への、肥料・種の支援政策',b:'使い方のコツを、農家グループで教え合う',a:'肥料を買うお金を借りやすく・補助して余裕を',key:'a'}},
+ {grp:'jp',src:'paper',hyp:1,id:'burden',c:'#E8790C',nm:'問題の転嫁',en:'Shifting the burden',tag:'すぐ効く方法に、頼りきり',
+  ttl:'塩は減ったのに、軽い高血圧は減らない',
+  pairs:{what:'論文の本文に書かれた、始めと終わりの値（男性・年齢調整なし）',items:[
+    {nm:'食塩',sub:'1日あたり',u:'g',a:[1995,15],b:[2019,10.9]},
+    {nm:'重い高血圧',sub:'Grade 2',u:'%',a:[1995,10.4],b:[2019,7.3]},
+    {nm:'軽い高血圧',sub:'Grade 1',u:'%',a:[1995,28.2],b:[2018,32.3]}]},
+  note:'年齢調整なし（高齢化の影響を含む）。2019年は血圧の測り方が変わったため、軽い高血圧は2018年の値。',
+  read:'食塩は15g→10.9gに減り、重い高血圧も減りました。一方、軽い高血圧は28.2%→32.3%と減っていません。論文は「減塩ばかりが強調され、食品群のバランスのよい栄養が手薄」と指摘しています。',
+  prob:'軽い高血圧が、なかなか減らない',
+  names:{S:'軽い高血圧\nの人の割合',Q:'減塩の呼びかけ\n・治療',E:'「減塩でOK」\nの安心感',F:'食事全体の\nバランス・運動'},
+  pr:['S'],data:['S','Q'],
+  story:['血圧の高さが問題になる','減塩の呼びかけや治療で、重い高血圧は減る','「塩さえ減らせばOK」と、ほかの対策が後回しに','食事全体のバランスや運動が育たず、軽い高血圧は減らない'],
+  lev:{t:'減塩だけでなく、食品群のバランスも目標と施策に入れる（論文の提言）',b:'男女で違う食習慣に合わせた声かけ・口コミ',a:'野菜や魚を選びやすくする手当・ポイント',key:'t'}},
+ {grp:'jp',src:'paper',think:1,id:'think',c:'#4A5578',nm:'型を考えるカード',en:'Which pattern is it?',tag:'この動き、どの型？',
+  ttl:'食べる量は減ったのに、太る人が増えた？',
+  pairs:{what:'論文の本文に書かれた、始めと終わりの値（男性・年齢調整なし）',items:[
+    {nm:'エネルギー',sub:'1日あたり',u:'kcal',a:[1995,2327],b:[2019,2141]},
+    {nm:'過体重・肥満',sub:'BMI 25以上',u:'%',a:[1995,23.8],b:[2019,33.0],goal:28}]},
+  note:'過体重・肥満の目標は28%未満（健康日本21、2022年まで）。食事記録では、食べた量が少なめに記録されることがあります。',
+  read:'エネルギーは2327→2141kcalに減ったのに、過体重・肥満は23.8%→33.0%に増えて、目標の28%を超えました。論文は、エネルギーだけが決め手ではなく、食事の西洋化（肉・脂が増え、魚・野菜が減った）や、体を動かす量の減少をあげています。',
+  prob:'食べる量は減ったのに、太る人が増えた？',
+  cands:['burden','fixes'],
+  candView:{"burden": {"prob": "太る人が、根本から減らない", "names": {"S": "過体重・肥満\nの人の割合", "Q": "食事制限の\n強さ", "E": "「量だけでOK」\nの安心感", "F": "食事の質・\n運動の習慣"}, "story": ["太る人が増えて、問題になる", "食事の量を制限する対策をする", "「量さえ気にすればOK」と、食事の中身や運動が後回しに", "食事の質や運動の習慣が育たず、太る人は減らない"]}, "fixes": {"prob": "減らしたはずが、また太りやすくなる", "names": {"P": "過体重・肥満\nの人の割合", "F": "食事制限の\n強さ", "U": "欠食・間食\nの回数"}, "story": ["太る人が増えて、問題になる", "食事の量を制限すると、その場は体重が減る", "でも食事をぬいて、そのぶん間食がふえる", "しばらくすると、また太りやすくなる"]}},
+  others:['食べた量を、少なめに記録していない？（過少申告）','食事の中身は？（肉・脂が増え、魚・野菜が減った）','体を動かす量は？（歩数の減少）','年齢の構成が変わった影響は？'],
+  names:{},pr:[],data:[],story:[],
+  lev:{t:'目標を「食べる量」だけでなく「食事の中身・運動」にも広げる',b:'男性に多い早食い・夜遅い食事を、職場や仲間で見直す',a:'魚や野菜を選びやすい値段・手当',key:'t'}}
 ];
 
 // 型の典型の形（tet_tool の botSVG2 と同じ線）
@@ -455,6 +502,7 @@ const TYP={
 
 // 型の名前に合わせたピクトグラム（白い線）
 const ICON={
+ think:'<circle cx="20" cy="20" r="14"/><path d="M15.5 15.5a4.5 4.5 0 1 1 6.3 4.1c-1.2.6-1.8 1.4-1.8 2.7v1"/><path d="M20 28.5h.01"/>',
  commons:'<circle cx="20" cy="21" r="7"/><path d="M20 14V4M17 7l3-3 3 3"/><path d="M14 26l-8 7M6 29v4h4"/><path d="M26 26l8 7M34 29v4h-4"/>',
  fixes:'<path d="M3 15h34M3 25h34"/><rect x="15" y="11" width="10" height="18" rx="2"/><path d="M30 25c0 3 3 4 3 7a3 3 0 0 1-6 0c0-3 3-4 3-7z"/>',
  success:'<path d="M6 34h28"/><path d="M8 28l9-9 6 4 11-13"/><path d="M28 10h6v6"/><path d="M8 28l9 1 6-1"/>',
@@ -474,22 +522,23 @@ const UI={
   levT:['トップダウン','政策・規制'],levB:['ボトムアップ','口コミ・周りの意識'],levA:['アフォーダビリティ','お金の余裕・感覚'],
   src:'出典：',srcSep:'／',zoom:'図を大きく',close:'閉じる',probL:'⚠ 問題：',point:'📊 データのポイント：',jp:'日本',world:'世界',
   infoJp:'野菜を食べることのデータ',infoW:'健康的な食事を買うお金がない人のデータ',infoSofa:'FAO 世界食料農業白書2025',infoStat:'FAO（FAOSTAT）のデータ',
-  probTag:'⚠ 問題',h1:'食のシステム編',help:'使い方',cols:'列',zout:'小さく（列をふやす）',zin:'大きく（列をへらす）',grip:'移動',gripT:'ドラッグして並びかえ',order:'並びを元にもどす',base:'2019年＝',yr:'年',dec:'年代',about:'約',cardAria:'のカード。めくると因果ループ図',loopAria:'の因果ループ図'},
+  probTag:'⚠ 問題',candOpen:'で読むとどうなるかを見る',candGo:'この型で読むと ▸',candH:'で読むと…',candNote:'これは一つの読み方（仮説）です。もう一方の型や、ほかの説明とも比べてみよう。',infoPaper:'論文（国民健康・栄養調査）のデータ',hyp:'論文の考察にもとづく仮説',noteL:'注',cands:'候補の型',others:'ほかの説明も考えよう',draw:'あなたなら、どんなループを描く？',drawSub:'変数と矢印を書きこんでみよう',typThink:'どの型の形に<br>近いかな？',h1:'食のシステム編',help:'使い方',cols:'列',zout:'小さく（列をふやす）',zin:'大きく（列をへらす）',grip:'移動',gripT:'ドラッグして並びかえ',order:'並びを元にもどす',base:'2019年＝',yr:'年',dec:'年代',about:'約',cardAria:'のカード。めくると因果ループ図',loopAria:'の因果ループ図'},
  en:{title:'System Behavior Cards | Food Systems',guess:'Guess mode',guessT:'Hide pattern names',reset:'Reset',resetT:'Flip all cards back and restore the original order',note:'Click to flip, drag to rearrange',lang:'日本語',
   graph:'📊 This graph shows…',stats:'🔢 By the numbers…',data:'Data: ',sep:', ',typ:'Typical shape<br>of this pattern',typBad:'up = worse',flip:'Flip me ↻',back:'Back to front ↻',
   same:'same direction',opp:'opposite direction',delay:'delay',front:'graph on the front',loop:'🔄 Going around the loop…',again:'↺ back to 1',hint:'💡 Ways out: how to use the three levers?',
   levT:['Top-down','Policy & regulation'],levB:['Bottom-up','Word of mouth & awareness'],levA:['Affordability','Financial room & money sense'],
   src:'Sources: ',srcSep:' / ',zoom:'Enlarge',close:'Close',probL:'⚠ Problem: ',point:'📊 Data point: ',jp:'Japan',world:'World',
   infoJp:'Data on eating vegetables',infoW:"Data on people who can't afford a healthy diet",infoSofa:'FAO, The State of Food and Agriculture 2025',infoStat:'FAO (FAOSTAT) data',
-  probTag:'⚠ Problem',h1:'Food Systems',help:'How to use',cols:' cols',zout:'Smaller (more columns)',zin:'Larger (fewer columns)',grip:'Move',gripT:'Drag to rearrange',order:'Reset order',base:'2019 = ',yr:'',dec:'s',about:'~',cardAria:' card. Flip to see the causal loop diagram',loopAria:' causal loop diagram'}
+  probTag:'⚠ Problem',candOpen:': see this reading',candGo:'Read it this way ▸',candH:': one way to read it',candNote:'This is one possible reading (a hypothesis). Compare it with the other pattern and other explanations.',infoPaper:'Data from a paper (NHNS)',hyp:'Hypothesis based on the paper',noteL:'Note',cands:'Candidate patterns',others:'Consider other explanations',draw:'What loop would you draw?',drawSub:'Write in variables and arrows',typThink:'Which pattern<br>shape is it?',h1:'Food Systems',help:'How to use',cols:' cols',zout:'Smaller (more columns)',zin:'Larger (fewer columns)',grip:'Move',gripT:'Drag to rearrange',order:'Reset order',base:'2019 = ',yr:'',dec:'s',about:'~',cardAria:' card. Flip to see the causal loop diagram',loopAria:' causal loop diagram'}
 };
 const u=k=>UI[LANG][k];
-const EN=[{"tag": "The goal slowly slips down", "ttl": "Fewer people are eating enough vegetables", "read": "Over 10 years, both women and men dropped about 7 points.", "prob": "The share eating enough vegetables slowly falls", "names": {"G": "Target\n(350 g/day)", "A": "Share eating\n350 g+", "Gp": "Gap to target", "Pr": "\"Too hard\"\nfeeling", "C": "Efforts to\neat more veg"}, "story": ["Few people reach 350 g", "People feel \"that's impossible\"", "The target quietly slips lower", "Less effort, so the share falls further"], "lev": {"t": "Keep the 350 g target of Health Japan 21; set vegetable standards for school and work meals", "b": "Share \"today's veggie dish\" on social media to raise the norm", "a": "Vegetable coupons or discounts give room for one more dish"}}, {"tag": "Grows, then hits a ceiling", "ttl": "Interest in vegetables stalled in 2022", "read": "Interest rose fast, then began to fall from 2022. Around the same time, vegetables became harder to afford (see the \"Vegetable affordability\" graph). Is price the brake?", "prob": "Interest stops growing partway", "names": {"E": "People trying\nvegetables", "S": "Interest in\nvegetables", "B": "\"Too pricey\"\nbrake", "C": "Rising veg\nprices"}, "story": ["More people try vegetables", "Word spreads and interest rises", "But people feel \"too expensive!\"", "The brake kicks in and growth stops"], "lev": {"t": "Stabilize vegetable prices through support for growers and stockpiles", "b": "Spread cheap, tasty ways to eat vegetables by word of mouth", "a": "Coupons or points so people can still buy when prices rise"}}, {"tag": "Demand outpaces preparation", "ttl": "Vegetables were most affordable until 2021", "read": "After that, vegetable prices outpaced wage growth, and by 2024 affordability was back to about the 2015 level. Did farming and distribution keep up?", "prob": "Would-be buyers drop off partway", "names": {"Eg": "Promoting\nvegetables", "D": "Would-be\nveg buyers", "Lm": "Veg shortage\n(higher prices)", "N": "Noticing\n\"not enough\"", "I": "Building\nsupply chains"}, "dataNote": " (opposite of affordability)", "story": ["Promotion increases would-be buyers", "Vegetables run short and prices rise", "People notice and start building supply", "Too late: high prices drive buyers away"], "lev": {"t": "Use policy to invest early in farms and distribution", "b": "Spread the word about seasonal, local vegetables to support growers", "a": "Temporary subsidies during price spikes keep room to buy"}}, {"tag": "Relying on the quick fix", "ttl": "Government messaging goes up and down", "read": "Messaging rises and falls like waves, while the share eating enough vegetables keeps falling (see the \"eating enough vegetables\" graph).", "prob": "The vegetable shortfall never really gets fixed", "names": {"S": "People eating\ntoo little veg", "Q": "Government\nmessaging", "E": "\"We campaigned,\njob done\"", "F": "Easy ways to\neat vegetables"}, "story": ["Low vegetable intake becomes a topic", "\"Eat your vegetables!\" campaigns help a little", "A \"we campaigned, job done\" feeling sets in", "Easy, cheap ways to eat veg never grow; the shortfall returns"], "lev": {"t": "Shift from campaigns to systems, e.g., veg standards for school meals", "b": "Share cooking and eating experiences with friends and family", "a": "Think \"cost per meal\" instead of \"vegetables are expensive\""}}, {"tag": "Quick fixes backfire later", "ttl": "Brazil: it fell, then rose higher than before", "read": "It improved temporarily in 2020 (26.0% → 19.4%), then worsened (29.8%). 2020 was the year of COVID emergency cash aid. Short-term measures alone may not bring lasting improvement.", "prob": "People struggling to eat well don't really decrease", "names": {"P": "Can't afford a\nhealthy diet", "F": "Temporary\ncash aid", "U": "Aid can't last,\nso it is cut"}, "story": ["COVID threatens more people's food", "The government rushes out cash, and numbers fall", "The money runs out and aid shrinks", "More people struggle than before"], "lev": {"t": "Plan how aid ends, and pair it with job and income policies", "b": "Spread and keep local food-sharing networks", "a": "Help households keep room in the budget for food after aid ends"}}, {"tag": "Winners keep winning; the gap widens", "ttl": "The gap between regions keeps widening", "read": "East Asia & Pacific fell from 29.3% to 17.8%, while Sub-Saharan Africa stayed around 70%. The gap grew from 41 to 53 points.", "prob": "Struggling regions get left behind", "names": {"Ae": "East Asia\ndiet gains", "Ar": "Money into\nEast Asia", "Al": "Investment\nfavoring E. Asia", "Be": "Africa\ndiet gains", "Br": "Money into\nAfrica"}, "dataNote": " (opposite of 'can't afford')", "story": ["Investment flows to the region that did a bit better", "More jobs and factories make it richer", "The other region gets little money", "The gap keeps growing"], "lev": {"t": "Target international aid and investment to regions left behind", "b": "Spread local success stories among farmers", "a": "Small loans that give people financial room"}}, {"tag": "Grows, then hits a ceiling", "ttl": "Lithuania: a fast drop, then stuck around 9%", "read": "It improved a lot at first (21.3% → 8.8%), then the gains got smaller. As progress is made, reaching the remaining people may become harder and more costly.", "prob": "Improvement stalls at some point", "names": {"E": "Rising\nwages", "S": "People who can\nafford meals", "B": "Hard-to-reach\nbarrier", "C": "Older people\non pensions"}, "dataNote": " (opposite of 'can't afford')", "story": ["Wages rise and more people can afford meals", "Money circulates and wages rise further", "But hard-to-reach people, like pension-only elders, remain", "It barely falls any further"], "lev": {"t": "Design programs aimed at hard-to-reach people, such as older adults", "b": "Community check-ins let people know support exists", "a": "Food allowances for pension-only households"}}, {"tag": "Demand outpaces preparation", "ttl": "World farming: gains from innovation nearly halved in the 2010s", "bars": {"name": "Extra kg, 10 years later, from a field that yielded 100 kg", "what": "Gains from new crop varieties and technology alone, with the same land and fertilizer (world average)"}, "read": "In the 2000s, innovation added +22 kg per decade; in the 2010s only +12 kg, almost half. Output didn't fall; the gain from innovation got smaller. Causes include land degradation and climate change (FAO).", "prob": "Gains from innovation weaken partway", "names": {"Eg": "New varieties\n& technology", "D": "Output gained\nby innovation", "Lm": "Degraded land\n& climate", "N": "Calls for\nmore research", "I": "Investment in\nfarm research"}, "story": ["New varieties and technology raise output", "Profits spread new technology further", "But degraded land and poorer fields act as a brake", "Research investment lags, and growth weakens"], "lev": {"t": "Increase public investment in farm research and soil health while growth lasts", "b": "Spread new techniques from farmer to farmer", "a": "Grants or loans give farmers room to try new technology"}}, {"tag": "Overused by all, until it's gone", "ttl": "World oceans: overfished stocks rose from 1 in 10 to about 3.5 in 10", "pict": {"name": "If the world's fish were \"10 groups\"…", "what": "Red fish = overfished groups (caught faster than they can recover). From FAO assessments of fish stocks such as \"Atlantic cod\"."}, "read": "In 1974 only 1 in 10 groups was overfished; by 2021 about 3.5 in 10. Fish in the open sea belong to no one, so the more everyone catches, the fewer remain.", "prob": "Fish decline, and each trip catches less", "names": {"Aa": "Country A's\ncatch", "Ba": "Country B's\ncatch", "T": "Total\ncatch", "G": "Catch per\nfishing trip", "Lm": "Fish stocks'\nrecovery"}, "story": ["Each country and fisher catches more", "The total catch grows too large", "Fish can't recover, and each trip catches less", "Yet the race to catch continues"], "lev": {"t": "Countries agree on catch limits (quotas)", "b": "Spread \"choose fish that aren't overfished\" by word of mouth", "a": "Compensate fishers' income during closed seasons"}}, {"tag": "Relying on the quick fix", "ttl": "China: fertilizer use rose 45×, then began to fall", "read": "5 kg (1961) → 235 kg (2014), about 45 times. In 2015 the government launched a plan to stop increasing fertilizer use; 192 kg in 2023. FAO notes that overuse can \"hide\" soil damage.", "prob": "Falling yields (poor soil) are never fixed at the root", "names": {"S": "Poor soil,\nlower yields", "Q": "More chemical\nfertilizer", "E": "Damaged soil\n(acid, salt)", "F": "Soil-building\npractices"}, "story": ["Soil wears out and yields fall", "More fertilizer brings yields back", "But overuse damages the soil further", "Soil care is put off, so even more fertilizer is needed"], "lev": {"t": "Rules and support to cut fertilizer overuse", "b": "Spread soil-building successes from farmer to farmer", "a": "Subsidies that protect income while using less fertilizer"}}, {"tag": "Winners keep winning; the gap widens", "ttl": "Fertilizer access: the gap between regions widened", "read": "Asia rose from 4.5 kg to 113 kg; Africa from 2.1 kg to 14 kg (1961 → 2023). FAO cites very limited fertilizer use as one reason for low yields in Africa.", "prob": "Low-yield regions get left behind", "names": {"Ae": "Yields in\nAsia", "Ar": "Fertilizer\nused in Asia", "Al": "Money\nfavoring Asia", "Be": "Yields in\nAfrica", "Br": "Fertilizer used\nin Africa"}, "story": ["Higher-yield regions use profits to buy fertilizer and machines", "Yields rise more, attracting money and investment", "Low-yield regions can't afford fertilizer", "The gap keeps growing"], "lev": {"t": "Support for fertilizer and seeds in low-yield regions", "b": "Farmer groups share know-how", "a": "Easier loans and subsidies to buy fertilizer"}}];
+const EN=[{"tag": "The goal slowly slips down", "ttl": "Fewer people are eating enough vegetables", "read": "Over 10 years, both women and men dropped about 7 points.", "prob": "The share eating enough vegetables slowly falls", "names": {"G": "Target\n(350 g/day)", "A": "Share eating\n350 g+", "Gp": "Gap to target", "Pr": "\"Too hard\"\nfeeling", "C": "Veg-eating\nefforts"}, "story": ["Few people reach 350 g", "People feel \"that's impossible\"", "The target quietly slips lower", "Less effort, so the share falls further"], "lev": {"t": "Keep the 350 g target of Health Japan 21; set vegetable standards for school and work meals", "b": "Share \"today's veggie dish\" on social media to raise the norm", "a": "Vegetable coupons or discounts give room for one more dish"}}, {"tag": "Grows, then hits a ceiling", "ttl": "Interest in vegetables stalled in 2022", "read": "Interest rose fast, then began to fall from 2022. Around the same time, vegetables became harder to afford (see the \"Vegetable affordability\" graph). Is price the brake?", "prob": "Interest stops growing partway", "names": {"E": "People trying\nvegetables", "S": "Interest in\nvegetables", "B": "Sense that veg\nis \"too pricey\"", "C": "Vegetable\nprices"}, "story": ["More people try vegetables", "Word spreads and interest rises", "But people feel \"too expensive!\"", "The brake kicks in and growth stops"], "lev": {"t": "Stabilize vegetable prices through support for growers and stockpiles", "b": "Spread cheap, tasty ways to eat vegetables by word of mouth", "a": "Coupons or points so people can still buy when prices rise"}}, {"tag": "Demand outpaces preparation", "ttl": "Vegetables were most affordable until 2021", "read": "After that, vegetable prices outpaced wage growth, and by 2024 affordability was back to about the 2015 level. Did farming and distribution keep up?", "prob": "Would-be buyers drop off partway", "names": {"Eg": "Veg promotion\nefforts", "D": "Would-be\nveg buyers", "Lm": "Vegetable\nscarcity", "N": "Perceived need\nto invest", "I": "Investment in\nsupply chains"}, "dataNote": " (opposite of affordability)", "story": ["Promotion increases would-be buyers", "Vegetables run short and prices rise", "People notice and start building supply", "Too late: high prices drive buyers away"], "lev": {"t": "Use policy to invest early in farms and distribution", "b": "Spread the word about seasonal, local vegetables to support growers", "a": "Temporary subsidies during price spikes keep room to buy"}}, {"tag": "Relying on the quick fix", "ttl": "Government messaging goes up and down", "read": "Messaging rises and falls like waves, while the share eating enough vegetables keeps falling (see the \"eating enough vegetables\" graph).", "prob": "The vegetable shortfall never really gets fixed", "names": {"S": "Share eating\ntoo little veg", "Q": "Government\nmessaging", "E": "\"We campaigned\"\ncomplacency", "F": "Easy ways to\neat vegetables"}, "story": ["Low vegetable intake becomes a topic", "\"Eat your vegetables!\" campaigns help a little", "A \"we campaigned, job done\" feeling sets in", "Easy, cheap ways to eat veg never grow; the shortfall returns"], "lev": {"t": "Shift from campaigns to systems, e.g., veg standards for school meals", "b": "Share cooking and eating experiences with friends and family", "a": "Think \"cost per meal\" instead of \"vegetables are expensive\""}}, {"tag": "Quick fixes backfire later", "ttl": "Brazil: it fell, then rose higher than before", "read": "It improved temporarily in 2020 (26.0% → 19.4%), then worsened (29.8%). 2020 was the year of COVID emergency cash aid. Short-term measures alone may not bring lasting improvement.", "prob": "People struggling to eat well don't really decrease", "names": {"P": "Share unable to\nafford healthy diet", "F": "Emergency\ncash aid", "U": "Fiscal\nburden"}, "story": ["COVID threatens more people's food", "The government rushes out cash, and numbers fall", "The money runs out and aid shrinks", "More people struggle than before"], "lev": {"t": "Plan how aid ends, and pair it with job and income policies", "b": "Spread and keep local food-sharing networks", "a": "Help households keep room in the budget for food after aid ends"}}, {"tag": "Winners keep winning; the gap widens", "ttl": "The gap between regions keeps widening", "read": "East Asia & Pacific fell from 29.3% to 17.8%, while Sub-Saharan Africa stayed around 70%. The gap grew from 41 to 53 points.", "prob": "Struggling regions get left behind", "names": {"Ae": "East Asia\ndiet quality", "Ar": "Investment in\nEast Asia", "Al": "Tilt toward\nEast Asia", "Be": "Africa\ndiet quality", "Br": "Investment in\nAfrica"}, "dataNote": " (opposite of 'can't afford')", "story": ["Investment flows to the region that did a bit better", "More jobs and factories make it richer", "The other region gets little money", "The gap keeps growing"], "lev": {"t": "Target international aid and investment to regions left behind", "b": "Spread local success stories among farmers", "a": "Small loans that give people financial room"}}, {"tag": "Grows, then hits a ceiling", "ttl": "Lithuania: a fast drop, then stuck around 9%", "read": "It improved a lot at first (21.3% → 8.8%), then the gains got smaller. As progress is made, reaching the remaining people may become harder and more costly.", "prob": "Improvement stalls at some point", "names": {"E": "Wage\nlevel", "S": "Share able to\nafford meals", "B": "Difficulty of\nreaching people", "C": "Pension-only\nhouseholds"}, "dataNote": " (opposite of 'can't afford')", "story": ["Wages rise and more people can afford meals", "Money circulates and wages rise further", "But hard-to-reach people, like pension-only elders, remain", "It barely falls any further"], "lev": {"t": "Design programs aimed at hard-to-reach people, such as older adults", "b": "Community check-ins let people know support exists", "a": "Food allowances for pension-only households"}}, {"tag": "Demand outpaces preparation", "ttl": "World farming: gains from innovation nearly halved in the 2010s", "bars": {"name": "Extra kg, 10 years later, from a field that yielded 100 kg", "what": "Gains from new crop varieties and technology alone, with the same land and fertilizer (world average)"}, "read": "In the 2000s, innovation added +22 kg per decade; in the 2010s only +12 kg, almost half. Output didn't fall; the gain from innovation got smaller. Causes include land degradation and climate change (FAO).", "prob": "Gains from innovation weaken partway", "names": {"Eg": "Spread of new\nvarieties & tech", "D": "Yield gains from\ninnovation", "Lm": "Land degradation\n& climate effects", "N": "Perceived need\nfor research", "I": "Investment in\nfarm research"}, "story": ["New varieties and technology raise output", "Profits spread new technology further", "But degraded land and poorer fields act as a brake", "Research investment lags, and growth weakens"], "lev": {"t": "Increase public investment in farm research and soil health while growth lasts", "b": "Spread new techniques from farmer to farmer", "a": "Grants or loans give farmers room to try new technology"}}, {"tag": "Overused by all, until it's gone", "ttl": "World oceans: overfished stocks rose from 1 in 10 to about 3.5 in 10", "pict": {"name": "If the world's fish were \"10 groups\"…", "what": "Red fish = overfished groups (caught faster than they can recover). From FAO assessments of fish stocks such as \"Atlantic cod\"."}, "read": "In 1974 only 1 in 10 groups was overfished; by 2021 about 3.5 in 10. Fish in the open sea belong to no one, so the more everyone catches, the fewer remain.", "prob": "Fish decline, and each trip catches less", "names": {"Aa": "Country A's\ncatch", "Ba": "Country B's\ncatch", "T": "Total\ncatch", "G": "Catch per\nfishing trip", "Lm": "Fish stock"}, "story": ["Each country and fisher catches more", "The total catch grows too large", "Fish can't recover, and each trip catches less", "Yet the race to catch continues"], "lev": {"t": "Countries agree on catch limits (quotas)", "b": "Spread \"choose fish that aren't overfished\" by word of mouth", "a": "Compensate fishers' income during closed seasons"}}, {"tag": "Relying on the quick fix", "ttl": "China: fertilizer use rose 45×, then began to fall", "read": "5 kg (1961) → 235 kg (2014), about 45 times. In 2015 the government launched a plan to stop increasing fertilizer use; 192 kg in 2023. FAO notes that overuse can \"hide\" soil damage.", "prob": "Falling yields (poor soil) are never fixed at the root", "names": {"S": "Low\nyields", "Q": "Chemical\nfertilizer use", "E": "Soil damage\n(acid, salt)", "F": "Soil-building\npractices"}, "story": ["Soil wears out and yields fall", "More fertilizer brings yields back", "But overuse damages the soil further", "Soil care is put off, so even more fertilizer is needed"], "lev": {"t": "Rules and support to cut fertilizer overuse", "b": "Spread soil-building successes from farmer to farmer", "a": "Subsidies that protect income while using less fertilizer"}}, {"tag": "Winners keep winning; the gap widens", "ttl": "Fertilizer access: the gap between regions widened", "read": "Asia rose from 4.5 kg to 113 kg; Africa from 2.1 kg to 14 kg (1961 → 2023). FAO cites very limited fertilizer use as one reason for low yields in Africa.", "prob": "Low-yield regions get left behind", "names": {"Ae": "Yields in\nAsia", "Ar": "Fertilizer\nuse in Asia", "Al": "Tilt toward\nAsia", "Be": "Yields in\nAfrica", "Br": "Fertilizer use\nin Africa"}, "story": ["Higher-yield regions use profits to buy fertilizer and machines", "Yields rise more, attracting money and investment", "Low-yield regions can't afford fertilizer", "The gap keeps growing"], "lev": {"t": "Support for fertilizer and seeds in low-yield regions", "b": "Farmer groups share know-how", "a": "Easier loans and subsidies to buy fertilizer"}}, {"tag": "Relying on the quick fix", "ttl": "Less salt, but mild high blood pressure isn't falling", "pairs": {"what": "Start and end values stated in the paper (men, not age-adjusted)", "items": [{"nm": "Salt", "sub": "per day"}, {"nm": "Severe hypertension", "sub": "Grade 2"}, {"nm": "Mild hypertension", "sub": "Grade 1"}]}, "note": "Not age-adjusted (includes aging). Measurement changed in 2019, so mild hypertension uses 2018.", "read": "Salt fell from 15 g to 10.9 g, and severe hypertension also fell. Mild hypertension, however, did not fall (28.2% → 32.3%). The paper notes that campaigns emphasize salt reduction rather than balanced nutrition from food groups.", "prob": "Mild high blood pressure isn't really falling", "names": {"S": "Share with mild\nhypertension", "Q": "Salt campaigns\n& treatment", "E": "\"Less salt is\nenough\" feeling", "F": "Balanced diet\n& exercise"}, "story": ["High blood pressure becomes a concern", "Salt campaigns and treatment reduce severe cases", "\"Less salt is enough\" puts other measures off", "Balanced diet and exercise lag; mild cases stay"], "lev": {"t": "Add food-group balance, not just salt, to targets (the paper's proposal)", "b": "Messages tailored to men's and women's habits", "a": "Support or points that make vegetables and fish easier to choose"}}, {"tag": "Which pattern does this movement fit?", "ttl": "People eat less, yet more are overweight?", "pairs": {"what": "Start and end values stated in the paper (men, not age-adjusted)", "items": [{"nm": "Energy", "sub": "per day"}, {"nm": "Overweight/obesity", "sub": "BMI ≥ 25"}]}, "note": "Target: under 28% (Health Japan 21, by 2022). Food records can under-report intake.", "read": "Energy intake fell from 2327 to 2141 kcal, yet overweight/obesity rose from 23.8% to 33.0%, above the 28% target. The paper suggests energy is not the only factor, pointing to a westernized diet (more meat and fat, less fish and vegetables) and less physical activity.", "prob": "People eat less, yet more are overweight?", "others": ["Is food intake under-reported?", "What about diet quality? (more meat/fat, less fish/veg)", "What about physical activity? (fewer steps)", "What about changes in age structure?"], "lev": {"t": "Broaden targets from \"how much\" to diet quality and activity", "b": "Rethink fast eating and late meals (common in men) with coworkers and friends", "a": "Support that makes fish and vegetables easier to afford"}, "candView": {"burden": {"prob": "Overweight isn't reduced at the root", "names": {"S": "Share\noverweight", "Q": "Strictness of\ndieting", "E": "\"Only amount\nmatters\" feeling", "F": "Diet quality &\nactivity habits"}, "story": ["More people become overweight", "Measures focus on limiting how much people eat", "\"Only the amount matters\" puts diet quality and exercise off", "Healthy eating and activity habits never grow, so overweight stays"]}, "fixes": {"prob": "Cutting back, yet weight comes back", "names": {"P": "Share\noverweight", "F": "Strictness of\ndieting", "U": "Skipped meals\n& snacking"}, "story": ["More people become overweight", "Limiting food lowers weight for a while", "But meals get skipped, and snacking increases", "After a while, weight gain becomes easier again"]}}}];
 const DEN={"y_f": {"hi": "More", "lo": "Less", "name": "Women eating enough vegetables", "what": "Share eating 350 g+ of vegetables a day"}, "y_m": {"hi": "More", "lo": "Less", "name": "Men eating enough vegetables", "what": "Share eating 350 g+ of vegetables a day"}, "x1": {"hi": "More", "lo": "Less", "name": "Amount of government messaging", "u": "2019 = 100", "what": "How often \"vegetables, nutrition, health\" appear in the Shokuiku (food education) White Paper"}, "x2": {"hi": "High", "lo": "Low", "name": "Interest in vegetables", "u": "2019 = 50", "what": "How often vegetables were searched online"}, "x3": {"hi": "Easier", "lo": "Harder", "name": "Vegetable affordability", "u": "2019 = 100", "what": "How many vegetables wages can buy"}, "bra": {"hi": "More", "lo": "Less", "name": "Brazil", "what": "Share who can't afford a healthy diet (up = worse)"}, "eap": {"hi": "More", "lo": "Less", "name": "East Asia & Pacific", "what": "Share who can't afford a healthy diet (up = worse)"}, "ssa": {"hi": "More", "lo": "Less", "name": "Sub-Saharan Africa", "what": "Share who can't afford a healthy diet (up = worse)"}, "ltu": {"hi": "More", "lo": "Less", "name": "Lithuania", "what": "Share who can't afford a healthy diet (up = worse)"}, "tfp": {"hi": "Faster", "lo": "Slower", "name": "Pace of gains from innovation", "what": "Yearly % gain in output from varieties and technology, without more land or fertilizer (decade average)"}, "chnN": {"hi": "More", "lo": "Less", "name": "China", "what": "Nitrogen fertilizer used per hectare of cropland (kg)"}, "asiaN": {"hi": "More", "lo": "Less", "name": "Asia", "what": "Nitrogen fertilizer used per hectare of cropland (kg)"}, "afrN": {"hi": "More", "lo": "Less", "name": "Africa", "what": "Nitrogen fertilizer used per hectare of cropland (kg)"}, "fish": {"hi": "More", "lo": "Less", "name": "Share of overfished stocks", "what": "Fish grouped by species and sea area (e.g., Atlantic cod): share caught faster than they recover"}};
-const REFS_EN={"国民健康・栄養調査": [["MHLW, National Health and Nutrition Survey (Japan)", "https://www.mhlw.go.jp/bunya/kenkou/kenkou_eiyou_chousa.html"]], "Googleトレンド": [["Google Trends", "https://trends.google.co.jp/trends/"]], "家計調査・消費者物価指数": [["Statistics Bureau of Japan, Family Income and Expenditure Survey", "https://www.stat.go.jp/data/kakei/"], ["Statistics Bureau of Japan, Consumer Price Index", "https://www.stat.go.jp/data/cpi/"]], "食育白書": [["MAFF, White Paper on Shokuiku (Japan)", "https://www.maff.go.jp/j/syokuiku/wpaper/"]], "世界銀行・FAO": [["World Bank & FAO, Food Prices for Nutrition", "https://www.worldbank.org/en/programs/icp/brief/foodpricesfornutrition"], ["Our World in Data (chart data)", "https://ourworldindata.org/grapher/share-healthy-diet-unaffordable"]], "FAO 世界食料農業白書2025": [["FAO, The State of Food and Agriculture 2025, Figure 4", "https://doi.org/10.4060/cd7067en-fig04"]], "FAO（SDG指標14.4.1）": [["FAO (SDG indicator 14.4.1) / Our World in Data", "https://ourworldindata.org/grapher/share-of-fish-stocks-overexploited"]], "FAOSTAT": [["FAOSTAT (fertilizers) / Our World in Data", "https://ourworldindata.org/grapher/nitrogen-fertilizer-application-per-hectare-of-cropland"], ["FAOSTAT", "https://www.fao.org/faostat/en/"]]};
+const REFS_EN={"paper":[["Fauzi et al. (2022) J. Clin. Med. 11:2350","https://doi.org/10.3390/jcm11092350"],["MHLW, National Health and Nutrition Survey (Japan)","https://www.mhlw.go.jp/bunya/kenkou/kenkou_eiyou_chousa.html"]],"国民健康・栄養調査": [["MHLW, National Health and Nutrition Survey (Japan)", "https://www.mhlw.go.jp/bunya/kenkou/kenkou_eiyou_chousa.html"]], "Googleトレンド": [["Google Trends", "https://trends.google.co.jp/trends/"]], "家計調査・消費者物価指数": [["Statistics Bureau of Japan, Family Income and Expenditure Survey", "https://www.stat.go.jp/data/kakei/"], ["Statistics Bureau of Japan, Consumer Price Index", "https://www.stat.go.jp/data/cpi/"]], "食育白書": [["MAFF, White Paper on Shokuiku (Japan)", "https://www.maff.go.jp/j/syokuiku/wpaper/"]], "世界銀行・FAO": [["World Bank & FAO, Food Prices for Nutrition", "https://www.worldbank.org/en/programs/icp/brief/foodpricesfornutrition"], ["Our World in Data (chart data)", "https://ourworldindata.org/grapher/share-healthy-diet-unaffordable"]], "FAO 世界食料農業白書2025": [["FAO, The State of Food and Agriculture 2025, Figure 4", "https://doi.org/10.4060/cd7067en-fig04"]], "FAO（SDG指標14.4.1）": [["FAO (SDG indicator 14.4.1) / Our World in Data", "https://ourworldindata.org/grapher/share-of-fish-stocks-overexploited"]], "FAOSTAT": [["FAOSTAT (fertilizers) / Our World in Data", "https://ourworldindata.org/grapher/nitrogen-fertilizer-application-per-hectare-of-cropland"], ["FAOSTAT", "https://www.fao.org/faostat/en/"]]};
 const DD=k=>LANG==='en'?{...D[k],...DEN[k]}:D[k];
 const loc=(c,ix)=>{if(LANG!=='en')return c;const e=EN[ix];return {...c,...e,nm:c.en,en:c.nm,
-  pict:c.pict?{...c.pict,...e.pict}:undefined,bars:c.bars?{...c.bars,...e.bars}:undefined};};
+  pict:c.pict?{...c.pict,...e.pict}:undefined,bars:c.bars?{...c.bars,...e.bars}:undefined,
+  pairs:c.pairs?{...c.pairs,...e.pairs,items:c.pairs.items.map((it,i)=>({...it,...((e.pairs&&e.pairs.items[i])||{})}))}:undefined};};
 // 文字の幅（日本語は1文字分、英数字は約0.58文字分）
 const tw=(t,fs)=>[...t].reduce((w,ch)=>w+(ch.charCodeAt(0)>255?fs:fs*.58),0);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -567,12 +616,12 @@ function cldSVG(card){
 }
 
 // 並び順（CARDSの番号）：日本と世界をまぜて、同じ型がとなり合わないようにする
-const ORDER=[0,4,1,8,2,5,7,3,6,9,10];
+const ORDER=[0,4,1,8,2,5,7,3,6,9,10,11,12];
 const ORIG_ORDER=[...ORDER];
 // 日本か世界かのタグ
 const place=c=>c.grp==='world'
   ?`<span class="place world">${u('world')}</span><span class="placeinfo">${c.src==='fao'?(c.id==='under'?u('infoSofa'):u('infoStat')):u('infoW')}</span>`
-  :`<span class="place jp">${u('jp')}</span><span class="placeinfo">${u('infoJp')}</span>`;
+  :`<span class="place jp">${u('jp')}</span><span class="placeinfo">${c.src==='paper'?u('infoPaper'):u('infoJp')}</span>${c.hyp?`<span class="hyp">${u('hyp')}</span>`:''}`;
 
 // 魚の絵（10グループのうち、とりすぎの分を赤くぬる）
 function pictBox(c){
@@ -600,6 +649,29 @@ function barBox(c){
   return {svg:`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(c.ttl)}">${g}</svg>`,
     leg:`<div class="lg"><div><b>${esc(B.name)}</b><small>${esc(B.what)}</small></div></div>`,src:[D[B.k].src]};
 }
+
+// 始めと終わりの2点を結ぶグラフ（論文の本文にある値だけを使う）
+function pairBox(c){
+  const P=c.pairs,n=P.items.length,W=320,H=150,pw=W/n;let g='';const F=(v,u)=>u==='%'?v.toFixed(1):String(v);
+  P.items.forEach((it,i)=>{
+    const x0=i*pw+16,x1=(i+1)*pw-16,yT=44,y0=H-30,vals=[it.a[1],it.b[1]].concat(it.goal!=null?[it.goal]:[]);
+    let lo=Math.min(...vals),hi=Math.max(...vals),pd=(hi-lo)*.25||1;lo-=pd;hi+=pd;const Y=v=>y0-(y0-yT)*(v-lo)/(hi-lo);
+    const up=it.b[1]>it.a[1],col=up?'#D0336B':'#1E88C8';
+    g+=`<text x="${(x0+x1)/2}" y="14" font-size="12.5" font-weight="800" text-anchor="middle" fill="#23263A">${esc(it.nm)} <tspan fill="${col}">${up?'↑':'↓'}</tspan></text>
+      <text x="${(x0+x1)/2}" y="28" font-size="10" text-anchor="middle" fill="#6B7088">${esc(it.sub)}</text>`;
+    if(it.goal!=null){g+=`<path d="M${x0-6},${Y(it.goal)}H${x1+6}" stroke="#E8790C" stroke-width="1.5" stroke-dasharray="4 3"/><text x="${x1+6}" y="${Y(it.goal)-4}" font-size="9.5" text-anchor="end" fill="#B35A00" font-weight="700">${LANG==='en'?'target':'目標'} ${it.goal}${it.u}</text>`;}
+    g+=`<path class="dl" d="M${x0},${Y(it.a[1])}L${x1},${Y(it.b[1])}" stroke="${col}" stroke-width="5" stroke-linecap="round" fill="none"/>
+      <circle cx="${x0}" cy="${Y(it.a[1])}" r="4" fill="#23263A"/><circle cx="${x1}" cy="${Y(it.b[1])}" r="4" fill="#23263A"/>
+      <text x="${x0}" y="${Y(it.a[1])+(up?18:-9)}" font-size="13" font-weight="800" text-anchor="middle" fill="#23263A" stroke="#fff" stroke-width="3" paint-order="stroke">${F(it.a[1],it.u)}</text>
+      <text x="${x1}" y="${Y(it.b[1])+(up?-9:18)}" font-size="13" font-weight="800" text-anchor="middle" fill="${col}" stroke="#fff" stroke-width="3" paint-order="stroke">${F(it.b[1],it.u)}</text>
+      <text x="${x0}" y="${H-12}" font-size="10" text-anchor="middle" fill="#6B7088">${it.a[0]}</text>
+      <text x="${x1}" y="${H-12}" font-size="10" text-anchor="middle" fill="#6B7088">${it.b[0]}</text>
+      <text x="${(x0+x1)/2}" y="${H-12}" font-size="10" text-anchor="middle" fill="#6B7088">${esc(it.u)}</text>`;
+    if(i)g+=`<path d="M${i*pw},36V${H-26}" stroke="#E2E4F0" stroke-width="1.5"/>`;
+  });
+  return {svg:`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(c.ttl)}">${g}</svg>`,
+    leg:`<div class="lg"><div><small>${esc(P.what)}</small></div></div>`,src:[c.src]};
+}
 function statsBox(c){
   const svg=`<div class="stats">${c.stats.map(x=>`<div class="st"><b style="color:${c.c}">${esc(x.v)}</b><span>${esc(x.l)}</span></div>`).join('')}</div>`;
   return {svg,leg:'',src:['FAO 世界食料農業白書2025']};
@@ -607,6 +679,7 @@ function statsBox(c){
 
 // 出典（クリックで開ける）
 const REFS={
+ 'paper':[['Fauzi ほか（2022）J. Clin. Med. 11:2350','https://doi.org/10.3390/jcm11092350'],['厚生労働省「国民健康・栄養調査」','https://www.mhlw.go.jp/bunya/kenkou/kenkou_eiyou_chousa.html']],
  '国民健康・栄養調査':[['厚生労働省「国民健康・栄養調査」','https://www.mhlw.go.jp/bunya/kenkou/kenkou_eiyou_chousa.html']],
  'Googleトレンド':[['Google トレンド','https://trends.google.co.jp/trends/']],
  '家計調査・消費者物価指数':[['総務省統計局「家計調査」','https://www.stat.go.jp/data/kakei/'],['総務省統計局「消費者物価指数」','https://www.stat.go.jp/data/cpi/']],
@@ -618,7 +691,7 @@ const REFS={
 };
 const refLinks=(src,sep)=>src.flatMap(k=>(LANG==='en'?REFS_EN:REFS)[k]||[[k,'']]).map(([t,u])=>u?`<a href="${u}" target="_blank" rel="noopener">${esc(t)}</a>`:esc(t)).join(sep);
 function render(){
-  const html=(c0,ix)=>{const c=loc(c0,ix);const d=c.stats?statsBox(c):c.pict?pictBox(c):c.bars?barBox(c):dataSVG(c);return `
+  const html=(c0,ix)=>{const c=loc(c0,ix);const d=c.stats?statsBox(c):c.pict?pictBox(c):c.bars?barBox(c):c.pairs?pairBox(c):dataSVG(c);return `
   <div class="card" data-ix="${ix}" tabindex="0" role="button" aria-pressed="false" aria-label="${esc(c.nm)}${u('cardAria')}" style="--c:${c.c}">
    <span class="grip" title="${u('gripT')}" aria-hidden="true">⠿</span>
    <div class="inner">
@@ -630,14 +703,25 @@ function render(){
         <div class="gbox">
           ${c.stats?'':`<div class="legend">${d.leg}</div>`}
           ${d.svg}
+          ${c.note?`<div class="cnote"><b>${u('noteL')}</b>${esc(c.note)}</div>`:''}
           <div class="gsrc">${u('data')}${refLinks(d.src,u('sep'))}</div>
         </div>
       </div>
-      <div class="foot"><div class="shape"><span class="sl">${u('typ')}${c.bad?`<small>${u('typBad')}</small>`:''}</span>${typSVG(c.id,c.c,c.bad)}</div><span class="pill">${u('flip')}</span></div>
+      <div class="foot"><div class="shape">${c.think?`<span class="sl">${u('typThink')}</span><span class="thq" aria-hidden="true">？</span>`:`<span class="sl">${u('typ')}${c.bad?`<small>${u('typBad')}</small>`:''}</span>${typSVG(c.id,c.c,c.bad)}`}</div><span class="pill">${u('flip')}</span></div>
     </section>
     <section class="face back">
       <div class="hd"><b>${esc(c.nm)}</b><span class="place ${c.grp==='world'?'world':'jp'}">${c.grp==='world'?u('world'):u('jp')}</span></div>
-      <div class="body">
+      ${c.think?`<div class="body">
+        <div class="prob tq">❓ ${esc(c.prob)}</div>
+        <span class="lbl">${u('cands')}</span>
+        <div class="cands">${c.cands.map(id=>{const T=TYPES.find(t=>t.id===id);return `<button type="button" class="cand" data-cand="${id}" style="--c:${T.c}" aria-label="${esc(T[LANG][0])}${u('candOpen')}">${typSVG(id,T.c)}<b>${esc(T[LANG][0])}</b><span class="cgo">${u('candGo')}</span></button>`;}).join('')}</div>
+        <span class="lbl">${u('others')}</span>
+        <ul class="others">${c.others.map(o=>`<li>${esc(o)}</li>`).join('')}</ul>
+        <div class="drawbox"><b>${u('draw')}</b><span>${u('drawSub')}</span></div>
+        <div class="hint"><b>${u('hint')}</b>
+          ${[['t','🏛️',...u('levT')],['b','🙋',...u('levB')],['a','💴',...u('levA')]].map(([k,ic,nm,sub])=>`<div class="lev"><span class="ln">${ic}${nm}<small>${sub}</small></span><span class="lt">${esc(c.lev[k])}</span></div>`).join('')}
+        </div>
+      </div>`:`      <div class="body">
         <div class="prob">⚠ ${esc(c.prob)}</div>
         <div class="cldbox">${cldSVG(c)}<button class="zoom" type="button">${u('zoom')}</button></div>
         <div class="key"><span><em style="color:#D0336B">＋</em> ${u('same')}</span><span><em style="color:#1E88C8">−</em> ${u('opp')}</span><span><em>∥</em> ${u('delay')}</span>${c.data.length?`<span><em style="color:#E8790C">■</em> ${u('front')}${c.dataNote?esc(c.dataNote):''}</span>`:''}</div>
@@ -645,8 +729,7 @@ function render(){
         <div class="hint"><b>${u('hint')}</b>
           ${[['t','🏛️',...u('levT')],['b','🙋',...u('levB')],['a','💴',...u('levA')]].map(([k,ic,nm,sub])=>`<div class="lev"><span class="ln">${ic}${nm}<small>${sub}</small></span><span class="lt">${esc(c.lev[k])}</span></div>`).join('')}
         </div>
-      </div>
-
+      </div>`}
     </section>
    </div>
   </div>`;};
@@ -658,11 +741,18 @@ function render(){
       if(el._flipping)return;el._flipping=true;
       inn.animate([{transform:'scaleX(1)'},{transform:'scaleX(0)'}],{duration:170,easing:'ease-in'}).onfinish=()=>{done();
         inn.animate([{transform:'scaleX(0)'},{transform:'scaleX(1)'}],{duration:210,easing:'ease-out'}).onfinish=()=>{el._flipping=false;};};};
-    el.addEventListener('click',e=>{if(e.target.closest('a,.grip')||justDragged)return;flip();});
-    el.querySelector('.zoom').addEventListener('click',e=>{e.stopPropagation();const c=loc(CARDS[+el.dataset.ix],+el.dataset.ix);
+    el.addEventListener('click',e=>{if(e.target.closest('a,.grip,.cand')||justDragged)return;flip();});
+    el.querySelectorAll('.cand').forEach(cb=>cb.addEventListener('click',e=>{e.stopPropagation();
+      const c=loc(CARDS[+el.dataset.ix],+el.dataset.ix),id=cb.dataset.cand,v=c.candView[id],T=TYPES.find(t=>t.id===id);
+      const pc={id,nm:T[LANG][0],names:v.names,pr:[Object.keys(ARCH[id].roles)[0]],data:[]};
+      document.getElementById('dlgc').innerHTML=`<h2 style="color:${T.c}">${esc(T[LANG][0])}${u('candH')}</h2><div class="prob">${u('probL')}${esc(v.prob)}</div>${cldSVG(pc)}
+        <ol class="story dstory" style="--c:${T.c}">${v.story.map(x=>`<li>${esc(x)}</li>`).join('')}</ol><div class="read" style="--c:${T.c}">${u('candNote')}</div>`;
+      document.getElementById('dlg').showModal();}));
+    el.querySelectorAll('.cand').forEach(cb=>cb.addEventListener('keydown',e=>e.stopPropagation()));
+    const zb=el.querySelector('.zoom');if(zb)zb.addEventListener('click',e=>{e.stopPropagation();const c=loc(CARDS[+el.dataset.ix],+el.dataset.ix);
       document.getElementById('dlgc').innerHTML=`<h2 style="color:${c.c}">${esc(c.nm)} <small style="font-size:13px;color:#6B7088">${esc(c.en)}</small></h2><div class="prob">${u('probL')}${esc(c.prob)}</div>${cldSVG(c)}<div class="read" style="--c:${c.c}">${u('point')}${esc(c.read)}</div>`;
       document.getElementById('dlg').showModal();});
-    el.querySelector('.zoom').addEventListener('keydown',e=>e.stopPropagation());
+    if(zb)zb.addEventListener('keydown',e=>e.stopPropagation());
     el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();flip();}});
   });
 }
