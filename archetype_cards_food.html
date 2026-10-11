@@ -24,16 +24,18 @@ header p{margin:0;color:var(--ink-2);font-size:14.5px;max-width:46em}
 .btn:hover{border-color:#B9BCD3}
 .btn[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
 .btn:focus-visible,.card:focus-visible{outline:3px solid #1C6FD1;outline-offset:3px}
-.bar .note{font-size:13px;color:#3B5683;font-weight:700}
+.bar .note{margin-left:auto;font-size:13px;color:#3B5683;font-weight:700}
 
 .grid{display:grid;grid-template-columns:repeat(var(--cols,3),minmax(0,1fr));gap:var(--gap,22px)}
 .card{zoom:var(--z,1)}
-.card{position:relative;height:770px;perspective:1600px;cursor:pointer;border-radius:20px;outline:none}
-.inner{position:absolute;inset:0;transition:transform .7s cubic-bezier(.3,.1,.2,1);transform-style:preserve-3d}
-.card.flipped .inner{transform:rotateY(180deg)}
-.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:#fff;
+.card{position:relative;aspect-ratio:1/1.48;cursor:pointer;border-radius:20px;outline:none}
+.inner{position:absolute;inset:0}
+.back{visibility:hidden}
+.card.flipped .back{visibility:visible}
+.card.flipped .front{visibility:hidden}
+.face{position:absolute;inset:0;background:#fff;
   border:2px solid var(--rule);border-bottom-width:5px;border-radius:20px;overflow:hidden;display:flex;flex-direction:column}
-.back{transform:rotateY(180deg)}
+
 .card:hover .face{border-color:var(--c)}
 
 /* 表 */
@@ -139,15 +141,14 @@ dialog .read::before{display:none}
 .gsrc a,.src a{color:#1C5FA8;text-decoration:underline;text-underline-offset:2px}
 .gsrc a:hover,.src a:hover{color:#0B3D75}
 .gsrc{text-align:left}
-.shape{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:12px;
-  background:#F7F7FC;border-radius:14px;padding:8px 14px}
-.shape .sl{font-size:13px;font-weight:800;color:var(--ink-2);line-height:1.35}
+.shape{display:flex;align-items:center;gap:8px;background:#F7F7FC;border-radius:12px;padding:5px 10px;min-width:0}
+.shape .sl{font-size:11.5px;font-weight:800;color:var(--ink-2);line-height:1.35}
 .shape .sl small{display:block;font-size:11px;font-weight:700;color:var(--ink-3);margin-top:2px}
-.shape svg{width:150px;height:auto;flex:none}
+.shape svg{width:96px;height:auto;flex:none}
 header h1{margin-bottom:0}
 body.en .front .nm{font-size:23px;line-height:1.2}
 body.en .front .ttl{font-size:18px}
-body.en .card{height:850px}
+
 body.en .lev{display:block;padding:2px 5px}
 body.en .lev .ln{display:block;white-space:normal}
 body.en .lev .ln small{display:inline;margin-left:6px}
@@ -161,7 +162,7 @@ body.en .lev .lt{font-size:12px}
 .ph{border:3px dashed #B9BCD3;border-radius:20px;background:rgba(255,255,255,.5)}
 body.is-dragging{user-select:none;cursor:grabbing}
 body.is-dragging .card{cursor:grabbing}
-.zoomctl{display:inline-flex;align-items:center;gap:6px;margin-left:auto;background:rgba(255,255,255,.7);border-radius:14px;padding:3px 6px}
+.zoomctl{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.7);border-radius:14px;padding:3px 6px}
 .zoomctl #cols{font-size:13px;font-weight:800;color:#173A73;min-width:3em;text-align:center}
 .zoomctl .btn{padding:5px 10px}
 .btn:disabled{opacity:.4;cursor:default}
@@ -190,10 +191,59 @@ body.is-dragging .card{cursor:grabbing}
 .card{transition:opacity .2s,filter .2s}
 .card.dim{opacity:.22;filter:grayscale(.7)}
 .card.hit .face{outline:4px solid var(--c);outline-offset:3px}
+/* ===== はがき比率（1:1.48）に収める ===== */
+.front .top{padding:14px 18px 12px 66px}
+.front .nm{font-size:25px}
+.front .tag{font-size:13.5px;margin-top:2px}
+.front .en{font-size:11.5px}
+.front .body{padding:10px 16px 0;gap:6px;overflow:hidden}
+.front .ttl{font-size:18px;line-height:1.35}
+.gbox{padding:7px 9px 3px;gap:4px}
+.lg{font-size:14.5px}
+.lg small{font-size:12px}
+.foot{padding:8px 14px 12px;gap:10px;justify-content:space-between}
+.back .hd{padding:11px 70px 7px 16px}
+.back .hd b{font-size:17px}
+.back .body{padding:8px 14px 10px;gap:6px}
+.prob{font-size:13.5px;padding:5px 10px}
+.key{font-size:10.5px;gap:2px 10px}
+.story li{font-size:12.5px;line-height:1.4}
+.hint{padding:6px 8px}
+.lev .lt{font-size:12px;line-height:1.35}
+.grip{top:10px;right:10px;bottom:auto;background:rgba(255,255,255,.92)}
+body.en .front .nm{font-size:21px}
+body.en .front .ttl{font-size:16px}
+body.en .lg{font-size:13px}
+body.en .story li{font-size:11px;line-height:1.3}
+body.en .lev .lt{font-size:10.8px;line-height:1.3}
+body.en .lev .ln{font-size:10px}
+body.en .prob{font-size:12.5px}
+.grip{padding:2px 8px;font-size:14px;line-height:1.2}
+.front .top{padding-right:46px}
+.back .hd{padding-right:48px}
+.cld{max-height:190px}
+.cldbox{display:flex;justify-content:center;background:#FAFAFE;border-radius:12px}
+.cldbox .cld{width:auto;max-width:100%}
+.back .body{gap:5px}
+.hint>b{font-size:11.5px}
+.lev{grid-template-columns:112px minmax(0,1fr)!important;padding:1px 4px}
+.lev .ln{font-size:10px}
+.lev .ln small{font-size:9px}
+
+/* ===== カードにマウスを当てたとき ===== */
+.card{transition:transform .25s ease,opacity .2s,filter .2s}
+.card:not(.dragging):hover,.card:not(.dragging):focus-visible{transform:scale(1.045);z-index:4}
+.card:not(.dragging):hover .face{box-shadow:0 22px 36px -10px rgba(23,58,115,.35);border-color:var(--c)}
+.card.dragging{transform:rotate(2deg) scale(1.02)}
+
+/* ===== 上のボタン（アイコンつき） ===== */
+.btn.ib{display:inline-flex;align-items:center;gap:7px}
+.btn.ib svg{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.btn.sq{padding:6px 8px}
 @media (prefers-reduced-motion:reduce){
   .inner{transition:none}
 }
-@media (max-width:420px){.card{height:810px}body.en .card{height:910px}}
+
 </style>
 </head>
 <body>
@@ -202,12 +252,11 @@ body.is-dragging .card{cursor:grabbing}
   <h1 id="h1">めくって発見！ 食のシステムの振る舞いカード</h1>
 </header>
 <div class="bar">
-  <button class="btn" id="guess" aria-pressed="false">🙈 あてっこモード（名前をかくす）</button>
-  <button class="btn" id="reset">ぜんぶ表にもどす</button>
-  <button class="btn" id="typesBtn" aria-expanded="false" aria-controls="drawer">📘 型の一覧</button>
-  <span class="zoomctl"><button class="btn" id="zout" aria-label="小さく">🔍−</button><span id="cols">3列</span><button class="btn" id="zin" aria-label="大きく">🔍＋</button></span>
-  <button class="btn" id="lang" lang="en">English</button>
-  <button class="btn" id="order">並びを元にもどす</button>
+  <button class="btn ib" id="typesBtn" aria-expanded="false" aria-controls="drawer"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg><span class="bl">型の一覧</span></button>
+  <button class="btn ib" id="guess" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 6.1A9.6 9.6 0 0 1 12 6c5 0 9 4.6 10 6-.5.8-1.5 2.1-3 3.4"/><path d="M6.6 6.6C4.5 8 3 10 2 12c1 1.4 5 6 10 6 1.7 0 3.3-.5 4.6-1.3"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg><span class="bl">あてっこモード</span></button>
+  <span class="zoomctl"><button class="btn ib sq" id="zout" aria-label="小さく"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/><path d="M7.5 10.5h6"/></svg></button><span id="cols">3列</span><button class="btn ib sq" id="zin" aria-label="大きく"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/><path d="M7.5 10.5h6M10.5 7.5v6"/></svg></button></span>
+  <button class="btn ib" id="reset"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3.5 4v5h5"/></svg><span class="bl">もとにもどす</span></button>
+  <button class="btn ib" id="lang" lang="en"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span class="bl">English</span></button>
   <span class="note" id="note">クリックでめくる・ドラッグで並びかえ</span>
 </div>
 <div class="grid" id="grid"></div>
@@ -389,14 +438,14 @@ const icon=id=>`<svg viewBox="0 0 40 40" fill="none" stroke="#fff" stroke-width=
 // ===== 日本語／English =====
 let LANG=(new URLSearchParams(location.search).get('lang')==='en')?'en':'ja';
 const UI={
- ja:{title:'めくって発見！ 食のシステムの振る舞いカード',guess:'🙈 あてっこモード（名前をかくす）',reset:'ぜんぶ表にもどす',note:'クリックでめくる・ドラッグで並びかえ',lang:'English',
+ ja:{title:'めくって発見！ 食のシステムの振る舞いカード',guess:'あてっこモード',guessT:'型の名前をかくす',reset:'もとにもどす',resetT:'カードを表にもどし、並びも最初にもどす',note:'クリックでめくる・ドラッグで並びかえ',lang:'English',
   graph:'📊 このグラフは…',stats:'🔢 数字で見ると…',data:'データ：',sep:'、',typ:'この型の<br>よくある形',typBad:'上ほど困る向き',flip:'めくってみよう ↻',back:'表にもどす ↻',
   same:'同じ向き',opp:'反対向き',delay:'時間がかかる',front:'表のグラフ',loop:'🔄 ぐるっと一周すると…',again:'↺ 1へ',hint:'💡 ぬけ出すヒント：3つの力をどうかける？',
   levT:['トップダウン','政策・規制'],levB:['ボトムアップ','口コミ・周りの意識'],levA:['アフォーダビリティ','お金の余裕・感覚'],
   src:'出典：',srcSep:'／',zoom:'図を大きく',close:'閉じる',probL:'⚠ 問題：',point:'📊 データのポイント：',jp:'日本',world:'世界',
   infoJp:'野菜を食べることのデータ',infoW:'健康的な食事を買うお金がない人のデータ',infoSofa:'FAO 世界食料農業白書2025',infoStat:'FAO（FAOSTAT）のデータ',
   probTag:'⚠ 問題',cols:'列',zout:'小さく（列をふやす）',zin:'大きく（列をへらす）',grip:'移動',gripT:'ドラッグして並びかえ',order:'並びを元にもどす',base:'2019年＝',yr:'年',dec:'年代',about:'約',cardAria:'のカード。めくると因果ループ図',loopAria:'の因果ループ図'},
- en:{title:'Flip & Discover: Food System Behavior Cards',guess:'🙈 Guess mode (hide names)',reset:'Flip all back',note:'Click to flip, drag to rearrange',lang:'日本語',
+ en:{title:'Flip & Discover: Food System Behavior Cards',guess:'Guess mode',guessT:'Hide pattern names',reset:'Reset',resetT:'Flip all cards back and restore the original order',note:'Click to flip, drag to rearrange',lang:'日本語',
   graph:'📊 This graph shows…',stats:'🔢 By the numbers…',data:'Data: ',sep:', ',typ:'Typical shape<br>of this pattern',typBad:'up = worse',flip:'Flip me ↻',back:'Back to front ↻',
   same:'same direction',opp:'opposite direction',delay:'delay',front:'graph on the front',loop:'🔄 Going around the loop…',again:'↺ back to 1',hint:'💡 Ways out: how to use the three levers?',
   levT:['Top-down','Policy & regulation'],levB:['Bottom-up','Word of mouth & awareness'],levA:['Affordability','Financial room & money sense'],
@@ -405,7 +454,7 @@ const UI={
   probTag:'⚠ Problem',cols:' cols',zout:'Smaller (more columns)',zin:'Larger (fewer columns)',grip:'Move',gripT:'Drag to rearrange',order:'Reset order',base:'2019 = ',yr:'',dec:'s',about:'~',cardAria:' card. Flip to see the causal loop diagram',loopAria:' causal loop diagram'}
 };
 const u=k=>UI[LANG][k];
-const EN=[{"tag": "The goal slowly slips down", "ttl": "Fewer people are eating enough vegetables", "read": "Over 10 years, both women and men dropped about 7 points.", "prob": "The share eating enough vegetables slowly falls", "names": {"G": "Target\n(350 g/day)", "A": "Share eating\n350 g+", "Gp": "Gap to target", "Pr": "\"Too hard\"\nfeeling", "C": "Efforts to\neat more veg"}, "story": ["Few people reach 350 g", "People feel \"that's impossible\"", "The target quietly slips lower", "Less effort, so the share falls further"], "lev": {"t": "Keep the 350 g target of Health Japan 21; set vegetable standards for school and work meals", "b": "Share \"today's veggie dish\" on social media to raise the norm", "a": "Vegetable coupons or discounts give room for one more dish"}}, {"tag": "Grows, then hits a ceiling", "ttl": "Interest in vegetables stalled in 2022", "read": "Interest rose fast, then began to fall from 2022. Around the same time, vegetables became harder to afford (see the \"Vegetable affordability\" graph). Is price the brake?", "prob": "Interest stops growing partway", "names": {"E": "People trying\nvegetables", "S": "Interest in\nvegetables", "B": "\"Too pricey\"\nbrake", "C": "Rising veg\nprices"}, "story": ["More people try vegetables", "Word spreads and interest rises", "But people feel \"too expensive!\"", "The brake kicks in and growth stops"], "lev": {"t": "Stabilize vegetable prices through support for growers and stockpiles", "b": "Spread cheap, tasty ways to eat vegetables by word of mouth", "a": "Coupons or points so people can still buy when prices rise"}}, {"tag": "Demand outpaces preparation", "ttl": "Vegetables were most affordable until 2021", "read": "After that, vegetable prices outpaced wage growth, and by 2024 affordability was back to about the 2015 level. Did farming and distribution keep up?", "prob": "Would-be buyers drop off partway", "names": {"Eg": "Promoting\nvegetables", "D": "Would-be\nveg buyers", "Lm": "Veg shortage\n(higher prices)", "N": "Noticing\n\"not enough\"", "I": "Building\nsupply chains"}, "dataNote": " (opposite of affordability)", "story": ["Promotion increases would-be buyers", "Vegetables run short and prices rise", "People notice and start building supply chains", "But it is too late, and high prices drive buyers away"], "lev": {"t": "Use policy to invest early in farms and distribution while demand is rising", "b": "Spread the word about seasonal, local vegetables to support growers", "a": "Temporary subsidies during price spikes keep room to buy"}}, {"tag": "Relying on the quick fix", "ttl": "Government messaging goes up and down", "read": "Messaging rises and falls like waves, while the share eating enough vegetables keeps falling (see the \"eating enough vegetables\" graph).", "prob": "The vegetable shortfall never really gets fixed", "names": {"S": "People eating\ntoo little veg", "Q": "Government\nmessaging", "E": "\"We campaigned,\njob done\"", "F": "Easy ways to\neat vegetables"}, "story": ["Low vegetable intake becomes a topic", "\"Eat your vegetables!\" campaigns help a little", "A \"we campaigned, job done\" feeling sets in", "Easy, cheap ways to eat vegetables never grow, so the shortfall returns"], "lev": {"t": "Shift from campaigns to systems, such as vegetable standards for school and work meals", "b": "Share experiences of cooking and eating with friends and family", "a": "Think \"cost per meal\" instead of \"vegetables are expensive\""}}, {"tag": "Quick fixes backfire later", "ttl": "Brazil: it fell, then rose higher than before", "read": "It improved temporarily in 2020 (26.0% → 19.4%), then worsened (29.8%). 2020 was the year of COVID emergency cash aid. Short-term measures alone may not bring lasting improvement.", "prob": "People struggling to eat well don't really decrease", "names": {"P": "Can't afford a\nhealthy diet", "F": "Temporary\ncash aid", "U": "Aid can't last,\nso it is cut"}, "story": ["COVID threatens more people's food", "The government rushes out cash, and numbers fall", "The money runs out and aid shrinks", "More people struggle than before"], "lev": {"t": "Plan how aid ends, and pair it with job and income policies", "b": "Spread and keep local food-sharing networks", "a": "Help households keep room in the budget for food after aid ends"}}, {"tag": "Winners keep winning; the gap widens", "ttl": "The gap between regions keeps widening", "read": "East Asia & Pacific fell from 29.3% to 17.8%, while Sub-Saharan Africa stayed around 70%. The gap grew from 41 to 53 points.", "prob": "Struggling regions get left behind", "names": {"Ae": "East Asia\ndiet gains", "Ar": "Money into\nEast Asia", "Al": "Investment\nfavoring E. Asia", "Be": "Africa\ndiet gains", "Br": "Money into\nAfrica"}, "dataNote": " (opposite of 'can't afford')", "story": ["Investment flows to the region that did a bit better", "More jobs and factories make it richer", "The other region gets little money", "The gap keeps growing"], "lev": {"t": "Target international aid and investment to regions left behind", "b": "Spread local success stories among farmers", "a": "Small loans that give people financial room"}}, {"tag": "Grows, then hits a ceiling", "ttl": "Lithuania: a fast drop, then stuck around 9%", "read": "It improved a lot at first (21.3% → 8.8%), then the gains got smaller. As progress is made, reaching the remaining people may become harder and more costly.", "prob": "Improvement stalls at some point", "names": {"E": "Rising\nwages", "S": "People who can\nafford meals", "B": "Hard-to-reach\nbarrier", "C": "Older people\non pensions"}, "dataNote": " (opposite of 'can't afford')", "story": ["Wages rise and more people can afford meals", "Money circulates and wages rise further", "But hard-to-reach people, like pension-only elders, remain", "It barely falls any further"], "lev": {"t": "Design programs aimed at hard-to-reach people, such as older adults", "b": "Community check-ins let people know support exists", "a": "Food allowances for pension-only households"}}, {"tag": "Demand outpaces preparation", "ttl": "World farming: gains from innovation nearly halved in the 2010s", "bars": {"name": "Extra kg, 10 years later, from a field that yielded 100 kg", "what": "Gains from new crop varieties and technology alone, with the same land and fertilizer (world average)"}, "read": "In the 2000s, innovation added +22 kg per decade; in the 2010s only +12 kg, almost half. Output didn't fall; the gain from innovation got smaller. Causes include land degradation and climate change (FAO).", "prob": "Gains from innovation weaken partway", "names": {"Eg": "New varieties\n& technology", "D": "Output gained\nby innovation", "Lm": "Degraded land\n& climate", "N": "Calls for\nmore research", "I": "Investment in\nfarm research"}, "story": ["New varieties and technology raise output", "Profits spread new technology further", "But degraded land and poorer fields act as a brake", "Research investment lags, and growth weakens"], "lev": {"t": "Increase public investment in farm research and soil health while growth lasts", "b": "Spread new techniques from farmer to farmer", "a": "Grants or loans give farmers room to try new technology"}}, {"tag": "Overused by all, until it's gone", "ttl": "World oceans: overfished stocks rose from 1 in 10 to about 3.5 in 10", "pict": {"name": "If the world's fish were \"10 groups\"…", "what": "Red fish = overfished groups (caught faster than they can recover). From FAO assessments of fish stocks such as \"Atlantic cod\"."}, "read": "In 1974 only 1 in 10 groups was overfished; by 2021 about 3.5 in 10. Fish in the open sea belong to no one, so the more everyone catches, the fewer remain.", "prob": "Fish decline, and each trip catches less", "names": {"Aa": "Country A's\ncatch", "Ba": "Country B's\ncatch", "T": "Total\ncatch", "G": "Catch per\nfishing trip", "Lm": "Fish stocks'\nrecovery"}, "story": ["Each country and fisher catches more", "The total catch grows too large", "Fish can't recover, and each trip catches less", "Yet the race to catch continues"], "lev": {"t": "Countries agree on catch limits (quotas)", "b": "Spread \"choose fish that aren't overfished\" by word of mouth", "a": "Compensate fishers' income during closed seasons"}}, {"tag": "Relying on the quick fix", "ttl": "China: fertilizer use rose 45×, then began to fall", "read": "5 kg (1961) → 235 kg (2014), about 45 times. In 2015 the government launched a plan to stop increasing fertilizer use; 192 kg in 2023. FAO notes that overuse can \"hide\" soil damage.", "prob": "Falling yields (poor soil) are never fixed at the root", "names": {"S": "Poor soil,\nlower yields", "Q": "More chemical\nfertilizer", "E": "Damaged soil\n(acid, salt)", "F": "Soil-building\npractices"}, "story": ["Soil wears out and yields fall", "More fertilizer brings yields back", "But overuse damages the soil further", "Soil care is put off, so even more fertilizer is needed"], "lev": {"t": "Rules and support to cut fertilizer overuse", "b": "Spread soil-building successes from farmer to farmer", "a": "Subsidies that protect income while using less fertilizer"}}, {"tag": "Winners keep winning; the gap widens", "ttl": "Fertilizer access: the gap between regions widened", "read": "Asia rose from 4.5 kg to 113 kg; Africa from 2.1 kg to 14 kg (1961 → 2023). FAO cites very limited fertilizer use as one reason for low yields in Africa.", "prob": "Low-yield regions get left behind", "names": {"Ae": "Yields in\nAsia", "Ar": "Fertilizer\nused in Asia", "Al": "Money\nfavoring Asia", "Be": "Yields in\nAfrica", "Br": "Fertilizer used\nin Africa"}, "story": ["Higher-yield regions use profits to buy fertilizer and machines", "Yields rise more, attracting money and investment", "Low-yield regions can't afford fertilizer", "The gap keeps growing"], "lev": {"t": "Support for fertilizer and seeds in low-yield regions", "b": "Farmer groups share know-how", "a": "Easier loans and subsidies to buy fertilizer"}}];
+const EN=[{"tag": "The goal slowly slips down", "ttl": "Fewer people are eating enough vegetables", "read": "Over 10 years, both women and men dropped about 7 points.", "prob": "The share eating enough vegetables slowly falls", "names": {"G": "Target\n(350 g/day)", "A": "Share eating\n350 g+", "Gp": "Gap to target", "Pr": "\"Too hard\"\nfeeling", "C": "Efforts to\neat more veg"}, "story": ["Few people reach 350 g", "People feel \"that's impossible\"", "The target quietly slips lower", "Less effort, so the share falls further"], "lev": {"t": "Keep the 350 g target of Health Japan 21; set vegetable standards for school and work meals", "b": "Share \"today's veggie dish\" on social media to raise the norm", "a": "Vegetable coupons or discounts give room for one more dish"}}, {"tag": "Grows, then hits a ceiling", "ttl": "Interest in vegetables stalled in 2022", "read": "Interest rose fast, then began to fall from 2022. Around the same time, vegetables became harder to afford (see the \"Vegetable affordability\" graph). Is price the brake?", "prob": "Interest stops growing partway", "names": {"E": "People trying\nvegetables", "S": "Interest in\nvegetables", "B": "\"Too pricey\"\nbrake", "C": "Rising veg\nprices"}, "story": ["More people try vegetables", "Word spreads and interest rises", "But people feel \"too expensive!\"", "The brake kicks in and growth stops"], "lev": {"t": "Stabilize vegetable prices through support for growers and stockpiles", "b": "Spread cheap, tasty ways to eat vegetables by word of mouth", "a": "Coupons or points so people can still buy when prices rise"}}, {"tag": "Demand outpaces preparation", "ttl": "Vegetables were most affordable until 2021", "read": "After that, vegetable prices outpaced wage growth, and by 2024 affordability was back to about the 2015 level. Did farming and distribution keep up?", "prob": "Would-be buyers drop off partway", "names": {"Eg": "Promoting\nvegetables", "D": "Would-be\nveg buyers", "Lm": "Veg shortage\n(higher prices)", "N": "Noticing\n\"not enough\"", "I": "Building\nsupply chains"}, "dataNote": " (opposite of affordability)", "story": ["Promotion increases would-be buyers", "Vegetables run short and prices rise", "People notice and start building supply", "Too late: high prices drive buyers away"], "lev": {"t": "Use policy to invest early in farms and distribution", "b": "Spread the word about seasonal, local vegetables to support growers", "a": "Temporary subsidies during price spikes keep room to buy"}}, {"tag": "Relying on the quick fix", "ttl": "Government messaging goes up and down", "read": "Messaging rises and falls like waves, while the share eating enough vegetables keeps falling (see the \"eating enough vegetables\" graph).", "prob": "The vegetable shortfall never really gets fixed", "names": {"S": "People eating\ntoo little veg", "Q": "Government\nmessaging", "E": "\"We campaigned,\njob done\"", "F": "Easy ways to\neat vegetables"}, "story": ["Low vegetable intake becomes a topic", "\"Eat your vegetables!\" campaigns help a little", "A \"we campaigned, job done\" feeling sets in", "Easy, cheap ways to eat veg never grow; the shortfall returns"], "lev": {"t": "Shift from campaigns to systems, e.g., veg standards for school meals", "b": "Share cooking and eating experiences with friends and family", "a": "Think \"cost per meal\" instead of \"vegetables are expensive\""}}, {"tag": "Quick fixes backfire later", "ttl": "Brazil: it fell, then rose higher than before", "read": "It improved temporarily in 2020 (26.0% → 19.4%), then worsened (29.8%). 2020 was the year of COVID emergency cash aid. Short-term measures alone may not bring lasting improvement.", "prob": "People struggling to eat well don't really decrease", "names": {"P": "Can't afford a\nhealthy diet", "F": "Temporary\ncash aid", "U": "Aid can't last,\nso it is cut"}, "story": ["COVID threatens more people's food", "The government rushes out cash, and numbers fall", "The money runs out and aid shrinks", "More people struggle than before"], "lev": {"t": "Plan how aid ends, and pair it with job and income policies", "b": "Spread and keep local food-sharing networks", "a": "Help households keep room in the budget for food after aid ends"}}, {"tag": "Winners keep winning; the gap widens", "ttl": "The gap between regions keeps widening", "read": "East Asia & Pacific fell from 29.3% to 17.8%, while Sub-Saharan Africa stayed around 70%. The gap grew from 41 to 53 points.", "prob": "Struggling regions get left behind", "names": {"Ae": "East Asia\ndiet gains", "Ar": "Money into\nEast Asia", "Al": "Investment\nfavoring E. Asia", "Be": "Africa\ndiet gains", "Br": "Money into\nAfrica"}, "dataNote": " (opposite of 'can't afford')", "story": ["Investment flows to the region that did a bit better", "More jobs and factories make it richer", "The other region gets little money", "The gap keeps growing"], "lev": {"t": "Target international aid and investment to regions left behind", "b": "Spread local success stories among farmers", "a": "Small loans that give people financial room"}}, {"tag": "Grows, then hits a ceiling", "ttl": "Lithuania: a fast drop, then stuck around 9%", "read": "It improved a lot at first (21.3% → 8.8%), then the gains got smaller. As progress is made, reaching the remaining people may become harder and more costly.", "prob": "Improvement stalls at some point", "names": {"E": "Rising\nwages", "S": "People who can\nafford meals", "B": "Hard-to-reach\nbarrier", "C": "Older people\non pensions"}, "dataNote": " (opposite of 'can't afford')", "story": ["Wages rise and more people can afford meals", "Money circulates and wages rise further", "But hard-to-reach people, like pension-only elders, remain", "It barely falls any further"], "lev": {"t": "Design programs aimed at hard-to-reach people, such as older adults", "b": "Community check-ins let people know support exists", "a": "Food allowances for pension-only households"}}, {"tag": "Demand outpaces preparation", "ttl": "World farming: gains from innovation nearly halved in the 2010s", "bars": {"name": "Extra kg, 10 years later, from a field that yielded 100 kg", "what": "Gains from new crop varieties and technology alone, with the same land and fertilizer (world average)"}, "read": "In the 2000s, innovation added +22 kg per decade; in the 2010s only +12 kg, almost half. Output didn't fall; the gain from innovation got smaller. Causes include land degradation and climate change (FAO).", "prob": "Gains from innovation weaken partway", "names": {"Eg": "New varieties\n& technology", "D": "Output gained\nby innovation", "Lm": "Degraded land\n& climate", "N": "Calls for\nmore research", "I": "Investment in\nfarm research"}, "story": ["New varieties and technology raise output", "Profits spread new technology further", "But degraded land and poorer fields act as a brake", "Research investment lags, and growth weakens"], "lev": {"t": "Increase public investment in farm research and soil health while growth lasts", "b": "Spread new techniques from farmer to farmer", "a": "Grants or loans give farmers room to try new technology"}}, {"tag": "Overused by all, until it's gone", "ttl": "World oceans: overfished stocks rose from 1 in 10 to about 3.5 in 10", "pict": {"name": "If the world's fish were \"10 groups\"…", "what": "Red fish = overfished groups (caught faster than they can recover). From FAO assessments of fish stocks such as \"Atlantic cod\"."}, "read": "In 1974 only 1 in 10 groups was overfished; by 2021 about 3.5 in 10. Fish in the open sea belong to no one, so the more everyone catches, the fewer remain.", "prob": "Fish decline, and each trip catches less", "names": {"Aa": "Country A's\ncatch", "Ba": "Country B's\ncatch", "T": "Total\ncatch", "G": "Catch per\nfishing trip", "Lm": "Fish stocks'\nrecovery"}, "story": ["Each country and fisher catches more", "The total catch grows too large", "Fish can't recover, and each trip catches less", "Yet the race to catch continues"], "lev": {"t": "Countries agree on catch limits (quotas)", "b": "Spread \"choose fish that aren't overfished\" by word of mouth", "a": "Compensate fishers' income during closed seasons"}}, {"tag": "Relying on the quick fix", "ttl": "China: fertilizer use rose 45×, then began to fall", "read": "5 kg (1961) → 235 kg (2014), about 45 times. In 2015 the government launched a plan to stop increasing fertilizer use; 192 kg in 2023. FAO notes that overuse can \"hide\" soil damage.", "prob": "Falling yields (poor soil) are never fixed at the root", "names": {"S": "Poor soil,\nlower yields", "Q": "More chemical\nfertilizer", "E": "Damaged soil\n(acid, salt)", "F": "Soil-building\npractices"}, "story": ["Soil wears out and yields fall", "More fertilizer brings yields back", "But overuse damages the soil further", "Soil care is put off, so even more fertilizer is needed"], "lev": {"t": "Rules and support to cut fertilizer overuse", "b": "Spread soil-building successes from farmer to farmer", "a": "Subsidies that protect income while using less fertilizer"}}, {"tag": "Winners keep winning; the gap widens", "ttl": "Fertilizer access: the gap between regions widened", "read": "Asia rose from 4.5 kg to 113 kg; Africa from 2.1 kg to 14 kg (1961 → 2023). FAO cites very limited fertilizer use as one reason for low yields in Africa.", "prob": "Low-yield regions get left behind", "names": {"Ae": "Yields in\nAsia", "Ar": "Fertilizer\nused in Asia", "Al": "Money\nfavoring Asia", "Be": "Yields in\nAfrica", "Br": "Fertilizer used\nin Africa"}, "story": ["Higher-yield regions use profits to buy fertilizer and machines", "Yields rise more, attracting money and investment", "Low-yield regions can't afford fertilizer", "The gap keeps growing"], "lev": {"t": "Support for fertilizer and seeds in low-yield regions", "b": "Farmer groups share know-how", "a": "Easier loans and subsidies to buy fertilizer"}}];
 const DEN={"y_f": {"hi": "More", "lo": "Less", "name": "Women eating enough vegetables", "what": "Share eating 350 g+ of vegetables a day"}, "y_m": {"hi": "More", "lo": "Less", "name": "Men eating enough vegetables", "what": "Share eating 350 g+ of vegetables a day"}, "x1": {"hi": "More", "lo": "Less", "name": "Amount of government messaging", "u": "2019 = 100", "what": "How often \"vegetables, nutrition, health\" appear in the Shokuiku (food education) White Paper"}, "x2": {"hi": "High", "lo": "Low", "name": "Interest in vegetables", "u": "2019 = 50", "what": "How often vegetables were searched online"}, "x3": {"hi": "Easier", "lo": "Harder", "name": "Vegetable affordability", "u": "2019 = 100", "what": "How many vegetables wages can buy"}, "bra": {"hi": "More", "lo": "Less", "name": "Brazil", "what": "Share who can't afford a healthy diet (up = worse)"}, "eap": {"hi": "More", "lo": "Less", "name": "East Asia & Pacific", "what": "Share who can't afford a healthy diet (up = worse)"}, "ssa": {"hi": "More", "lo": "Less", "name": "Sub-Saharan Africa", "what": "Share who can't afford a healthy diet (up = worse)"}, "ltu": {"hi": "More", "lo": "Less", "name": "Lithuania", "what": "Share who can't afford a healthy diet (up = worse)"}, "tfp": {"hi": "Faster", "lo": "Slower", "name": "Pace of gains from innovation", "what": "Yearly % gain in output from varieties and technology, without more land or fertilizer (decade average)"}, "chnN": {"hi": "More", "lo": "Less", "name": "China", "what": "Nitrogen fertilizer used per hectare of cropland (kg)"}, "asiaN": {"hi": "More", "lo": "Less", "name": "Asia", "what": "Nitrogen fertilizer used per hectare of cropland (kg)"}, "afrN": {"hi": "More", "lo": "Less", "name": "Africa", "what": "Nitrogen fertilizer used per hectare of cropland (kg)"}, "fish": {"hi": "More", "lo": "Less", "name": "Share of overfished stocks", "what": "Fish grouped by species and sea area (e.g., Atlantic cod): share caught faster than they recover"}};
 const REFS_EN={"国民健康・栄養調査": [["MHLW, National Health and Nutrition Survey (Japan)", "https://www.mhlw.go.jp/bunya/kenkou/kenkou_eiyou_chousa.html"]], "Googleトレンド": [["Google Trends", "https://trends.google.co.jp/trends/"]], "家計調査・消費者物価指数": [["Statistics Bureau of Japan, Family Income and Expenditure Survey", "https://www.stat.go.jp/data/kakei/"], ["Statistics Bureau of Japan, Consumer Price Index", "https://www.stat.go.jp/data/cpi/"]], "食育白書": [["MAFF, White Paper on Shokuiku (Japan)", "https://www.maff.go.jp/j/syokuiku/wpaper/"]], "世界銀行・FAO": [["World Bank & FAO, Food Prices for Nutrition", "https://www.worldbank.org/en/programs/icp/brief/foodpricesfornutrition"], ["Our World in Data (chart data)", "https://ourworldindata.org/grapher/share-healthy-diet-unaffordable"]], "FAO 世界食料農業白書2025": [["FAO, The State of Food and Agriculture 2025, Figure 4", "https://doi.org/10.4060/cd7067en-fig04"]], "FAO（SDG指標14.4.1）": [["FAO (SDG indicator 14.4.1) / Our World in Data", "https://ourworldindata.org/grapher/share-of-fish-stocks-overexploited"]], "FAOSTAT": [["FAOSTAT (fertilizers) / Our World in Data", "https://ourworldindata.org/grapher/nitrogen-fertilizer-application-per-hectare-of-cropland"], ["FAOSTAT", "https://www.fao.org/faostat/en/"]]};
 const DD=k=>LANG==='en'?{...D[k],...DEN[k]}:D[k];
@@ -420,14 +469,14 @@ function typSVG(id,col,flip){
   const W=120,H=60,x0=8,x1=W-6,yT=6,y0=H-8,X=t=>x0+(x1-x0)*t,Y=v=>yT+(y0-yT)*(flip?v:(1-v));
   const curve=P=>{let d=`M${X(P[0][0])},${Y(P[0][1])}`;for(let i=1;i<P.length;i++){const[a,b]=P[i-1],[c,e]=P[i],mx=(a+c)/2;d+=` C${X(mx)},${Y(b)} ${X(mx)},${Y(e)} ${X(c)},${Y(e)}`;}return d;};
   return `<svg viewBox="0 0 ${W} ${H}" aria-hidden="true"><path d="M${x0},${yT}V${y0}H${x1}" fill="none" stroke="#23263A" stroke-opacity=".25" stroke-width="1.5" stroke-dasharray="2 4"/>`+
-    TYP[id].map(P=>`<path d="${curve(P)}" fill="none" stroke="${col}" stroke-width="5" stroke-linecap="round"/>`).join('')+`</svg>`;
+    TYP[id].map(P=>`<path class="dl" d="${curve(P)}" fill="none" stroke="${col}" stroke-width="5" stroke-linecap="round"/>`).join('')+`</svg>`;
 }
 
 // 実データのグラフ（縦軸の上下の意味と、2019年の基準線をのせる）
 function dataSVG(card){
   const ss=card.series.map(s=>({...DD(s.k),...s}));
   const hi=ss[0].hi,lo=ss[0].lo,lw=Math.max(tw(hi,10.5),tw(lo,10.5));
-  const W=320,H=225,x0=Math.max(40,lw*1.15+20),x1=W-22,yT=16,y0=H-26;
+  const W=320,H=184,x0=Math.max(40,lw*1.15+20),x1=W-22,yT=16,y0=H-26;
   const yrs=ss.flatMap(s=>s.h.map(p=>p[0])),ya=Math.min(...yrs),yb=Math.max(...yrs);
   const X=y=>x0+(x1-x0)*(y-ya)/(yb-ya||1);
   const vals=ss.flatMap(s=>s.h.map(p=>p[1])).concat(ss[0].base!=null?[ss[0].base]:[]);
@@ -446,7 +495,7 @@ function dataSVG(card){
     segs.forEach(P=>{if(P.length<2)return;let d=`M${P[0][0]},${P[0][1]}`;
       for(let k=0;k<P.length-1;k++){const p0=P[k-1]||P[k],p1=P[k],p2=P[k+1],p3=P[k+2]||p2;
         d+=` C${p1[0]+(p2[0]-p0[0])/6},${p1[1]+(p2[1]-p0[1])/6} ${p2[0]-(p3[0]-p1[0])/6},${p2[1]-(p3[1]-p1[1])/6} ${p2[0]},${p2[1]}`;}
-      g+=`<path d="${d}" fill="none" stroke="${c}" stroke-width="${i?(card.shared?5:3.5):6}" ${i&&!card.shared?'stroke-dasharray="6 5"':''} stroke-linecap="round" stroke-linejoin="round"/>`;});
+      g+=`<path class="dl" d="${d}" fill="none" stroke="${c}" stroke-width="${i?(card.shared?5:3.5):6}" ${i&&!card.shared?'stroke-dasharray="6 5"':''} stroke-linecap="round" stroke-linejoin="round"/>`;});
     const f=pts[0],l=pts[pts.length-1],T=(x,y,v,an)=>`<text x="${x}" y="${y}" font-size="14" font-weight="800" fill="#23263A" stroke="#fff" stroke-width="3" paint-order="stroke" text-anchor="${an}">${v}</text>`;
     g+=`<circle cx="${f[0]}" cy="${f[1]}" r="3.6" fill="#23263A"/><circle cx="${l[0]}" cy="${l[1]}" r="3.6" fill="#23263A"/>`;
     const off=card.shared?(i?-10:19):-10;const pu=s.pu||'';g+=T(f[0]+6,f[1]+off,f[3]+pu,'start')+T(l[0],l[1]+off,l[3]+pu,'middle');
@@ -489,6 +538,7 @@ function cldSVG(card){
 
 // 並び順（CARDSの番号）：日本と世界をまぜて、同じ型がとなり合わないようにする
 const ORDER=[0,4,1,8,2,5,7,3,6,9,10];
+const ORIG_ORDER=[...ORDER];
 // 日本か世界かのタグ
 const place=c=>c.grp==='world'
   ?`<span class="place world">${u('world')}</span><span class="placeinfo">${c.src==='fao'?(c.id==='under'?u('infoSofa'):u('infoStat')):u('infoW')}</span>`
@@ -497,10 +547,10 @@ const place=c=>c.grp==='world'
 // 魚の絵（10グループのうち、とりすぎの分を赤くぬる）
 function pictBox(c){
   const P=c.pict,h=D[P.k].h,val=y=>(h.find(p=>p[0]===y)||[0,0])[1];
-  const W=330,rowH=42,H=P.years.length*rowH+6,x0=52,fw=22;let g='',defs='';
+  const W=330,rowH=38,H=P.years.length*rowH+6,x0=52,fw=22;let g='',defs='';
   const fish=(x,y,id,frac)=>{const d=`M${x},${y} c6,-9 16,-9 20,0 c-4,9 -14,9 -20,0z M${x+20},${y} l6,-6 v12z`;
     defs+=`<clipPath id="${id}"><rect x="${x-1}" y="${y-10}" width="${28*frac}" height="20"/></clipPath>`;
-    return `<path d="${d}" fill="#DCE6F2"/><path d="${d}" fill="#E5533D" clip-path="url(#${id})"/><circle cx="${x+5}" cy="${y-1.5}" r="1.4" fill="#23263A"/>`;};
+    return `<path d="${d}" fill="#DCE6F2"/><path class="fr" d="${d}" fill="#E5533D" clip-path="url(#${id})"/><circle cx="${x+5}" cy="${y-1.5}" r="1.4" fill="#23263A"/>`;};
   P.years.forEach((y,r)=>{const v=val(y)/10,yy=18+r*rowH;
     g+=`<text x="0" y="${yy+4}" font-size="13" font-weight="800" fill="#4A4E66">${y}${u('yr')}</text>`;
     for(let n=0;n<10;n++){const fr=Math.max(0,Math.min(1,v-n));g+=fish(x0+n*fw+2,yy,'f'+(++N),fr);}
@@ -511,9 +561,9 @@ function pictBox(c){
 // 10年ごとの棒グラフ（年あたりの伸び率を「100kgが10年で何kg増えたか」に直す）
 function barBox(c){
   const B=c.bars,h=D[B.k].h.map(([y,r])=>[y,Math.round((Math.pow(1+r/100,10)-1)*100)]);
-  const W=320,H=200,x0=4,x1=W-4,y0=H-26,yT=26,mx=Math.max(...h.map(p=>p[1])),bw=(x1-x0)/h.length;let g='';
+  const W=320,H=180,x0=4,x1=W-4,y0=H-26,yT=26,mx=Math.max(...h.map(p=>p[1])),bw=(x1-x0)/h.length;let g='';
   h.forEach(([y,v],i)=>{const bh=(y0-yT)*v/mx,x=x0+i*bw+bw*.18,w=bw*.64,last=i===h.length-1,top=v===mx;
-    g+=`<rect x="${x}" y="${y0-bh}" width="${w}" height="${Math.max(bh,1.5)}" rx="5" fill="${c.c}" opacity="${last||top?1:.45}"/>`;
+    g+=`<rect class="bar" x="${x}" y="${y0-bh}" width="${w}" height="${Math.max(bh,1.5)}" rx="5" fill="${c.c}" opacity="${last||top?1:.45}"/>`;
     g+=`<text x="${x+w/2}" y="${y0-bh-6}" font-size="14" font-weight="800" text-anchor="middle" fill="#23263A">+${v}kg</text>`;
     g+=`<text x="${x+w/2}" y="${H-8}" font-size="11" text-anchor="middle" fill="#6B7088">${y}${u('dec')}</text>`;});
   g+=`<path d="M${x0},${y0}H${x1}" stroke="#23263A" stroke-opacity=".3" stroke-width="1.5"/>`;
@@ -540,7 +590,7 @@ const refLinks=(src,sep)=>src.flatMap(k=>(LANG==='en'?REFS_EN:REFS)[k]||[[k,'']]
 function render(){
   const html=(c0,ix)=>{const c=loc(c0,ix);const d=c.stats?statsBox(c):c.pict?pictBox(c):c.bars?barBox(c):dataSVG(c);return `
   <div class="card" data-ix="${ix}" tabindex="0" role="button" aria-pressed="false" aria-label="${esc(c.nm)}${u('cardAria')}" style="--c:${c.c}">
-   <span class="grip" title="${u('gripT')}" aria-hidden="true">⠿ ${u('grip')}</span>
+   <span class="grip" title="${u('gripT')}" aria-hidden="true">⠿</span>
    <div class="inner">
     <section class="face front">
       <div class="top"><span class="ico">${icon(c.id)}</span><div class="nm">${esc(c.nm)}</div><div class="tag">${esc(c.tag)}</div><div class="en">${esc(c.en)}</div><div class="q" aria-hidden="true">？</div></div>
@@ -548,14 +598,12 @@ function render(){
         <div class="where">${place(c)}</div>
         <div class="ttl">${esc(c.ttl)}</div>
         <div class="gbox">
-          <span class="lbl">${c.stats?u('stats'):u('graph')}</span>
           ${c.stats?'':`<div class="legend">${d.leg}</div>`}
           ${d.svg}
           <div class="gsrc">${u('data')}${refLinks(d.src,u('sep'))}</div>
         </div>
-        <div class="shape"><span class="sl">${u('typ')}${c.bad?`<small>${u('typBad')}</small>`:''}</span>${typSVG(c.id,c.c,c.bad)}</div>
       </div>
-      <div class="foot"><span class="pill">${u('flip')}</span></div>
+      <div class="foot"><div class="shape"><span class="sl">${u('typ')}${c.bad?`<small>${u('typBad')}</small>`:''}</span>${typSVG(c.id,c.c,c.bad)}</div><span class="pill">${u('flip')}</span></div>
     </section>
     <section class="face back">
       <div class="hd"><b>${esc(c.nm)}</b><span class="place ${c.grp==='world'?'world':'jp'}">${c.grp==='world'?u('world'):u('jp')}</span></div>
@@ -563,20 +611,23 @@ function render(){
         <div class="prob">⚠ ${esc(c.prob)}</div>
         <div class="cldbox">${cldSVG(c)}<button class="zoom" type="button">${u('zoom')}</button></div>
         <div class="key"><span><em style="color:#D0336B">＋</em> ${u('same')}</span><span><em style="color:#1E88C8">−</em> ${u('opp')}</span><span><em>∥</em> ${u('delay')}</span>${c.data.length?`<span><em style="color:#E8790C">■</em> ${u('front')}${c.dataNote?esc(c.dataNote):''}</span>`:''}</div>
-        <span class="lbl">${u('loop')}</span>
         <ol class="story">${c.story.map((s,i,a)=>`<li>${esc(s)}${i===a.length-1?` <span class="again">${u('again')}</span>`:''}</li>`).join('')}</ol>
         <div class="hint"><b>${u('hint')}</b>
           ${[['t','🏛️',...u('levT')],['b','🙋',...u('levB')],['a','💴',...u('levA')]].map(([k,ic,nm,sub])=>`<div class="lev"><span class="ln">${ic}${nm}<small>${sub}</small></span><span class="lt">${esc(c.lev[k])}</span></div>`).join('')}
         </div>
-        <div class="src">${u('src')}${refLinks(d.src,u('srcSep'))}</div>
       </div>
-      <div class="foot"><span class="pill">${u('back')}</span></div>
+
     </section>
    </div>
   </div>`;};
   document.getElementById('grid').innerHTML=ORDER.map(i=>html(CARDS[i],i)).join('');
   document.querySelectorAll('.card').forEach(el=>{
-    const flip=()=>{el.classList.toggle('flipped');el.setAttribute('aria-pressed',el.classList.contains('flipped'));};
+    const flip=()=>{const done=()=>{el.classList.toggle('flipped');el.setAttribute('aria-pressed',el.classList.contains('flipped'));};
+      const inn=el.querySelector('.inner');
+      if(window.matchMedia('(prefers-reduced-motion: reduce)').matches||!inn.animate){done();return;}
+      if(el._flipping)return;el._flipping=true;
+      inn.animate([{transform:'scaleX(1)'},{transform:'scaleX(0)'}],{duration:170,easing:'ease-in'}).onfinish=()=>{done();
+        inn.animate([{transform:'scaleX(0)'},{transform:'scaleX(1)'}],{duration:210,easing:'ease-out'}).onfinish=()=>{el._flipping=false;};};};
     el.addEventListener('click',e=>{if(e.target.closest('a,.grip')||justDragged)return;flip();});
     el.querySelector('.zoom').addEventListener('click',e=>{e.stopPropagation();const c=loc(CARDS[+el.dataset.ix],+el.dataset.ix);
       document.getElementById('dlgc').innerHTML=`<h2 style="color:${c.c}">${esc(c.nm)} <small style="font-size:13px;color:#6B7088">${esc(c.en)}</small></h2><div class="prob">${u('probL')}${esc(c.prob)}</div>${cldSVG(c)}<div class="read" style="--c:${c.c}">${u('point')}${esc(c.read)}</div>`;
@@ -588,9 +639,10 @@ function render(){
 function applyLang(){
   document.documentElement.lang=LANG;document.body.classList.toggle('en',LANG==='en');
   document.title=u('title');document.getElementById('h1').textContent=u('title');
-  document.getElementById('guess').textContent=u('guess');document.getElementById('reset').textContent=u('reset');
-  document.getElementById('note').textContent=u('note');document.getElementById('order').textContent=u('order');['zout','zin'].forEach(k=>{const b=document.getElementById(k);b.title=u(k);b.setAttribute('aria-label',u(k));});layout();document.getElementById('dlgx').textContent=u('close');
-  const lb=document.getElementById('lang');lb.textContent=u('lang');lb.lang=LANG==='en'?'ja':'en';
+  const bl=(id,t,ti)=>{const b=document.getElementById(id);b.querySelector('.bl').textContent=t;if(ti)b.title=ti;};
+  bl('guess',u('guess'),u('guessT'));bl('reset',u('reset'),u('resetT'));
+  document.getElementById('note').textContent=u('note');['zout','zin'].forEach(k=>{const b=document.getElementById(k);b.title=u(k);b.setAttribute('aria-label',u(k));});layout();document.getElementById('dlgx').textContent=u('close');
+  const lb=document.getElementById('lang');lb.querySelector('.bl').textContent=u('lang');lb.lang=LANG==='en'?'ja':'en';
   render();renderTypes();applyFilter();
 }
 
@@ -628,7 +680,7 @@ function typeSVG(T){
   return `<svg viewBox="0 0 ${W} ${H}" aria-hidden="true">${g}</svg>`;
 }
 function renderTypes(){
-  document.getElementById('typesT').textContent=tt('t');document.getElementById('typesBtn').textContent=tt('btn');
+  document.getElementById('typesT').textContent=tt('t');document.getElementById('typesBtn').querySelector('.bl').textContent=tt('t');
   document.getElementById('typesN').textContent=document.body.classList.contains('guess')?tt('ng'):tt('n');
   document.getElementById('tgrid').innerHTML=TYPES.map(T=>{const [nm,tag]=T[LANG],other=T[LANG==='en'?'ja':'en'][0],n=CARDS.filter(c=>c.id===T.id).length;
     return `<button type="button" class="tcard${FILTER===T.id?' on':''}" data-t="${T.id}" style="--c:${T.c}" aria-pressed="${FILTER===T.id}">
@@ -647,11 +699,11 @@ function applyFilter(){
     el.classList.toggle('dim',!!on&&c.id!==FILTER);el.classList.toggle('hit',!!on&&c.id===FILTER);});
 }
 // ===== カードの大きさ（列の数）を変える =====
-const BASE_W=370;           // カードのもとの幅
+const BASE_W=400;           // カードのもとの幅
 let COLS=null;              // null＝画面の幅に合わせる
 function layout(){
   const g=document.getElementById('grid');if(!g)return;
-  const W=g.clientWidth,auto=Math.max(1,Math.min(6,Math.floor((W+22)/330)));
+  const W=g.clientWidth,auto=Math.max(1,Math.min(6,Math.floor((W+22)/350)));
   const maxC=Math.max(1,Math.min(8,Math.floor((W+10)/170)));
   let c=COLS==null?auto:Math.max(1,Math.min(maxC,COLS));
   const gap=c>=5?14:c===4?18:22,z=Math.min(1.15,((W-gap*(c-1))/c)/BASE_W);
@@ -665,7 +717,6 @@ document.getElementById('zout').addEventListener('click',()=>{COLS=CUR+1;layout(
 document.getElementById('zin').addEventListener('click',()=>{COLS=CUR-1;layout();});
 window.addEventListener('resize',layout);
 // ===== ドラッグで並びかえ（マウスはカードのどこでも、タッチは「移動」のつまみから） =====
-const ORIG_ORDER=[...ORDER];
 let justDragged=false,drag=null;
 const grid=document.getElementById('grid');
 grid.addEventListener('pointerdown',e=>{
@@ -701,14 +752,34 @@ const endDrag=e=>{
   ORDER.splice(0,ORDER.length,...[...grid.querySelectorAll('.card')].map(c=>+c.dataset.ix));
   justDragged=true;setTimeout(()=>justDragged=false,60);
 };
-window.addEventListener('pointerup',endDrag);window.addEventListener('pointercancel',endDrag);
-document.getElementById('order').addEventListener('click',()=>{ORDER.splice(0,ORDER.length,...ORIG_ORDER);render();applyFilter();});
+window.addEventListener('pointerup',endDrag);
+// ===== カードにマウスを当てると、表のグラフが少し動く =====
+const RM=window.matchMedia('(prefers-reduced-motion: reduce)');
+function play(el){
+  if(RM.matches||el.classList.contains('flipped')||el.classList.contains('dragging'))return;
+  const fr=el.querySelector('.front');if(!fr)return;
+  fr.querySelectorAll('path.dl').forEach((p,i)=>{const L=p.getTotalLength();if(!L)return;
+    const da=p.getAttribute('stroke-dasharray');
+    p.animate(da?[{opacity:0},{opacity:1}]:[{strokeDasharray:L+' '+L,strokeDashoffset:L},{strokeDasharray:L+' '+L,strokeDashoffset:0}],{duration:da?500:950+i*150,easing:'cubic-bezier(.3,.1,.2,1)'});});
+  fr.querySelectorAll('.chart circle').forEach((c,i)=>{c.style.transformBox='fill-box';c.style.transformOrigin='center';
+    c.animate([{transform:'scale(0)'},{transform:'scale(1.6)',offset:.7},{transform:'scale(1)'}],{duration:500,delay:650+i*25,easing:'ease-out',fill:'backwards'});});
+  fr.querySelectorAll('rect.bar').forEach((r,i)=>{r.style.transformBox='fill-box';r.style.transformOrigin='bottom';
+    r.animate([{transform:'scaleY(0)'},{transform:'scaleY(1)'}],{duration:600,delay:i*90,easing:'cubic-bezier(.3,1.4,.5,1)',fill:'backwards'});});
+  fr.querySelectorAll('path.fr').forEach((p,i)=>{p.animate([{transform:'translateX(0)'},{transform:'translateX(-3px)'},{transform:'translateX(2px)'},{transform:'translateX(0)'}],{duration:700,delay:i*40,easing:'ease-in-out'});});
+}
+grid.addEventListener('pointerover',e=>{const el=e.target.closest('.card');if(!el||e.pointerType!=='mouse')return;
+  if(el._hov)return;el._hov=true;play(el);});
+grid.addEventListener('pointerout',e=>{const el=e.target.closest('.card');if(!el)return;
+  if(!e.relatedTarget||!el.contains(e.relatedTarget))el._hov=false;});
+grid.addEventListener('focusin',e=>{const el=e.target.closest('.card');if(el)play(el);});
+window.addEventListener('pointercancel',endDrag);
+
 applyLang();
 document.getElementById('lang').addEventListener('click',()=>{LANG=LANG==='en'?'ja':'en';applyLang();});
 document.getElementById('dlgx').addEventListener('click',()=>document.getElementById('dlg').close());
 document.getElementById('dlg').addEventListener('click',e=>{if(e.target.id==='dlg')e.target.close();});
 document.getElementById('guess').addEventListener('click',e=>{const on=document.body.classList.toggle('guess');e.currentTarget.setAttribute('aria-pressed',on);renderTypes();applyFilter();});
-document.getElementById('reset').addEventListener('click',()=>document.querySelectorAll('.card.flipped').forEach(el=>{el.classList.remove('flipped');el.setAttribute('aria-pressed','false');}));
+document.getElementById('reset').addEventListener('click',()=>{ORDER.splice(0,ORDER.length,...ORIG_ORDER);FILTER=null;render();renderTypes();applyFilter();});
 </script>
 </body>
 </html>
