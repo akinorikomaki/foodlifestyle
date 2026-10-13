@@ -1336,7 +1336,8 @@ window.TET={
   config:()=>CONFIG,
   answer:()=>({id:S.participant.id, group:S.participant.group, value:S.participant.value, pos:pos(), lanes:JSON.parse(JSON.stringify(S.lanes)), rank:[...S.rank]}),
   mode:m=>{ const sum=m==='summary'&&!LOCK; $('sheetApp').hidden=sum; $('sumApp').hidden=!sum;
-    const u=new URL(location.href); if(sum) u.searchParams.set('mode','summary'); else u.searchParams.delete('mode'); history.replaceState(null,'',u);
+    // URLに画面の状態を残す（プレビュー画面など、URLを書き換えられない環境では何もしない）
+    try{ const u=new URL(location.href); if(sum) u.searchParams.set('mode','summary'); else u.searchParams.delete('mode'); history.replaceState(null,'',u); }catch(e){}
     if(sum){ window.TET_SUM&&window.TET_SUM.render(); } else draw(); }
 };
 let UI=(()=>{try{return localStorage.getItem('tet-ui')||'simple'}catch(e){return 'simple'}})();
