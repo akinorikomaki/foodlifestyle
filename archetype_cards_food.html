@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-<html lang="ja">
-<head>
+<html lang="ja" data-theme="light" style="color-scheme: light;"><head><!-- frame-runtime --><!-- /frame-runtime -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 48 48%27 fill=%27none%27 stroke-width=%275%27 stroke-linecap=%27round%27%3E%3Cpath d=%27M24 24c-6-10-18-8-18 0s12 10 18 0%27 stroke=%27%23D0336B%27/%3E%3Cpath d=%27M24 24c6 10 18 8 18 0s-12-10-18 0%27 stroke=%27%231E88C8%27/%3E%3C/svg%3E">
 <title>システムの振る舞いカード｜食のシステム編</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
 <style>
 :root{
   --paper:#F4F5FB; --ink:#23263A; --ink-2:#4A4E66; --ink-3:#6B7088; --rule:#E2E4F0;
@@ -240,6 +239,7 @@ dialog .cld{width:100%;max-height:68vh;height:auto}
 
 /* ===== 上のボタン（アイコンつき） ===== */
 .btn.ib{display:inline-flex;align-items:center;gap:7px}
+.btn[hidden]{display:none!important}
 .btn.ib svg{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .btn.sq{padding:6px 8px}
 /* ===== 案A：図鑑・フィールドノート風 ===== */
@@ -289,6 +289,42 @@ button.cand:focus-visible{outline:3px solid #1C6FD1;outline-offset:2px}
 .cand .cgo{font-size:10.5px;font-weight:800;color:#fff;background:var(--c);border-radius:999px;padding:1px 8px;margin-top:2px}
 dialog .dstory{margin:10px 0 0}
 dialog .dstory li{font-size:14px}
+/* ===== データから作る ===== */
+.place.user{color:#5B3F00;background:#FFF4D6;border-color:#EBCB7A}
+.udel{position:absolute;top:10px;right:46px;z-index:5;width:30px;height:28px;border-radius:999px;border:1.5px solid var(--rule);background:rgba(255,255,255,.92);color:#8A2D1E;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+.udel svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.udel:hover{background:#FFE9E5;border-color:#E5533D}
+.front .top{padding-right:84px}
+.card:has(.udel) .back .hd{padding-right:86px}
+.mkdlg{width:min(980px,96vw);max-height:92vh;overflow:auto}
+.mkdlg h2{margin:0 0 8px;font-size:21px;color:#1F2A44}
+.mkdlg .close{position:sticky;top:0;float:right;z-index:2}
+.mks{border-top:1.5px solid #E4E1D6;padding:12px 0}
+.mks h3{margin:0 0 8px;font-size:15.5px;color:#1F2A44}
+.mkrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:6px 0}
+.mkl{display:flex;flex-direction:column;gap:3px;font-size:12.5px;font-weight:700;color:#4A4E66;margin:6px 0}
+.mkl input,.mkl textarea,.mkl select{font:inherit;font-weight:500;font-size:14px;border:1.5px solid #D9D6CB;border-radius:8px;padding:6px 9px;background:#fff;color:#23263A;min-width:0}
+.mkl textarea{resize:vertical}
+.mkl .mkrow{margin:0}.mkl .mkrow input{flex:1}
+.mkl.sm{font-size:11.5px}.mkl.sm input{font-size:13px;padding:4px 8px}
+.mkgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0 12px}
+.mkfile{cursor:pointer}
+.mkmsg{font-size:13px;color:#8A4B00;margin:4px 0;min-height:1em}
+.mknote{font-size:13px;color:#4A4E66;margin:0 0 6px}
+.mkents{border:1.5px solid #E4E1D6;border-radius:10px;padding:6px 10px;max-height:150px;overflow:auto;margin:6px 0}
+.mkents legend{font-size:12.5px;font-weight:700;color:#4A4E66;padding:0 4px}
+.mkchip{display:inline-flex;align-items:center;gap:4px;font-size:13px;margin:2px 10px 2px 0}
+#mkPrev{max-width:440px}
+.btn.mkpri{background:#1F2A44;color:#fff;border-color:#1F2A44}
+#mkCands{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.mkcand{border:2px solid color-mix(in srgb,var(--c) 40%,#fff);border-radius:14px;padding:10px 12px;background:#fff}
+.mkhd{display:flex;align-items:center;gap:8px;font-size:15px;color:var(--c)}
+.mkhd span{margin-left:auto;font-size:11.5px;color:#4A4E66;font-weight:700}
+.mkwhy{font-size:12.5px;background:color-mix(in srgb,var(--c) 8%,#fff);border-radius:8px;padding:5px 8px;margin:6px 0}
+.mkwhy b{margin-right:6px}
+.mkprev{display:flex;gap:8px;align-items:center}.mkprev>svg{width:80px;flex:none}.mkcld{flex:1;min-width:0}.mkcld .cld{width:100%;max-height:150px}
+.mkvars{border:1.5px solid #EEE;border-radius:10px;padding:2px 8px 6px;margin:6px 0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 8px}
+.mkvars legend{font-size:11.5px;font-weight:700;color:#4A4E66;padding:0 4px}
 @media (prefers-reduced-motion:reduce){
   .inner{transition:none}
 }
@@ -297,29 +333,32 @@ dialog .dstory li{font-size:14px}
 </head>
 <body>
 <div class="wrap">
-<header class="brand"><svg class="logo" viewBox="0 0 48 48" fill="none" stroke-width="4" stroke-linecap="round" aria-hidden="true"><path d="M24 24c-6-10-18-8-18 0s12 10 18 0" stroke="#D0336B"/><path d="M24 24c6 10 18 8 18 0s-12-10-18 0" stroke="#1E88C8"/><path d="M10 14l-4 2 1 4" stroke="#D0336B"/><path d="M38 34l4-2-1-4" stroke="#1E88C8"/></svg><div><span class="eyebrow" id="eyebrow">SYSTEM BEHAVIOR CARDS<span class="ebj"> ・ システムの振る舞いカード</span></span><h1 id="h1">食のシステム編</h1></div></header>
+<header class="brand"><svg class="logo" viewBox="0 0 48 48" fill="none" stroke-width="4" stroke-linecap="round" aria-hidden="true"><path d="M24 24c-6-10-18-8-18 0s12 10 18 0" stroke="#D0336B"></path><path d="M24 24c6 10 18 8 18 0s-12-10-18 0" stroke="#1E88C8"></path><path d="M10 14l-4 2 1 4" stroke="#D0336B"></path><path d="M38 34l4-2-1-4" stroke="#1E88C8"></path></svg><div><span class="eyebrow" id="eyebrow">SYSTEM BEHAVIOR CARDS<span class="ebj"> ・ システムの振る舞いカード</span></span><h1 id="h1">食のシステム編</h1></div></header>
 <div class="bar" role="toolbar" aria-label="操作">
-  <button class="btn ib" id="typesBtn" aria-expanded="false" aria-controls="drawer"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg><span class="bl">型の一覧</span></button>
-  <button class="btn ib" id="guess" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 6.1A9.6 9.6 0 0 1 12 6c5 0 9 4.6 10 6-.5.8-1.5 2.1-3 3.4"/><path d="M6.6 6.6C4.5 8 3 10 2 12c1 1.4 5 6 10 6 1.7 0 3.3-.5 4.6-1.3"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg><span class="bl">あてっこモード</span></button>
+  <button class="btn ib" id="typesBtn" aria-expanded="false" aria-controls="drawer"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"></rect><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"></rect><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"></rect><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"></rect></svg><span class="bl">型の一覧</span></button>
+  <button class="btn ib" id="guess" aria-pressed="false" title="型の名前をかくす"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18"></path><path d="M10.6 6.1A9.6 9.6 0 0 1 12 6c5 0 9 4.6 10 6-.5.8-1.5 2.1-3 3.4"></path><path d="M6.6 6.6C4.5 8 3 10 2 12c1 1.4 5 6 10 6 1.7 0 3.3-.5 4.6-1.3"></path><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"></path></svg><span class="bl">あてっこモード</span></button>
   <span class="sep" aria-hidden="true"></span>
-  <span class="zoomctl"><button class="btn ib sq" id="zout" aria-label="小さく"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/><path d="M7.5 10.5h6"/></svg></button><span id="cols">3列</span><button class="btn ib sq" id="zin" aria-label="大きく"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/><path d="M7.5 10.5h6M10.5 7.5v6"/></svg></button></span>
+  <span class="zoomctl"><button class="btn ib sq" id="zout" aria-label="小さく（列をふやす）" title="小さく（列をふやす）"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="M15.5 15.5L21 21"></path><path d="M7.5 10.5h6"></path></svg></button><span id="cols">2列</span><button class="btn ib sq" id="zin" aria-label="大きく（列をへらす）" title="大きく（列をへらす）"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="M15.5 15.5L21 21"></path><path d="M7.5 10.5h6M10.5 7.5v6"></path></svg></button></span>
   <span class="sep" aria-hidden="true"></span>
-  <button class="btn ib" id="reset"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3.5 4v5h5"/></svg><span class="bl">もとにもどす</span></button>
-  <button class="btn ib" id="lang" lang="en"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span class="bl">English</span></button>
+  <button class="btn ib" id="mkBtn" hidden=""><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="3"></rect><path d="M12 8v8M8 12h8"></path></svg><span class="bl">データから作る</span></button>
+  <button class="btn ib" id="saveBtn" title="作ったカードも入れて、このページをHTMLファイルに保存" hidden=""><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5"></path><path d="M4.5 19.5h15"></path></svg><span class="bl">HTMLに保存</span></button>
+  <button class="btn ib" id="reset" title="カードを表にもどし、並びも最初にもどす"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"></path><path d="M3.5 4v5h5"></path></svg><span class="bl">もとにもどす</span></button>
+  <button class="btn ib" id="lang" lang="en"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><ellipse cx="12" cy="12" rx="4" ry="9"></ellipse><path d="M3 12h18"></path></svg><span class="bl">English</span></button>
   <span class="sep" aria-hidden="true"></span>
-  <span class="helpw"><button class="btn ib sq" id="help" aria-expanded="false" aria-controls="helpPop" aria-label="使い方"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .8-1 1.5v.7"/><path d="M12 17h.01"/></svg></button>
-  <span class="helppop" id="helpPop" role="status" hidden><span id="note">クリックでめくる・ドラッグで並びかえ</span></span></span>
+  <span class="helpw"><button class="btn ib sq" id="help" aria-expanded="false" aria-controls="helpPop" aria-label="使い方" title="使い方"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .8-1 1.5v.7"></path><path d="M12 17h.01"></path></svg></button>
+  <span class="helppop" id="helpPop" role="status" hidden=""><span id="note">クリックでめくる・ドラッグで並びかえ</span></span></span>
 </div>
-<div class="grid" id="grid"></div>
-<aside class="drawer" id="drawer" aria-labelledby="typesT" hidden>
+<div class="grid" id="grid" style="--cols: 2; --gap: 22px; --z: 1.2500;"></div>
+<aside class="drawer" id="drawer" aria-labelledby="typesT" hidden="">
   <div class="dhd"><b id="typesT">型の一覧</b><button class="btn" type="button" id="drawerX" aria-label="閉じる">✕</button></div>
   <p id="typesN">押すと、その型のカードが光るよ</p>
   <div class="tgrid" id="tgrid"></div>
 </aside>
+<dialog id="mkdlg" class="mkdlg"><button class="btn close" type="button" id="mkx">✕</button><div id="mkc"></div></dialog>
 <dialog id="dlg"><button class="btn close" type="button" id="dlgx">閉じる</button><div id="dlgc"></div></dialog>
 </div>
 
-<script>
+<script id="app">
 // ===== フードシステムのデータ（TET設定 foodlifestyle-health より） =====
 const D={
   y_f:{hi:'多い',lo:'少ない',name:'野菜をしっかり食べる女性',u:'%',what:'1日に野菜を350g以上食べる人の割合',src:'国民健康・栄養調査',h:[[2014,29.2],[2015,31.4],[2016,27.2],[2017,29.0],[2018,27.0],[2019,26.5],[2022,24.8],[2023,21.9],[2024,22.0]]},
@@ -340,6 +379,8 @@ const D={
 
 // ===== 型の定義（tet_tool の ARCH と同じ配置） =====
 const ARCH={
+ escalation:{roles:{Aa:[35,100],R:[165,25],Ba:[295,100],Ta:[100,178],Tb:[230,178]},
+  e:[['Aa','R','+'],['R','Tb','+'],['Tb','Ba','+'],['Ba','R','-'],['R','Ta','-'],['Ta','Aa','+']],L:[['B',100,100,['Aa','R','Ta']],['B',230,100,['R','Tb','Ba']]]},
  commons:{roles:{Aa:[45,30],Ba:[45,170],T:[165,100],G:[295,100],Lm:[295,22]},
   e:[['Aa','T','+'],['Ba','T','+'],['T','G','-',1],['G','Aa','+'],['G','Ba','+'],['Lm','G','+']],L:[['B',160,52,['Aa','T','G']],['B',160,148,['Ba','T','G']]]},
  fixes:{roles:{P:[40,100],F:[290,100],U:[165,178]},
@@ -502,6 +543,7 @@ const TYP={
 
 // 型の名前に合わせたピクトグラム（白い線）
 const ICON={
+ escalation:'<path d="M8 34V14M8 14l-4 5M8 14l4 5"/><path d="M20 34V9M20 9l-4 5M20 9l4 5"/><path d="M32 34V4M32 4l-4 5M32 4l4 5"/>',
  think:'<circle cx="20" cy="20" r="14"/><path d="M15.5 15.5a4.5 4.5 0 1 1 6.3 4.1c-1.2.6-1.8 1.4-1.8 2.7v1"/><path d="M20 28.5h.01"/>',
  commons:'<circle cx="20" cy="21" r="7"/><path d="M20 14V4M17 7l3-3 3 3"/><path d="M14 26l-8 7M6 29v4h4"/><path d="M26 26l8 7M34 29v4h-4"/>',
  fixes:'<path d="M3 15h34M3 25h34"/><rect x="15" y="11" width="10" height="18" rx="2"/><path d="M30 25c0 3 3 4 3 7a3 3 0 0 1-6 0c0-3 3-4 3-7z"/>',
@@ -522,21 +564,21 @@ const UI={
   levT:['トップダウン','政策・規制'],levB:['ボトムアップ','口コミ・周りの意識'],levA:['アフォーダビリティ','お金の余裕・感覚'],
   src:'出典：',srcSep:'／',zoom:'図を大きく',close:'閉じる',probL:'⚠ 問題：',point:'📊 データのポイント：',jp:'日本',world:'世界',
   infoJp:'野菜を食べることのデータ',infoW:'健康的な食事を買うお金がない人のデータ',infoSofa:'FAO 世界食料農業白書2025',infoStat:'FAO（FAOSTAT）のデータ',
-  probTag:'⚠ 問題',candOpen:'で読むとどうなるかを見る',candGo:'この型で読むと ▸',candH:'で読むと…',candNote:'これは一つの読み方（仮説）です。もう一方の型や、ほかの説明とも比べてみよう。',infoPaper:'論文（国民健康・栄養調査）のデータ',hyp:'論文の考察にもとづく仮説',noteL:'注',cands:'候補の型',others:'ほかの説明も考えよう',draw:'あなたなら、どんなループを描く？',drawSub:'変数と矢印を書きこんでみよう',typThink:'どの型の形に<br>近いかな？',h1:'食のシステム編',help:'使い方',cols:'列',zout:'小さく（列をふやす）',zin:'大きく（列をへらす）',grip:'移動',gripT:'ドラッグして並びかえ',order:'並びを元にもどす',base:'2019年＝',yr:'年',dec:'年代',about:'約',cardAria:'のカード。めくると因果ループ図',loopAria:'の因果ループ図'},
+  probTag:'⚠ 問題',thinkNm:'型を考えるカード',thinkTag:'この動き、どの型？',thinkEn:'Which pattern is it?',candOpen:'で読むとどうなるかを見る',candGo:'この型で読むと ▸',candH:'で読むと…',candNote:'これは一つの読み方（仮説）です。もう一方の型や、ほかの説明とも比べてみよう。',infoPaper:'論文（国民健康・栄養調査）のデータ',hyp:'論文の考察にもとづく仮説',noteL:'注',cands:'候補の型',others:'ほかの説明も考えよう',draw:'あなたなら、どんなループを描く？',drawSub:'変数と矢印を書きこんでみよう',typThink:'どの型の形に<br>近いかな？',h1:'食のシステム編',help:'使い方',cols:'列',zout:'小さく（列をふやす）',zin:'大きく（列をへらす）',grip:'移動',gripT:'ドラッグして並びかえ',order:'並びを元にもどす',base:'2019年＝',yr:'年',dec:'年代',about:'約',cardAria:'のカード。めくると因果ループ図',loopAria:'の因果ループ図'},
  en:{title:'System Behavior Cards | Food Systems',guess:'Guess mode',guessT:'Hide pattern names',reset:'Reset',resetT:'Flip all cards back and restore the original order',note:'Click to flip, drag to rearrange',lang:'日本語',
   graph:'📊 This graph shows…',stats:'🔢 By the numbers…',data:'Data: ',sep:', ',typ:'Typical shape<br>of this pattern',typBad:'up = worse',flip:'Flip me ↻',back:'Back to front ↻',
   same:'same direction',opp:'opposite direction',delay:'delay',front:'graph on the front',loop:'🔄 Going around the loop…',again:'↺ back to 1',hint:'💡 Ways out: how to use the three levers?',
   levT:['Top-down','Policy & regulation'],levB:['Bottom-up','Word of mouth & awareness'],levA:['Affordability','Financial room & money sense'],
   src:'Sources: ',srcSep:' / ',zoom:'Enlarge',close:'Close',probL:'⚠ Problem: ',point:'📊 Data point: ',jp:'Japan',world:'World',
   infoJp:'Data on eating vegetables',infoW:"Data on people who can't afford a healthy diet",infoSofa:'FAO, The State of Food and Agriculture 2025',infoStat:'FAO (FAOSTAT) data',
-  probTag:'⚠ Problem',candOpen:': see this reading',candGo:'Read it this way ▸',candH:': one way to read it',candNote:'This is one possible reading (a hypothesis). Compare it with the other pattern and other explanations.',infoPaper:'Data from a paper (NHNS)',hyp:'Hypothesis based on the paper',noteL:'Note',cands:'Candidate patterns',others:'Consider other explanations',draw:'What loop would you draw?',drawSub:'Write in variables and arrows',typThink:'Which pattern<br>shape is it?',h1:'Food Systems',help:'How to use',cols:' cols',zout:'Smaller (more columns)',zin:'Larger (fewer columns)',grip:'Move',gripT:'Drag to rearrange',order:'Reset order',base:'2019 = ',yr:'',dec:'s',about:'~',cardAria:' card. Flip to see the causal loop diagram',loopAria:' causal loop diagram'}
+  probTag:'⚠ Problem',thinkNm:'Which pattern is it?',thinkTag:'Which pattern does this movement fit?',thinkEn:'型を考えるカード',candOpen:': see this reading',candGo:'Read it this way ▸',candH:': one way to read it',candNote:'This is one possible reading (a hypothesis). Compare it with the other pattern and other explanations.',infoPaper:'Data from a paper (NHNS)',hyp:'Hypothesis based on the paper',noteL:'Note',cands:'Candidate patterns',others:'Consider other explanations',draw:'What loop would you draw?',drawSub:'Write in variables and arrows',typThink:'Which pattern<br>shape is it?',h1:'Food Systems',help:'How to use',cols:' cols',zout:'Smaller (more columns)',zin:'Larger (fewer columns)',grip:'Move',gripT:'Drag to rearrange',order:'Reset order',base:'2019 = ',yr:'',dec:'s',about:'~',cardAria:' card. Flip to see the causal loop diagram',loopAria:' causal loop diagram'}
 };
 const u=k=>UI[LANG][k];
 const EN=[{"tag": "The goal slowly slips down", "ttl": "Fewer people are eating enough vegetables", "read": "Over 10 years, both women and men dropped about 7 points.", "prob": "The share eating enough vegetables slowly falls", "names": {"G": "Target\n(350 g/day)", "A": "Share eating\n350 g+", "Gp": "Gap to target", "Pr": "\"Too hard\"\nfeeling", "C": "Veg-eating\nefforts"}, "story": ["Few people reach 350 g", "People feel \"that's impossible\"", "The target quietly slips lower", "Less effort, so the share falls further"], "lev": {"t": "Keep the 350 g target of Health Japan 21; set vegetable standards for school and work meals", "b": "Share \"today's veggie dish\" on social media to raise the norm", "a": "Vegetable coupons or discounts give room for one more dish"}}, {"tag": "Grows, then hits a ceiling", "ttl": "Interest in vegetables stalled in 2022", "read": "Interest rose fast, then began to fall from 2022. Around the same time, vegetables became harder to afford (see the \"Vegetable affordability\" graph). Is price the brake?", "prob": "Interest stops growing partway", "names": {"E": "People trying\nvegetables", "S": "Interest in\nvegetables", "B": "Sense that veg\nis \"too pricey\"", "C": "Vegetable\nprices"}, "story": ["More people try vegetables", "Word spreads and interest rises", "But people feel \"too expensive!\"", "The brake kicks in and growth stops"], "lev": {"t": "Stabilize vegetable prices through support for growers and stockpiles", "b": "Spread cheap, tasty ways to eat vegetables by word of mouth", "a": "Coupons or points so people can still buy when prices rise"}}, {"tag": "Demand outpaces preparation", "ttl": "Vegetables were most affordable until 2021", "read": "After that, vegetable prices outpaced wage growth, and by 2024 affordability was back to about the 2015 level. Did farming and distribution keep up?", "prob": "Would-be buyers drop off partway", "names": {"Eg": "Veg promotion\nefforts", "D": "Would-be\nveg buyers", "Lm": "Vegetable\nscarcity", "N": "Perceived need\nto invest", "I": "Investment in\nsupply chains"}, "dataNote": " (opposite of affordability)", "story": ["Promotion increases would-be buyers", "Vegetables run short and prices rise", "People notice and start building supply", "Too late: high prices drive buyers away"], "lev": {"t": "Use policy to invest early in farms and distribution", "b": "Spread the word about seasonal, local vegetables to support growers", "a": "Temporary subsidies during price spikes keep room to buy"}}, {"tag": "Relying on the quick fix", "ttl": "Government messaging goes up and down", "read": "Messaging rises and falls like waves, while the share eating enough vegetables keeps falling (see the \"eating enough vegetables\" graph).", "prob": "The vegetable shortfall never really gets fixed", "names": {"S": "Share eating\ntoo little veg", "Q": "Government\nmessaging", "E": "\"We campaigned\"\ncomplacency", "F": "Easy ways to\neat vegetables"}, "story": ["Low vegetable intake becomes a topic", "\"Eat your vegetables!\" campaigns help a little", "A \"we campaigned, job done\" feeling sets in", "Easy, cheap ways to eat veg never grow; the shortfall returns"], "lev": {"t": "Shift from campaigns to systems, e.g., veg standards for school meals", "b": "Share cooking and eating experiences with friends and family", "a": "Think \"cost per meal\" instead of \"vegetables are expensive\""}}, {"tag": "Quick fixes backfire later", "ttl": "Brazil: it fell, then rose higher than before", "read": "It improved temporarily in 2020 (26.0% → 19.4%), then worsened (29.8%). 2020 was the year of COVID emergency cash aid. Short-term measures alone may not bring lasting improvement.", "prob": "People struggling to eat well don't really decrease", "names": {"P": "Share unable to\nafford healthy diet", "F": "Emergency\ncash aid", "U": "Fiscal\nburden"}, "story": ["COVID threatens more people's food", "The government rushes out cash, and numbers fall", "The money runs out and aid shrinks", "More people struggle than before"], "lev": {"t": "Plan how aid ends, and pair it with job and income policies", "b": "Spread and keep local food-sharing networks", "a": "Help households keep room in the budget for food after aid ends"}}, {"tag": "Winners keep winning; the gap widens", "ttl": "The gap between regions keeps widening", "read": "East Asia & Pacific fell from 29.3% to 17.8%, while Sub-Saharan Africa stayed around 70%. The gap grew from 41 to 53 points.", "prob": "Struggling regions get left behind", "names": {"Ae": "East Asia\ndiet quality", "Ar": "Investment in\nEast Asia", "Al": "Tilt toward\nEast Asia", "Be": "Africa\ndiet quality", "Br": "Investment in\nAfrica"}, "dataNote": " (opposite of 'can't afford')", "story": ["Investment flows to the region that did a bit better", "More jobs and factories make it richer", "The other region gets little money", "The gap keeps growing"], "lev": {"t": "Target international aid and investment to regions left behind", "b": "Spread local success stories among farmers", "a": "Small loans that give people financial room"}}, {"tag": "Grows, then hits a ceiling", "ttl": "Lithuania: a fast drop, then stuck around 9%", "read": "It improved a lot at first (21.3% → 8.8%), then the gains got smaller. As progress is made, reaching the remaining people may become harder and more costly.", "prob": "Improvement stalls at some point", "names": {"E": "Wage\nlevel", "S": "Share able to\nafford meals", "B": "Difficulty of\nreaching people", "C": "Pension-only\nhouseholds"}, "dataNote": " (opposite of 'can't afford')", "story": ["Wages rise and more people can afford meals", "Money circulates and wages rise further", "But hard-to-reach people, like pension-only elders, remain", "It barely falls any further"], "lev": {"t": "Design programs aimed at hard-to-reach people, such as older adults", "b": "Community check-ins let people know support exists", "a": "Food allowances for pension-only households"}}, {"tag": "Demand outpaces preparation", "ttl": "World farming: gains from innovation nearly halved in the 2010s", "bars": {"name": "Extra kg, 10 years later, from a field that yielded 100 kg", "what": "Gains from new crop varieties and technology alone, with the same land and fertilizer (world average)"}, "read": "In the 2000s, innovation added +22 kg per decade; in the 2010s only +12 kg, almost half. Output didn't fall; the gain from innovation got smaller. Causes include land degradation and climate change (FAO).", "prob": "Gains from innovation weaken partway", "names": {"Eg": "Spread of new\nvarieties & tech", "D": "Yield gains from\ninnovation", "Lm": "Land degradation\n& climate effects", "N": "Perceived need\nfor research", "I": "Investment in\nfarm research"}, "story": ["New varieties and technology raise output", "Profits spread new technology further", "But degraded land and poorer fields act as a brake", "Research investment lags, and growth weakens"], "lev": {"t": "Increase public investment in farm research and soil health while growth lasts", "b": "Spread new techniques from farmer to farmer", "a": "Grants or loans give farmers room to try new technology"}}, {"tag": "Overused by all, until it's gone", "ttl": "World oceans: overfished stocks rose from 1 in 10 to about 3.5 in 10", "pict": {"name": "If the world's fish were \"10 groups\"…", "what": "Red fish = overfished groups (caught faster than they can recover). From FAO assessments of fish stocks such as \"Atlantic cod\"."}, "read": "In 1974 only 1 in 10 groups was overfished; by 2021 about 3.5 in 10. Fish in the open sea belong to no one, so the more everyone catches, the fewer remain.", "prob": "Fish decline, and each trip catches less", "names": {"Aa": "Country A's\ncatch", "Ba": "Country B's\ncatch", "T": "Total\ncatch", "G": "Catch per\nfishing trip", "Lm": "Fish stock"}, "story": ["Each country and fisher catches more", "The total catch grows too large", "Fish can't recover, and each trip catches less", "Yet the race to catch continues"], "lev": {"t": "Countries agree on catch limits (quotas)", "b": "Spread \"choose fish that aren't overfished\" by word of mouth", "a": "Compensate fishers' income during closed seasons"}}, {"tag": "Relying on the quick fix", "ttl": "China: fertilizer use rose 45×, then began to fall", "read": "5 kg (1961) → 235 kg (2014), about 45 times. In 2015 the government launched a plan to stop increasing fertilizer use; 192 kg in 2023. FAO notes that overuse can \"hide\" soil damage.", "prob": "Falling yields (poor soil) are never fixed at the root", "names": {"S": "Low\nyields", "Q": "Chemical\nfertilizer use", "E": "Soil damage\n(acid, salt)", "F": "Soil-building\npractices"}, "story": ["Soil wears out and yields fall", "More fertilizer brings yields back", "But overuse damages the soil further", "Soil care is put off, so even more fertilizer is needed"], "lev": {"t": "Rules and support to cut fertilizer overuse", "b": "Spread soil-building successes from farmer to farmer", "a": "Subsidies that protect income while using less fertilizer"}}, {"tag": "Winners keep winning; the gap widens", "ttl": "Fertilizer access: the gap between regions widened", "read": "Asia rose from 4.5 kg to 113 kg; Africa from 2.1 kg to 14 kg (1961 → 2023). FAO cites very limited fertilizer use as one reason for low yields in Africa.", "prob": "Low-yield regions get left behind", "names": {"Ae": "Yields in\nAsia", "Ar": "Fertilizer\nuse in Asia", "Al": "Tilt toward\nAsia", "Be": "Yields in\nAfrica", "Br": "Fertilizer use\nin Africa"}, "story": ["Higher-yield regions use profits to buy fertilizer and machines", "Yields rise more, attracting money and investment", "Low-yield regions can't afford fertilizer", "The gap keeps growing"], "lev": {"t": "Support for fertilizer and seeds in low-yield regions", "b": "Farmer groups share know-how", "a": "Easier loans and subsidies to buy fertilizer"}}, {"tag": "Relying on the quick fix", "ttl": "Less salt, but mild high blood pressure isn't falling", "pairs": {"what": "Start and end values stated in the paper (men, not age-adjusted)", "items": [{"nm": "Salt", "sub": "per day"}, {"nm": "Severe hypertension", "sub": "Grade 2"}, {"nm": "Mild hypertension", "sub": "Grade 1"}]}, "note": "Not age-adjusted (includes aging). Measurement changed in 2019, so mild hypertension uses 2018.", "read": "Salt fell from 15 g to 10.9 g, and severe hypertension also fell. Mild hypertension, however, did not fall (28.2% → 32.3%). The paper notes that campaigns emphasize salt reduction rather than balanced nutrition from food groups.", "prob": "Mild high blood pressure isn't really falling", "names": {"S": "Share with mild\nhypertension", "Q": "Salt campaigns\n& treatment", "E": "\"Less salt is\nenough\" feeling", "F": "Balanced diet\n& exercise"}, "story": ["High blood pressure becomes a concern", "Salt campaigns and treatment reduce severe cases", "\"Less salt is enough\" puts other measures off", "Balanced diet and exercise lag; mild cases stay"], "lev": {"t": "Add food-group balance, not just salt, to targets (the paper's proposal)", "b": "Messages tailored to men's and women's habits", "a": "Support or points that make vegetables and fish easier to choose"}}, {"tag": "Which pattern does this movement fit?", "ttl": "People eat less, yet more are overweight?", "pairs": {"what": "Start and end values stated in the paper (men, not age-adjusted)", "items": [{"nm": "Energy", "sub": "per day"}, {"nm": "Overweight/obesity", "sub": "BMI ≥ 25"}]}, "note": "Target: under 28% (Health Japan 21, by 2022). Food records can under-report intake.", "read": "Energy intake fell from 2327 to 2141 kcal, yet overweight/obesity rose from 23.8% to 33.0%, above the 28% target. The paper suggests energy is not the only factor, pointing to a westernized diet (more meat and fat, less fish and vegetables) and less physical activity.", "prob": "People eat less, yet more are overweight?", "others": ["Is food intake under-reported?", "What about diet quality? (more meat/fat, less fish/veg)", "What about physical activity? (fewer steps)", "What about changes in age structure?"], "lev": {"t": "Broaden targets from \"how much\" to diet quality and activity", "b": "Rethink fast eating and late meals (common in men) with coworkers and friends", "a": "Support that makes fish and vegetables easier to afford"}, "candView": {"burden": {"prob": "Overweight isn't reduced at the root", "names": {"S": "Share\noverweight", "Q": "Strictness of\ndieting", "E": "\"Only amount\nmatters\" feeling", "F": "Diet quality &\nactivity habits"}, "story": ["More people become overweight", "Measures focus on limiting how much people eat", "\"Only the amount matters\" puts diet quality and exercise off", "Healthy eating and activity habits never grow, so overweight stays"]}, "fixes": {"prob": "Cutting back, yet weight comes back", "names": {"P": "Share\noverweight", "F": "Strictness of\ndieting", "U": "Skipped meals\n& snacking"}, "story": ["More people become overweight", "Limiting food lowers weight for a while", "But meals get skipped, and snacking increases", "After a while, weight gain becomes easier again"]}}}];
 const DEN={"y_f": {"hi": "More", "lo": "Less", "name": "Women eating enough vegetables", "what": "Share eating 350 g+ of vegetables a day"}, "y_m": {"hi": "More", "lo": "Less", "name": "Men eating enough vegetables", "what": "Share eating 350 g+ of vegetables a day"}, "x1": {"hi": "More", "lo": "Less", "name": "Amount of government messaging", "u": "2019 = 100", "what": "How often \"vegetables, nutrition, health\" appear in the Shokuiku (food education) White Paper"}, "x2": {"hi": "High", "lo": "Low", "name": "Interest in vegetables", "u": "2019 = 50", "what": "How often vegetables were searched online"}, "x3": {"hi": "Easier", "lo": "Harder", "name": "Vegetable affordability", "u": "2019 = 100", "what": "How many vegetables wages can buy"}, "bra": {"hi": "More", "lo": "Less", "name": "Brazil", "what": "Share who can't afford a healthy diet (up = worse)"}, "eap": {"hi": "More", "lo": "Less", "name": "East Asia & Pacific", "what": "Share who can't afford a healthy diet (up = worse)"}, "ssa": {"hi": "More", "lo": "Less", "name": "Sub-Saharan Africa", "what": "Share who can't afford a healthy diet (up = worse)"}, "ltu": {"hi": "More", "lo": "Less", "name": "Lithuania", "what": "Share who can't afford a healthy diet (up = worse)"}, "tfp": {"hi": "Faster", "lo": "Slower", "name": "Pace of gains from innovation", "what": "Yearly % gain in output from varieties and technology, without more land or fertilizer (decade average)"}, "chnN": {"hi": "More", "lo": "Less", "name": "China", "what": "Nitrogen fertilizer used per hectare of cropland (kg)"}, "asiaN": {"hi": "More", "lo": "Less", "name": "Asia", "what": "Nitrogen fertilizer used per hectare of cropland (kg)"}, "afrN": {"hi": "More", "lo": "Less", "name": "Africa", "what": "Nitrogen fertilizer used per hectare of cropland (kg)"}, "fish": {"hi": "More", "lo": "Less", "name": "Share of overfished stocks", "what": "Fish grouped by species and sea area (e.g., Atlantic cod): share caught faster than they recover"}};
 const REFS_EN={"paper":[["Fauzi et al. (2022) J. Clin. Med. 11:2350","https://doi.org/10.3390/jcm11092350"],["MHLW, National Health and Nutrition Survey (Japan)","https://www.mhlw.go.jp/bunya/kenkou/kenkou_eiyou_chousa.html"]],"国民健康・栄養調査": [["MHLW, National Health and Nutrition Survey (Japan)", "https://www.mhlw.go.jp/bunya/kenkou/kenkou_eiyou_chousa.html"]], "Googleトレンド": [["Google Trends", "https://trends.google.co.jp/trends/"]], "家計調査・消費者物価指数": [["Statistics Bureau of Japan, Family Income and Expenditure Survey", "https://www.stat.go.jp/data/kakei/"], ["Statistics Bureau of Japan, Consumer Price Index", "https://www.stat.go.jp/data/cpi/"]], "食育白書": [["MAFF, White Paper on Shokuiku (Japan)", "https://www.maff.go.jp/j/syokuiku/wpaper/"]], "世界銀行・FAO": [["World Bank & FAO, Food Prices for Nutrition", "https://www.worldbank.org/en/programs/icp/brief/foodpricesfornutrition"], ["Our World in Data (chart data)", "https://ourworldindata.org/grapher/share-healthy-diet-unaffordable"]], "FAO 世界食料農業白書2025": [["FAO, The State of Food and Agriculture 2025, Figure 4", "https://doi.org/10.4060/cd7067en-fig04"]], "FAO（SDG指標14.4.1）": [["FAO (SDG indicator 14.4.1) / Our World in Data", "https://ourworldindata.org/grapher/share-of-fish-stocks-overexploited"]], "FAOSTAT": [["FAOSTAT (fertilizers) / Our World in Data", "https://ourworldindata.org/grapher/nitrogen-fertilizer-application-per-hectare-of-cropland"], ["FAOSTAT", "https://www.fao.org/faostat/en/"]]};
 const DD=k=>LANG==='en'?{...D[k],...DEN[k]}:D[k];
-const loc=(c,ix)=>{if(LANG!=='en')return c;const e=EN[ix];return {...c,...e,nm:c.en,en:c.nm,
+const loc=(c,ix)=>{if(c.user)return uLoc(c);if(LANG!=='en')return c;const e=EN[ix];return {...c,...e,nm:c.en,en:c.nm,
   pict:c.pict?{...c.pict,...e.pict}:undefined,bars:c.bars?{...c.bars,...e.bars}:undefined,
   pairs:c.pairs?{...c.pairs,...e.pairs,items:c.pairs.items.map((it,i)=>({...it,...((e.pairs&&e.pairs.items[i])||{})}))}:undefined};};
 // 文字の幅（日本語は1文字分、英数字は約0.58文字分）
@@ -569,18 +611,18 @@ function dataSVG(card){
   const dec=ss[0].dec,yl=t=>dec?t+u('dec'):t;
   (dec?ss[0].h.map(p=>p[0]):[...new Set([ya,Math.round((ya+yb)/2),yb])]).forEach(t=>g+=`<text x="${X(t)}" y="${H-8}" font-size="${dec?10.5:12}" text-anchor="middle" fill="#6B7088">${yl(t)}</text>`);
   ss.forEach((s,i)=>{
-    const pts=s.h.map(([yr,v])=>[X(yr),Y(v),yr,v]),c=i?col2:card.c;
-    const segs=[[pts[0]]];for(let k=1;k<pts.length;k++){if(pts[k][2]-pts[k-1][2]>(dec?10:1)){g+=`<path d="M${pts[k-1][0]},${pts[k-1][1]}L${pts[k][0]},${pts[k][1]}" stroke="${c}" stroke-width="2" stroke-dasharray="3 4" fill="none" opacity=".7"/>`;segs.push([]);}segs[segs.length-1].push(pts[k]);}
+    const pts=s.h.map(([yr,v])=>[X(yr),Y(v),yr,v]),c=i?col2:card.c;const dfs=s.h.slice(1).map((p,j)=>p[0]-s.h[j][0]).filter(x=>x>0).sort((a,b)=>a-b),stp=dec?10:Math.max(1,dfs[Math.floor(dfs.length/2)]||1);
+    const segs=[[pts[0]]];for(let k=1;k<pts.length;k++){if(pts[k][2]-pts[k-1][2]>stp*1.5){g+=`<path d="M${pts[k-1][0]},${pts[k-1][1]}L${pts[k][0]},${pts[k][1]}" stroke="${c}" stroke-width="2" stroke-dasharray="3 4" fill="none" opacity=".7"/>`;segs.push([]);}segs[segs.length-1].push(pts[k]);}
     segs.forEach(P=>{if(P.length<2)return;let d=`M${P[0][0]},${P[0][1]}`;
       for(let k=0;k<P.length-1;k++){const p0=P[k-1]||P[k],p1=P[k],p2=P[k+1],p3=P[k+2]||p2;
         d+=` C${p1[0]+(p2[0]-p0[0])/6},${p1[1]+(p2[1]-p0[1])/6} ${p2[0]-(p3[0]-p1[0])/6},${p2[1]-(p3[1]-p1[1])/6} ${p2[0]},${p2[1]}`;}
       g+=`<path class="dl" d="${d}" fill="none" stroke="${c}" stroke-width="${i?(card.shared?5:3.5):6}" ${i&&!card.shared?'stroke-dasharray="6 5"':''} stroke-linecap="round" stroke-linejoin="round"/>`;});
     const f=pts[0],l=pts[pts.length-1],T=(x,y,v,an)=>`<text x="${x}" y="${y}" font-size="14" font-weight="800" fill="#23263A" stroke="#fff" stroke-width="3" paint-order="stroke" text-anchor="${an}">${v}</text>`;
     g+=`<circle cx="${f[0]}" cy="${f[1]}" r="3.6" fill="#23263A"/><circle cx="${l[0]}" cy="${l[1]}" r="3.6" fill="#23263A"/>`;
-    const off=card.shared?(i?-10:19):-10;const pu=s.pu||'';g+=T(f[0]+6,f[1]+off,f[3]+pu,'start')+T(l[0],l[1]+off,l[3]+pu,'middle');
+    const off=card.shared?(i?-10:19):-10;const pu=s.pu||'';const fN=v=>Math.abs(v)>=10000?new Intl.NumberFormat(LANG==='en'?'en':'ja',{notation:'compact',maximumFractionDigits:1}).format(v):v;g+=T(f[0]+6,f[1]+off,fN(f[3])+pu,'start')+T(l[0],l[1]+off,fN(l[3])+pu,'middle');
     if(ss.length===1&&pts.length>3){const mid=pts.slice(1,-1);const mx=mid.reduce((p,q)=>q[3]>p[3]?q:p),mn=mid.reduce((p,q)=>q[3]<p[3]?q:p);
       [mx,mn].forEach((q,k)=>{const lo=k===1,rg=(b-a)*.12,ex=lo?(q[3]<Math.min(f[3],l[3])-rg):(q[3]>Math.max(f[3],l[3])+rg);if(!ex)return;
-        g+=`<circle cx="${q[0]}" cy="${q[1]}" r="3" fill="#23263A"/>`+T(q[0],q[1]+(lo?19:-10),q[3]+pu+(LANG==='en'?' ('+yl(q[2])+')':'（'+yl(q[2])+'）'),'middle');});}
+        g+=`<circle cx="${q[0]}" cy="${q[1]}" r="3" fill="#23263A"/>`+T(q[0],q[1]+(lo?19:-10),fN(q[3])+pu+(LANG==='en'?' ('+yl(q[2])+')':'（'+yl(q[2])+'）'),'middle');});}
   });
   const leg=ss.map((s,i)=>`<div class="lg"><i class="${i&&!card.shared?'dash':''}" style="--sc:${i?col2:card.c}"></i><div><b>${esc(s.name)}</b>${i&&s.what===ss[0].what?'':`<small>${esc(s.what)}</small>`}</div></div>`).join('');
   return {svg:`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(card.ttl)}">${g}</svg>`,leg,src:[...new Set(ss.map(s=>s.src))]};
@@ -619,9 +661,9 @@ function cldSVG(card){
 const ORDER=[0,4,1,8,2,5,7,3,6,9,10,11,12];
 const ORIG_ORDER=[...ORDER];
 // 日本か世界かのタグ
-const place=c=>c.grp==='world'
+const place=c=>c.grp==='user'?`<span class="place user">${mk('mine')}</span><span class="placeinfo">${esc(c.usrc||'')}</span><span class="hyp">${mk('hyp')}</span>`:c.grp==='world'
   ?`<span class="place world">${u('world')}</span><span class="placeinfo">${c.src==='fao'?(c.id==='under'?u('infoSofa'):u('infoStat')):u('infoW')}</span>`
-  :`<span class="place jp">${u('jp')}</span><span class="placeinfo">${c.src==='paper'?u('infoPaper'):u('infoJp')}</span>${c.hyp?`<span class="hyp">${u('hyp')}</span>`:''}`;
+  :`<span class="place jp">${u('jp')}</span><span class="placeinfo">${c.src==='paper'?u('infoPaper'):u('infoJp')}</span>${c.hyp&&c.grp!=='user'?`<span class="hyp">${u('hyp')}</span>`:''}`;
 
 // 魚の絵（10グループのうち、とりすぎの分を赤くぬる）
 function pictBox(c){
@@ -693,7 +735,7 @@ const refLinks=(src,sep)=>src.flatMap(k=>(LANG==='en'?REFS_EN:REFS)[k]||[[k,'']]
 function render(){
   const html=(c0,ix)=>{const c=loc(c0,ix);const d=c.stats?statsBox(c):c.pict?pictBox(c):c.bars?barBox(c):c.pairs?pairBox(c):dataSVG(c);return `
   <div class="card" data-ix="${ix}" tabindex="0" role="button" aria-pressed="false" aria-label="${esc(c.nm)}${u('cardAria')}" style="--c:${c.c}">
-   <span class="grip" title="${u('gripT')}" aria-hidden="true">⠿</span>
+   <span class="grip" title="${u('gripT')}" aria-hidden="true">⠿</span>${c.user?`<button type="button" class="udel" title="${mk('del')}" aria-label="${mk('del')}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/><path d="M10 11v6M14 11v6"/></svg></button>`:''}
    <div class="inner">
     <section class="face front">
       <div class="top"><span class="ico">${icon(c.id)}</span><div class="nm">${esc(c.nm)}</div><div class="tag">${esc(c.tag)}</div><div class="en">${esc(c.en)}</div><div class="q" aria-hidden="true">？</div></div>
@@ -710,7 +752,7 @@ function render(){
       <div class="foot"><div class="shape">${c.think?`<span class="sl">${u('typThink')}</span><span class="thq" aria-hidden="true">？</span>`:`<span class="sl">${u('typ')}${c.bad?`<small>${u('typBad')}</small>`:''}</span>${typSVG(c.id,c.c,c.bad)}`}</div><span class="pill">${u('flip')}</span></div>
     </section>
     <section class="face back">
-      <div class="hd"><b>${esc(c.nm)}</b><span class="place ${c.grp==='world'?'world':'jp'}">${c.grp==='world'?u('world'):u('jp')}</span></div>
+      <div class="hd"><b>${esc(c.nm)}</b><span class="place ${c.grp==='world'?'world':c.grp==='user'?'user':'jp'}">${c.grp==='world'?u('world'):c.grp==='user'?mk('mine'):u('jp')}</span></div>
       ${c.think?`<div class="body">
         <div class="prob tq">❓ ${esc(c.prob)}</div>
         <span class="lbl">${u('cands')}</span>
@@ -741,10 +783,11 @@ function render(){
       if(el._flipping)return;el._flipping=true;
       inn.animate([{transform:'scaleX(1)'},{transform:'scaleX(0)'}],{duration:170,easing:'ease-in'}).onfinish=()=>{done();
         inn.animate([{transform:'scaleX(0)'},{transform:'scaleX(1)'}],{duration:210,easing:'ease-out'}).onfinish=()=>{el._flipping=false;};};};
-    el.addEventListener('click',e=>{if(e.target.closest('a,.grip,.cand')||justDragged)return;flip();});
+    el.addEventListener('click',e=>{if(e.target.closest('a,.grip,.cand,.udel')||justDragged)return;flip();});
+    const ud=el.querySelector('.udel');if(ud){ud.addEventListener('click',e=>{e.stopPropagation();if(confirm(mk('delQ')))deleteUser(+el.dataset.ix);});ud.addEventListener('keydown',e=>e.stopPropagation());}
     el.querySelectorAll('.cand').forEach(cb=>cb.addEventListener('click',e=>{e.stopPropagation();
       const c=loc(CARDS[+el.dataset.ix],+el.dataset.ix),id=cb.dataset.cand,v=c.candView[id],T=TYPES.find(t=>t.id===id);
-      const pc={id,nm:T[LANG][0],names:v.names,pr:[Object.keys(ARCH[id].roles)[0]],data:[]};
+      const pc={id,nm:T[LANG][0],names:v.names,pr:[(c.user&&DR[id])||Object.keys(ARCH[id].roles)[0]],data:[]};
       document.getElementById('dlgc').innerHTML=`<h2 style="color:${T.c}">${esc(T[LANG][0])}${u('candH')}</h2><div class="prob">${u('probL')}${esc(v.prob)}</div>${cldSVG(pc)}
         <ol class="story dstory" style="--c:${T.c}">${v.story.map(x=>`<li>${esc(x)}</li>`).join('')}</ol><div class="read" style="--c:${T.c}">${u('candNote')}</div>`;
       document.getElementById('dlg').showModal();}));
@@ -760,7 +803,7 @@ function applyLang(){
   document.documentElement.lang=LANG;document.body.classList.toggle('en',LANG==='en');
   document.title=u('title');document.getElementById('h1').textContent=u('h1');
   const bl=(id,t,ti)=>{const b=document.getElementById(id);b.querySelector('.bl').textContent=t;if(ti)b.title=ti;};
-  bl('guess',u('guess'),u('guessT'));bl('reset',u('reset'),u('resetT'));
+  bl('guess',u('guess'),u('guessT'));bl('mkBtn',mk('btn'));bl('saveBtn',mk('save'),mk('saveT'));bl('reset',u('reset'),u('resetT'));
   document.getElementById('note').textContent=u('note');document.getElementById('help').setAttribute('aria-label',u('help'));document.getElementById('help').title=u('help');['zout','zin'].forEach(k=>{const b=document.getElementById(k);b.title=u(k);b.setAttribute('aria-label',u(k));});layout();document.getElementById('dlgx').textContent=u('close');
   const lb=document.getElementById('lang');lb.querySelector('.bl').textContent=u('lang');lb.lang=LANG==='en'?'ja':'en';
   render();renderTypes();applyFilter();
@@ -802,7 +845,7 @@ function typeSVG(T){
 function renderTypes(){
   document.getElementById('typesT').textContent=tt('t');document.getElementById('typesBtn').querySelector('.bl').textContent=tt('t');
   document.getElementById('typesN').textContent=document.body.classList.contains('guess')?tt('ng'):tt('n');
-  document.getElementById('tgrid').innerHTML=TYPES.map(T=>{const [nm,tag]=T[LANG],other=T[LANG==='en'?'ja':'en'][0],n=CARDS.filter(c=>c.id===T.id).length;
+  document.getElementById('tgrid').innerHTML=TYPES.map(T=>{const [nm,tag]=T[LANG],other=T[LANG==='en'?'ja':'en'][0],n=ORDER.filter(i=>CARDS[i].id===T.id).length;
     return `<button type="button" class="tcard${FILTER===T.id?' on':''}" data-t="${T.id}" style="--c:${T.c}" aria-pressed="${FILTER===T.id}">
       <b>${esc(nm)}</b><span class="tg">${esc(tag)}</span>${typeSVG(T)}<span class="te">${esc(other)}</span>
       <span class="tn">${n?tt('cnt')+n+tt('mai'):tt('none')}</span></button>`;}).join('');
@@ -896,6 +939,308 @@ grid.addEventListener('pointerout',e=>{const el=e.target.closest('.card');if(!el
 grid.addEventListener('focusin',e=>{const el=e.target.closest('.card');if(el)play(el);});
 window.addEventListener('pointercancel',endDrag);
 
+// ===== データから新しいカードを作る（1 データ入力 → 2 振る舞いの候補 → 3 人が選んで直す） =====
+const UKEY='sbc-user-cards-v1',DKEY='sbc-deleted-v1';
+// HTMLに保存したときに、作ったカードがここに書きこまれる
+const SEED=[{"uid":"mv4i1hklt5l4","ttl":"Maize (corn) - Production (tonnes)：どの型？","vname":"Maize (corn) - Production (tonnes)","unit":"","src":"Our World in Data","srcU":"","betterLow":false,"series":[{"name":"World","h":[[1961,205027230],[1962,204876640],[1963,220228110],[1964,215172380],[1965,226544130],[1966,245599100],[1967,272548400],[1968,255670480],[1969,269506000],[1970,265831070],[1971,313622530],[1972,308826200],[1973,318290370],[1974,306427260],[1975,341751870],[1976,352395780],[1977,371593280],[1978,393600000],[1979,418622900],[1980,396623300],[1981,446772400],[1982,448932200],[1983,347081950],[1984,450449920],[1985,485527230],[1986,478176540],[1987,453115700],[1988,403050140],[1989,476874400],[1990,483387900],[1991,494367000],[1992,532691680],[1993,477156260],[1994,568446460],[1995,517234700],[1996,585681100],[1997,584562200],[1998,614801700],[1999,607170940],[2000,591934800],[2001,614986900],[2002,603501060],[2003,644601900],[2004,728982500],[2005,714224260],[2006,706821700],[2007,793296450],[2008,828108200],[2009,822089500],[2010,851980740],[2011,886743000],[2012,873744400],[2013,1015521660],[2014,1040230340],[2015,1052811900],[2016,1126408800],[2017,1137672700],[2018,1112875900],[2019,1138850800],[2020,1153946800],[2021,1203326800],[2022,1160145800],[2023,1238582500],[2024,1218205600]]}],"cands":[{"type":"limits","why":"1961年から2023年まで生産量はほぼ右上がりで伸びてきたが、2024年にわずかに頭打ちの動きが出ていて、成長がいつか限界にぶつかる形に似ている。","prob":"中","names":{"E":"栽培の拡大力","S":"トウモロコシ\n生産量","B":"土地・水の限度","C":"環境と資源の\n余力"},"story":["栽培面積や技術が広がり、生産量が伸びる。","伸びると、さらに種や肥料や機械への投資が進む。","一方で土地、水、土のよさなどの限度が少しずつ効いてくる。","限度が強まると、伸びの勢いが弱まり、横ばいに近づく。"],"lev":{"t":"土地利用や水の管理のルールで、限度に近づく前に備える。","b":"農家どうしで土づくりや節水の工夫を伝え合う。","a":"収入が安定するよう、保険や融資で長期の投資をしやすくする。"}},{"type":"under","why":"生産量は60年以上ずっと伸びてきたが、1983年のように大きく落ち込む年もあり、需要に合わせた投資が追いつかないと伸びが止まる形に合う。","prob":"低〜中","names":{"Eg":"需要の強さ","D":"トウモロコシ\n生産量","Lm":"供給の能力","N":"投資の水準","I":"設備・技術の量"},"story":["食料や飼料、燃料の需要が強まり、生産量が伸びる。","需要に応えるには、設備や技術への投資が必要になる。","投資が遅れると、供給能力が需要に追いつかなくなる。","その結果、伸びが鈍り、需要の勢いも生かしきれない。"],"lev":{"t":"研究開発や農業インフラへの長期の支援を計画的に行う。","b":"地域で機械や技術を共有し、導入の経験を広げる。","a":"小さな農家でも使える低コストの設備や資金の仕組みをつくる。"}}]}]/*SEED*/;
+const DR={fixes:'P',burden:'S',drift:'A',limits:'S',under:'D',escalation:'R',commons:'G',success:'Ae'};
+const DR2={success:'Be',escalation:'Ba'};
+const GEN={ja:{
+ fixes:{P:'{X}',F:'応急処置',U:'意図しない\n結果'},
+ burden:{S:'{X}',Q:'対処療法',E:'副作用',F:'根本的な\n解決策'},
+ drift:{G:'目標の\nレベル',A:'{X}',Gp:'目標との差',Pr:'目標を下げる\n圧力',C:'是正の\n取り組み'},
+ limits:{E:'努力・\n取り組み',S:'{X}',B:'成長を妨げる\n動き',C:'制約'},
+ under:{Eg:'成長への\n取り組み',D:'{X}',Lm:'制約の\n影響',N:'投資の必要性\nの認識',I:'能力への\n投資'},
+ escalation:{Aa:'Aの行動',R:'{X}',Ba:'Bの行動',Ta:'Aにとって\nの脅威',Tb:'Bにとって\nの脅威'},
+ commons:{Aa:'Aの利用量',Ba:'Bの利用量',T:'利用量の\n合計',G:'{X}',Lm:'資源の限界'},
+ success:{Ae:'{X}',Ar:'Aへの資源',Al:'Aへの\nかたより',Be:'{Y}',Br:'Bへの資源'}},
+en:{
+ fixes:{P:'{X}',F:'Quick fix',U:'Unintended\nconsequence'},
+ burden:{S:'{X}',Q:'Symptomatic\nfix',E:'Side effect',F:'Fundamental\nsolution'},
+ drift:{G:'Goal level',A:'{X}',Gp:'Gap to goal',Pr:'Pressure to\nlower the goal',C:'Corrective\naction'},
+ limits:{E:'Effort',S:'{X}',B:'Limiting\naction',C:'Constraint'},
+ under:{Eg:'Growth\neffort',D:'{X}',Lm:'Effect of\nconstraint',N:'Perceived need\nto invest',I:'Investment\nin capacity'},
+ escalation:{Aa:"A's action",R:'{X}',Ba:"B's action",Ta:'Threat to A',Tb:'Threat to B'},
+ commons:{Aa:"A's use",Ba:"B's use",T:'Total use',G:'{X}',Lm:'Resource\nlimit'},
+ success:{Ae:'{X}',Ar:'Resources\nto A',Al:'Tilt toward A',Be:'{Y}',Br:'Resources\nto B'}}};
+const GSTORY={ja:{
+ fixes:['「{X}」が問題になる','すぐ効く手当てで、その場は良くなる','手当ての意図しない結果が、遅れて出てくる','前より悪くなり、また手当てに頼る'],
+ burden:['「{X}」が問題になる','すぐ効く方法で、その場はしのぐ','副作用で、根本的な解決の力が弱まる','根本から直らず、また同じ問題が起きる'],
+ drift:['目標と「{X}」の差が大きい','「無理だ」という声が強まる','目標のほうが、少しずつ下がる','取り組みが弱まり、「{X}」もさらに下がる'],
+ limits:['取り組みで「{X}」が伸びる','伸びた成果が、さらに取り組みを後押しする','でも、伸びるほど制約によるブレーキが強まる','やがて頭打ちになる'],
+ under:['取り組みで「{X}」が伸びる','伸びるほど、制約の影響が大きくなる','能力への投資が必要だと気づく','投資が遅れ、伸びが止まって下がり始める'],
+ escalation:['Aが動くと、Bにとっての脅威が強まる','Bが張り合って、もっと強く動く','今度はAにとっての脅威が強まる','おたがいに強まり、エスカレートしていく'],
+ commons:['それぞれが、みんなの資源を使う','利用量の合計が、資源の限界に近づく','しばらくして「{X}」が下がる','もっと使おうとして、さらに悪くなる'],
+ success:['少しうまくいった側に、資源が集まる','資源で、さらにうまくいく','もう一方には、資源が回らない','差がどんどん広がる']},
+en:{
+ fixes:['"{X}" becomes a problem','A quick fix makes things better for now','Unintended consequences appear later','Things get worse, and the quick fix is used again'],
+ burden:['"{X}" becomes a problem','A quick fix gets us through for now','Side effects weaken the fundamental solution','The root cause stays, and the problem returns'],
+ drift:['The gap between the goal and "{X}" is large','Voices saying "it\'s impossible" grow','The goal slowly slips lower','Effort weakens, and "{X}" falls further'],
+ limits:['Effort makes "{X}" grow','Results encourage even more effort','But the brake from a constraint gets stronger','Eventually it levels off'],
+ under:['Effort makes "{X}" grow','The constraint matters more as it grows','People notice the need to invest','Investment comes late, growth stops and starts to fall'],
+ escalation:["When A acts, the threat to B grows",'B competes and acts even harder','Then the threat to A grows','Both keep escalating'],
+ commons:['Each party uses the shared resource','Total use approaches the resource limit','After a while, "{X}" falls','People try to use more, making it worse'],
+ success:['Resources flow to the side that did a bit better','Resources make it do even better','The other side gets few resources','The gap keeps widening']}};
+const GPROB={ja:{fixes:'「{X}」が、結局よくならない',burden:'「{X}」が、根本から直らない',drift:'「{X}」が、少しずつ下がっていく',limits:'「{X}」が、途中で伸びなくなる',under:'「{X}」が、途中から下がってしまう',escalation:'張り合いが、どんどん激しくなる',commons:'「{X}」が、みんなで使ううちに下がる',success:'「{Y}」の側が、取り残される'},
+ en:{fixes:'"{X}" never really improves',burden:'"{X}" is never fixed at the root',drift:'"{X}" slowly falls',limits:'"{X}" stops growing partway',under:'"{X}" starts falling partway',escalation:'The competition keeps intensifying',commons:'"{X}" falls as everyone uses the resource',success:'The "{Y}" side gets left behind'}};
+const MK={ja:{btn:'データから作る',save:'HTMLに保存',saveT:'作ったカードも入れて、このページをHTMLファイルに保存',saveNg:'保存できませんでした',plotted:'表のグラフの変数',h:'データからカードを作る',s1:'1　時系列データを入れる',s2:'2　振る舞いの候補',s3:'3　型を選んで、直す',
+  file:'CSVファイルを選ぶ',paste:'またはCSVを貼りつける（Excelからのコピーも可）',owid:'Our World in Data のURL',owidGo:'読み込む',
+  owidNg:'このページからはOur World in Dataに直接つなげません。グラフの「Download」→「Full data (CSV)」で保存して、ファイルを選んでください。',
+  read:'読みこむ',pick:'使う系列（2つまで）',col:'値の列',vname:'変数の名前',unit:'単位',dir:'この変数は',good:'増えると良い',bad:'減ると良い',src:'出典の名前',srcU:'出典のURL（任意）',
+  aiGo:'AIで候補を作る',autoGo:'形から候補を出す（AIなし）',aiWait:'AIが考えています…',aiNg:'AIの返答を受け取れなかったため、グラフの形から候補を出しました。',
+  why:'この型だと思う理由',sel:'カードにする',ttl:'カードの見出し',probL:'問題',vars:'変数（増減の言葉は入れず、量の名前で）',story:'ぐるっと一周（1行に1つ）',lev:'ぬけ出すヒント',
+  one:'1つ選ぶと、その型のカードになります。2つ以上選ぶと「型を考えるカード」になります。',make:'カードを追加',need:'候補を1つ以上選んでください',noData:'データが読みこめませんでした。「年,値」の形か、Our World in DataのCSVか確かめてください。',
+  made:'カードを追加しました',del:'このカードを削除',delQ:'このカードを削除しますか？（元にもどせません）',mine:'自作',hyp:'データの形からの仮説',none:'（書きこもう）',
+  shapeR:{drift:'少しずつ下がり続けている',limits:'大きく伸びたあと、伸びがゆるやかになった',under:'伸びたあと、途中から下がり始めた',fixes:'いったん良くなったあと、前より悪くなった',burden:'上がったり下がったりをくり返しながら、良くならない',commons:'しばらく伸びたあと、終わりのほうで急に下がった',success:'2つの系列の差が広がっている',escalation:'2つの系列が、からみ合いながら同じ向きに動いている'}},
+ en:{btn:'Make from data',save:'Save HTML',saveT:'Save this page as an HTML file, including the cards you made',saveNg:'Could not save the file',plotted:'Plotted variable',h:'Make a card from data',s1:'1  Enter time-series data',s2:'2  Candidate behaviors',s3:'3  Choose a pattern and edit',
+  file:'Choose a CSV file',paste:'Or paste CSV (copy from Excel works too)',owid:'Our World in Data URL',owidGo:'Load',
+  owidNg:'This page cannot connect to Our World in Data directly. Use "Download" → "Full data (CSV)" on the chart, save it, and choose the file.',
+  read:'Read',pick:'Series to use (up to 2)',col:'Value column',vname:'Variable name',unit:'Unit',dir:'This variable is',good:'better when higher',bad:'better when lower',src:'Source name',srcU:'Source URL (optional)',
+  aiGo:'Generate candidates with AI',autoGo:'Suggest from the shape (no AI)',aiWait:'AI is thinking…',aiNg:'No answer came back from AI, so candidates were suggested from the shape of the graph.',
+  why:'Why this pattern',sel:'Use for the card',ttl:'Card headline',probL:'Problem',vars:'Variables (quantities, no "increase/decrease" words)',story:'Around the loop (one per line)',lev:'Ways out',
+  one:'Choose one to make a card of that pattern. Choose two or more to make a "Which pattern is it?" card.',make:'Add card',need:'Choose at least one candidate',noData:'Could not read the data. Check that it is "year,value" or an Our World in Data CSV.',
+  made:'Card added',del:'Delete this card',delQ:'Delete this card? (This cannot be undone)',mine:'Mine',hyp:'Hypothesis from the data shape',none:'(write here)',
+  shapeR:{drift:'It keeps slowly falling',limits:'After rising a lot, growth slowed down',under:'After rising, it started falling partway',fixes:'It improved for a while, then got worse than before',burden:'It goes up and down without really improving',commons:'After rising for a while, it dropped sharply near the end',success:'The gap between the two series is widening',escalation:'The two series move the same way, intertwined'}}};
+const mk=k=>MK[LANG][k];
+
+// --- CSV を読む ---
+function parseCSV(t){
+  t=t.replace(/^\uFEFF/,'');const sep=(t.split('\n')[0].match(/\t/g)||[]).length>(t.split('\n')[0].match(/,/g)||[]).length?'\t':',';
+  const rows=[];let row=[],f='',q=false;
+  for(let i=0;i<t.length;i++){const ch=t[i];
+    if(q){if(ch==='"'){if(t[i+1]==='"'){f+='"';i++;}else q=false;}else f+=ch;}
+    else if(ch==='"')q=true;else if(ch===sep){row.push(f);f='';}else if(ch==='\n'||ch==='\r'){if(ch==='\r'&&t[i+1]==='\n')i++;row.push(f);rows.push(row);row=[];f='';}else f+=ch;}
+  if(f||row.length){row.push(f);rows.push(row);}
+  return rows.filter(r=>r.some(x=>x.trim()!==''));
+}
+// 表を「系列 → [年,値]」に直す。OWIDの形（Entity, Code, Year, 値…）と、横長の形（年, 系列1, 系列2…）に対応
+function toSeries(rows){
+  if(rows.length<3)return null;
+  const H=rows[0].map(x=>x.trim()),lo=H.map(x=>x.toLowerCase());
+  const ei=lo.indexOf('entity'),yi=lo.findIndex(x=>x==='year'||x==='年'||x==='年度'||x==='date');
+  const num=v=>{const n=parseFloat(String(v).replace(/[, ]/g,''));return isFinite(n)?n:null;};
+  if(ei>=0&&yi>=0){
+    const vcols=H.map((h,i)=>i).filter(i=>i!==ei&&i!==yi&&lo[i]!=='code'&&rows.slice(1).some(r=>num(r[i])!=null));
+    if(!vcols.length)return null;
+    const byCol={};vcols.forEach(ci=>{const m={};rows.slice(1).forEach(r=>{const y=num(r[yi]),v=num(r[ci]);if(y==null||v==null)return;(m[r[ei]]=m[r[ei]]||[]).push([y,v]);});byCol[H[ci]]=m;});
+    return {kind:'owid',cols:vcols.map(i=>H[i]),byCol};
+  }
+  const y0=yi>=0?yi:0;
+  const vcols=H.map((h,i)=>i).filter(i=>i!==y0&&rows.slice(1).some(r=>num(r[i])!=null));
+  if(!vcols.length||!rows.slice(1).some(r=>num(String(r[y0]).slice(0,4))!=null))return null;
+  const m={};vcols.forEach(ci=>{m[H[ci]||('series '+ci)]=rows.slice(1).map(r=>[num(String(r[y0]).slice(0,4)),num(r[ci])]).filter(p=>p[0]!=null&&p[1]!=null);});
+  return {kind:'wide',cols:['value'],byCol:{value:m}};
+}
+// --- 形から候補を出す（AIなしでも動く） ---
+function shapeCandidates(series,betterLow){
+  const norm=h=>{const v=h.map(p=>p[1]*(betterLow?-1:1)),a=Math.min(...v),b=Math.max(...v),r=(b-a)||1;return v.map(x=>(x-a)/r);};
+  const y=norm(series[0].h),n=y.length,first=y[0],last=y[n-1],mid=y[Math.floor(n/2)];
+  const inner=y.slice(1,-1),mx=Math.max(...inner),mn=Math.min(...inner),imx=y.indexOf(mx);
+  let sgn=0,flips=0;for(let i=1;i<n;i++){const d=Math.sign(y[i]-y[i-1]);if(d&&sgn&&d!==sgn)flips++;if(d)sgn=d;}
+  const osc=flips/Math.max(1,n-2),trend=last-first,early=Math.abs(mid-first),late=Math.abs(last-mid);
+  const tail=y.slice(Math.floor(n*.8)),tailDrop=Math.max(...y.slice(0,Math.floor(n*.8)))-Math.min(...tail);
+  const S={};
+  S.drift=Math.max(0,-trend)*(1-osc)*(mx<=Math.max(first,.6)?1:.5);
+  S.limits=trend>0?Math.max(0,trend)*(early/(early+late+1e-6))*(1-osc):0;
+  S.under=Math.max(0,mx-Math.max(first,last))*(last>first?1.1:.7)*(imx>n*.25&&imx<n*.9?1:.4);
+  S.fixes=Math.max(0,mx-Math.max(first,last))*(last<first?1.2:.4);
+  S.burden=osc*(trend<=0.05?1:.5)*.9;
+  S.commons=(imx>n*.5?1:.3)*Math.max(0,tailDrop-.35)*(trend<.2?1:.5)*1.3;
+  if(series[1]){const z=norm(series[1].h),m=Math.min(y.length,z.length);
+    const g0=Math.abs(y[0]-z[0]),g1=Math.abs(y[m-1]-z[m-1]);
+    const raw=(i,s)=>s.h[i]?s.h[i][1]:null;const gr0=Math.abs(raw(0,series[0])-raw(0,series[1])),gr1=Math.abs(raw(series[0].h.length-1,series[0])-raw(series[1].h.length-1,series[1]));
+    S.success=Math.max(0,(gr1-gr0)/(Math.max(gr0,gr1)||1))*1.2;
+    let cross=0;for(let i=1;i<m;i++)if(Math.sign(y[i]-z[i])!==Math.sign(y[i-1]-z[i-1]))cross++;
+    S.escalation=(cross>=2?.45:0)+(cross>=2&&Math.sign(y[m-1]-y[0])===Math.sign(z[m-1]-z[0])?.1:0);
+  }
+  const list=Object.entries(S).filter(([k,v])=>v>0).sort((a,b)=>b[1]-a[1]).map(([k])=>k);
+  (trend>=0?['limits','under','fixes','burden']:['drift','fixes','burden','commons']).forEach(k=>{if(list.length<2&&!list.includes(k))list.push(k);});
+  return list.slice(0,3);
+}
+function fillT(t,X,Y){return String(t).replaceAll('{X}',X).replaceAll('{Y}',Y||'B');}
+function genericCand(id,X,Y){
+  const L=LANG;return {type:id,why:MK[L].shapeR[id]||'',prob:fillT(GPROB[L][id],X,Y),
+    names:Object.fromEntries(Object.entries(GEN[L][id]).map(([k,v])=>[k,fillT(v,X,Y)])),
+    story:GSTORY[L][id].map(s=>fillT(s,X,Y)),lev:{t:'',b:'',a:''}};
+}
+// --- AIで候補を作る（Claudeの中で開いたときだけ） ---
+// Claude の中で開いたとき（AIが使えるとき）だけ、「データから作る」と「HTMLに保存」を出す
+['mkBtn','saveBtn'].forEach(id=>{const b=document.getElementById(id);if(b)b.hidden=true;});
+let SAMPLE=null;(async()=>{try{if(window.claude&&window.claude.use)SAMPLE=await window.claude.use('sample');}catch(e){SAMPLE=null;}
+  if(SAMPLE){['mkBtn','saveBtn'].forEach(id=>document.getElementById(id).hidden=false);}})();
+async function aiCandidates(series,meta){
+  if(!SAMPLE)return null;
+  const roles=Object.fromEntries(Object.keys(GEN.en).map(id=>[id,Object.keys(ARCH[id].roles)]));
+  const data=series.map(s=>({name:s.name,points:s.h.filter((p,i,a)=>a.length<=40||i%Math.ceil(a.length/40)===0||i===a.length-1)}));
+  const prompt=`You help researchers read time-series data with system archetypes (system dynamics).
+Data (JSON): ${JSON.stringify({variable:meta.vname,unit:meta.unit,betterWhen:meta.betterLow?'lower':'higher',source:meta.src,series:data})}
+Archetypes and the role keys you must use for each: ${JSON.stringify(roles)}
+Archetype ids: fixes (Fixes that fail), burden (Shifting the burden), drift (Drifting goals), limits (Limits to success), under (Growth and underinvestment), escalation, commons (Tragedy of the commons), success (Success to the successful).
+Task: propose 2 or 3 different archetypes whose typical behavior-over-time matches this data, as hypotheses for discussion.
+Rules:
+- Write all text in ${LANG==='en'?'English':'Japanese (simple words for high-school and university students)'}.
+- Variable names must be neutral quantities (amount, number, share, level, strength). Never put direction or change words (increase, decrease, more, less, rise, fall, shortage, 増える, 減る, ふやす, 減らす, 不足, 値上がり) in variable names; direction is shown by arrows.
+- Each variable name at most 14 characters; you may use "\\n" once to break it into two lines.
+- The plotted variable is this role for each type: ${JSON.stringify(DR)}; name it after the data.
+- "why" explains which feature of the data shape fits the archetype (one sentence). Do not claim causation; this is a hypothesis.
+- "story" is 4 short steps around the loop. "lev" gives one short hint each for top-down (policy, regulation), bottom-up (word of mouth, awareness of people around), affordability (financial room, money sense).
+Return only JSON: {"candidates":[{"type":"...","why":"...","prob":"...","names":{"<role key>":"..."},"story":["","","",""],"lev":{"t":"","b":"","a":""}}]}`;
+  try{
+    const r=await SAMPLE.json(prompt,{modelTier:'default'});
+    const c=(r&&r.candidates||[]).filter(x=>ARCH[x.type]&&x.names).slice(0,3).map(x=>{
+      const g=genericCand(x.type,meta.vname,series[1]?series[1].name:'B');
+      const names={};Object.keys(ARCH[x.type].roles).forEach(k=>names[k]=String(x.names[k]||g.names[k]).slice(0,40));
+      return {type:x.type,why:String(x.why||g.why),prob:String(x.prob||g.prob),names,story:(Array.isArray(x.story)&&x.story.length?x.story:g.story).slice(0,5).map(String),lev:{t:String(x.lev?.t||''),b:String(x.lev?.b||''),a:String(x.lev?.a||'')}};});
+    return c.length?c:null;
+  }catch(e){return null;}
+}
+// --- 保存と読み込み ---
+function loadUser(){try{return JSON.parse(localStorage.getItem(UKEY)||'[]');}catch(e){return [];}}
+function saveUser(list){try{localStorage.setItem(UKEY,JSON.stringify(list));}catch(e){}}
+let DELETED=(()=>{try{return JSON.parse(localStorage.getItem(DKEY)||'[]');}catch(e){return [];}})();
+let USER=(()=>{const local=loadUser(),ids=new Set(local.map(r=>r.uid));return SEED.filter(r=>!ids.has(r.uid)&&!DELETED.includes(r.uid)).concat(local);})();
+function registerUser(rec){
+  rec.series.forEach((s,i)=>{D['u_'+rec.uid+'_'+i]={hi:rec.betterLow?(LANG==='en'?'More':'多い'):(LANG==='en'?'More':'多い'),lo:LANG==='en'?'Less':'少ない',name:s.name,u:rec.unit,what:rec.vname+(rec.unit?'（'+rec.unit+'）':''),src:'user:'+rec.uid,h:s.h};});
+  REFS['user:'+rec.uid]=[[rec.src||mk('mine'),rec.srcU||'']];REFS_EN['user:'+rec.uid]=REFS['user:'+rec.uid];
+  const T=TYPES.find(t=>t.id===rec.cands[0].type);
+  const multi=rec.cands.length>1,c0=rec.cands[0];
+  const card={user:1,uid:rec.uid,grp:'user',src:'user:'+rec.uid,usrc:rec.src,bad:rec.betterLow?1:0,
+    id:multi?'think':c0.type,c:multi?'#4A5578':T.c,ttl:rec.ttl,series:rec.series.map((s,i)=>({k:'u_'+rec.uid+'_'+i})),shared:rec.series.length>1?1:0,
+    read:rec.cands.map(c=>c.why).join(' / '),prob:multi?rec.ttl:c0.prob,names:c0.names,pr:[DR[c0.type]],data:[DR[c0.type]].concat(DR2[c0.type]&&rec.series[1]?[DR2[c0.type]]:[]),
+    story:c0.story,lev:{t:c0.lev.t||mk('none'),b:c0.lev.b||mk('none'),a:c0.lev.a||mk('none'),key:'t'},hyp:1};
+  if(multi){card.think=1;card.cands=rec.cands.map(c=>c.type);card.candView=Object.fromEntries(rec.cands.map(c=>[c.type,{prob:c.prob,names:c.names,story:c.story}]));
+    card.others=rec.cands.map(c=>`${TYPES.find(t=>t.id===c.type)[LANG][0]}：${c.why}`);}
+  const ix=CARDS.push(card)-1;return ix;
+}
+USER.forEach(r=>{const ix=registerUser(r);ORDER.push(ix);ORIG_ORDER.push(ix);});
+function uLoc(c){if(c.think)return {...c,nm:u('thinkNm'),tag:u('thinkTag'),en:u('thinkEn')};const T=TYPES.find(t=>t.id===c.id);return {...c,nm:T[LANG][0],tag:T[LANG][1],en:T[LANG==='en'?'ja':'en'][0]};}
+function deleteUser(ix){
+  const c=CARDS[ix];if(!c||!c.user)return;
+  USER=USER.filter(r=>r.uid!==c.uid);saveUser(USER);if(SEED.some(r=>r.uid===c.uid)){DELETED.push(c.uid);try{localStorage.setItem(DKEY,JSON.stringify(DELETED));}catch(e){}}
+  [ORDER,ORIG_ORDER].forEach(a=>{const k=a.indexOf(ix);if(k>=0)a.splice(k,1);});
+  c.deleted=1;render();renderTypes();applyFilter();
+}
+// --- 作成画面 ---
+let MKS=null;
+function openMaker(){
+  MKS={parsed:null,cands:[]};const d=document.getElementById('mkdlg');
+  document.getElementById('mkc').innerHTML=`<h2>${mk('h')}</h2>
+  <section class="mks"><h3>${mk('s1')}</h3>
+    <div class="mkrow"><label class="btn ib mkfile">${mk('file')}<input type="file" id="mkFile" accept=".csv,.tsv,.txt,text/csv" hidden></label></div>
+    <label class="mkl">${mk('paste')}<textarea id="mkPaste" rows="4" placeholder="Entity,Code,Year,Value&#10;World,OWID_WRL,1961,205004683"></textarea></label>
+    <div class="mkrow"><button class="btn" type="button" id="mkRead">${mk('read')}</button></div>
+    <label class="mkl">${mk('owid')}<span class="mkrow"><input id="mkUrl" type="url" placeholder="https://ourworldindata.org/grapher/..."><button class="btn" type="button" id="mkUrlGo">${mk('owidGo')}</button></span></label>
+    <p class="mkmsg" id="mkMsg1" role="status"></p>
+    <div id="mkPick"></div>
+  </section>
+  <section class="mks" id="mkS2" hidden><h3>${mk('s2')}</h3>
+    <div class="mkrow"><button class="btn mkpri" type="button" id="mkAi">${mk('aiGo')}</button></div>
+    <p class="mkmsg" id="mkMsg2" role="status"></p>
+  </section>
+  <section class="mks" id="mkS3" hidden><h3>${mk('s3')}</h3><p class="mknote">${mk('one')}</p>
+    <label class="mkl">${mk('ttl')}<input id="mkTtl"></label>
+    <div id="mkCands"></div>
+    <div class="mkrow"><button class="btn mkpri" type="button" id="mkMake">${mk('make')}</button></div><p class="mkmsg" id="mkMsg3" role="status"></p>
+  </section>`;
+  const $=id=>document.getElementById(id);
+  const readText=t=>{const p=toSeries(parseCSV(t));if(!p){$('mkMsg1').textContent=mk('noData');return;}MKS.parsed=p;$('mkMsg1').textContent='';showPick();};
+  $('mkFile').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>readText(String(r.result));r.readAsText(f);});
+  $('mkRead').addEventListener('click',()=>readText($('mkPaste').value));
+  $('mkUrlGo').addEventListener('click',async()=>{
+    let url=$('mkUrl').value.trim();if(!url)return;
+    try{const U=new URL(url);if(!/ourworldindata\.org$/.test(U.hostname))throw 0;
+      if(U.pathname.startsWith('/grapher/')){U.pathname=U.pathname.replace(/\/$/,'')+'.csv';U.searchParams.set('csvType','filtered');U.searchParams.set('useColumnShortNames','false');}
+      else throw 0;
+      const r=await fetch(U.toString());if(!r.ok)throw 0;readText(await r.text());
+    }catch(e){$('mkMsg1').textContent=mk('owidNg');}
+  });
+  $('mkAi').addEventListener('click',()=>makeCands(true));
+  $('mkMake').addEventListener('click',makeCard);
+  d.showModal();
+}
+function showPick(){
+  const P=MKS.parsed,$=id=>document.getElementById(id);
+  const col=P.cols[0],ents=Object.keys(P.byCol[col]);
+  $('mkPick').innerHTML=`${P.cols.length>1?`<label class="mkl">${mk('col')}<select id="mkCol">${P.cols.map(c=>`<option>${esc(c)}</option>`).join('')}</select></label>`:''}
+   <fieldset class="mkents"><legend>${mk('pick')}</legend><div id="mkEnts"></div></fieldset>
+   <div class="mkgrid"><label class="mkl">${mk('vname')}<input id="mkV" value="${esc(P.kind==='owid'?col:'')}"></label><label class="mkl">${mk('unit')}<input id="mkU"></label>
+   <label class="mkl">${mk('src')}<input id="mkSrc" value="${P.kind==='owid'?'Our World in Data':''}"></label><label class="mkl">${mk('srcU')}<input id="mkSrcU" type="url" value="${esc(document.getElementById('mkUrl').value.trim())}"></label></div>
+   <div class="mkrow"><span>${mk('dir')}</span><label><input type="radio" name="mkDir" value="g" checked> ${mk('good')}</label><label><input type="radio" name="mkDir" value="b"> ${mk('bad')}</label></div>
+   <div id="mkPrev"></div>`;
+  const drawEnts=()=>{const c=$('mkCol')?$('mkCol').value:col,E=Object.keys(P.byCol[c]);
+    $('mkEnts').innerHTML=E.slice(0,300).map((e,i)=>`<label class="mkchip"><input type="checkbox" value="${esc(e)}" ${i===0||/world/i.test(e)&&i<5?'checked':''}> ${esc(e)}</label>`).join('');
+    const boxes=[...$('mkEnts').querySelectorAll('input')];let chk=boxes.filter(b=>b.checked);if(chk.length>2)chk.slice(2).forEach(b=>b.checked=false);
+    boxes.forEach(b=>b.addEventListener('change',()=>{const on=boxes.filter(x=>x.checked);if(on.length>2)b.checked=false;prev();}));prev();};
+  const prev=()=>{const s=curSeries();$('mkS2').hidden=!s.length;if(!s.length){$('mkPrev').innerHTML='';return;}
+    const tmp={c:'#1F2A44',ttl:'',series:s.map((x,i)=>({k:'__p'+i})),shared:s.length>1?1:0};s.forEach((x,i)=>D['__p'+i]={hi:LANG==='en'?'More':'多い',lo:LANG==='en'?'Less':'少ない',name:x.name,u:'',what:'',src:'',h:x.h});
+    $('mkPrev').innerHTML=dataSVG(tmp).svg;};
+  if($('mkCol'))$('mkCol').addEventListener('change',drawEnts);
+  drawEnts();
+}
+function curSeries(){const P=MKS.parsed,$=id=>document.getElementById(id);if(!P)return [];const c=$('mkCol')?$('mkCol').value:P.cols[0];
+  return [...$('mkEnts').querySelectorAll('input:checked')].map(b=>({name:b.value,h:(P.byCol[c][b.value]||[]).slice().sort((a,b)=>a[0]-b[0])})).filter(s=>s.h.length>=4);}
+function meta(){const $=id=>document.getElementById(id);const s=curSeries();
+  return {vname:$('mkV').value.trim()||(s[0]&&s[0].name)||'X',unit:$('mkU').value.trim(),src:$('mkSrc').value.trim(),srcU:$('mkSrcU').value.trim(),betterLow:document.querySelector('input[name=mkDir]:checked').value==='b',series:s};}
+async function makeCands(useAI){
+  const $=id=>document.getElementById(id),m=meta();if(!m.series.length)return;
+  $('mkMsg2').textContent=useAI?mk('aiWait'):'';$('mkAi').disabled=true;
+  let c=useAI?await aiCandidates(m.series,m):null;
+  if(!c){if(useAI)$('mkMsg2').textContent=mk('aiNg');else $('mkMsg2').textContent='';
+    const Y=m.series[1]?m.series[1].name:'B';c=shapeCandidates(m.series,m.betterLow).map(id=>genericCand(id,m.vname,Y));}
+  else $('mkMsg2').textContent='';
+  $('mkAi').disabled=false;
+  MKS.cands=c;$('mkS3').hidden=false;
+  if(!$('mkTtl').value)$('mkTtl').value=m.vname+(LANG==='en'?': which pattern?':'：どの型？');
+  $('mkCands').innerHTML=c.map((x,i)=>{const T=TYPES.find(t=>t.id===x.type);return `<div class="mkcand" style="--c:${T.c}" data-i="${i}">
+    <label class="mkhd"><input type="checkbox" class="mkSel" ${i===0?'checked':''}> <b>${esc(T[LANG][0])}</b><span>${mk('sel')}</span></label>
+    <div class="mkwhy"><b>${mk('why')}</b>${esc(x.why)}</div>
+    <div class="mkprev">${typSVG(x.type,T.c,m.betterLow)}<div class="mkcld"></div></div>
+    <label class="mkl">${mk('probL')}<input class="mkProb" value="${esc(x.prob)}"></label>
+    <fieldset class="mkvars"><legend>${mk('vars')}</legend>${Object.keys(ARCH[x.type].roles).map(k=>`<label class="mkl sm">${esc(/\{X\}|\{Y\}/.test(GEN[LANG][x.type][k])?mk('plotted'):GEN[LANG][x.type][k].replace(/\n/g,''))}<input data-k="${k}" value="${esc(x.names[k]).replace(/\n/g,'\\n')}"></label>`).join('')}</fieldset>
+    <label class="mkl">${mk('story')}<textarea class="mkStory" rows="4">${esc(x.story.join('\n'))}</textarea></label>
+    <fieldset class="mkvars"><legend>${mk('lev')}</legend>${[['t',u('levT')[0]],['b',u('levB')[0]],['a',u('levA')[0]]].map(([k,nm])=>`<label class="mkl sm">${nm}<input data-l="${k}" value="${esc(x.lev[k])}"></label>`).join('')}</fieldset>
+  </div>`;}).join('');
+  const redraw=box=>{const i=+box.dataset.i,x=readCand(box,i);box.querySelector('.mkcld').innerHTML=cldSVG({id:x.type,nm:'',names:x.names,pr:[DR[x.type]],data:[DR[x.type]]});};
+  document.querySelectorAll('.mkcand').forEach(b=>{redraw(b);b.querySelectorAll('.mkvars input[data-k]').forEach(inp=>inp.addEventListener('input',()=>redraw(b)));});
+}
+function readCand(box,i){const x=MKS.cands[i];const names={};box.querySelectorAll('input[data-k]').forEach(inp=>names[inp.dataset.k]=inp.value.replace(/\\n/g,'\n').trim()||x.names[inp.dataset.k]);
+  const lev={};box.querySelectorAll('input[data-l]').forEach(inp=>lev[inp.dataset.l]=inp.value.trim());
+  return {type:x.type,why:x.why,prob:box.querySelector('.mkProb').value.trim()||x.prob,names,story:box.querySelector('.mkStory').value.split('\n').map(s=>s.trim()).filter(Boolean).slice(0,5),lev};}
+function makeCard(){
+  const $=id=>document.getElementById(id),m=meta();
+  const sel=[...document.querySelectorAll('.mkcand')].filter(b=>b.querySelector('.mkSel').checked).map(b=>readCand(b,+b.dataset.i));
+  if(!sel.length){$('mkMsg3').textContent=mk('need');return;}
+  const rec={uid:Date.now().toString(36)+Math.random().toString(36).slice(2,6),ttl:$('mkTtl').value.trim()||m.vname,vname:m.vname,unit:m.unit,src:m.src,srcU:m.srcU,betterLow:m.betterLow,
+    series:m.series.map(s=>({name:s.name,h:s.h})),cands:sel};
+  USER.push(rec);saveUser(USER);
+  const ix=registerUser(rec);ORDER.push(ix);ORIG_ORDER.push(ix);
+  render();renderTypes();applyFilter();document.getElementById('mkdlg').close();
+  const el=document.querySelector(`#grid .card[data-ix="${ix}"]`);if(el)el.scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+// ===== 作ったカードごと、HTMLファイルに保存する =====
+let DL=null;(async()=>{try{if(window.claude&&window.claude.use)DL=await window.claude.use('downloads');}catch(e){DL=null;}})();
+async function exportHTML(){
+  const root=document.documentElement.cloneNode(true);
+  root.querySelectorAll('script').forEach(sc=>{if(sc.id!=='app')sc.remove();});
+  const app=root.querySelector('script#app');
+  app.textContent=app.textContent.replace(/const SEED=[\s\S]*?\/\*SEED\*\//,'const SEED='+JSON.stringify(USER).replace(/</g,'\\u003c')+'/*SEED*/');
+  ['grid','tgrid','mkc','dlgc'].forEach(id=>{const e=root.querySelector('#'+id);if(e)e.innerHTML='';});
+  root.querySelectorAll('dialog').forEach(d=>d.removeAttribute('open'));
+  const dr=root.querySelector('#drawer');if(dr)dr.setAttribute('hidden','');const hp=root.querySelector('#helpPop');if(hp)hp.setAttribute('hidden','');
+  root.querySelector('body').removeAttribute('class');root.querySelectorAll('[aria-pressed="true"]').forEach(b=>b.setAttribute('aria-pressed','false'));
+  root.setAttribute('lang','ja');
+  ['mkBtn','saveBtn'].forEach(id=>{const b=root.querySelector('#'+id);if(b)b.setAttribute('hidden','');});
+  const html='<!DOCTYPE html>\n'+root.outerHTML;
+  const d=new Date(),fn=`system_behavior_cards_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}.html`;
+  if(DL){try{await DL.save({filename:fn,data:html});}catch(e){if(e&&e.code!=='declined')alert(mk('saveNg'));}return;}
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));a.download=fn;document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);
+}
+document.getElementById('saveBtn').addEventListener('click',exportHTML);
+document.getElementById('mkBtn').addEventListener('click',openMaker);
+document.getElementById('mkx').addEventListener('click',()=>document.getElementById('mkdlg').close());
+
 applyLang();
 document.getElementById('lang').addEventListener('click',()=>{LANG=LANG==='en'?'ja':'en';applyLang();});
 document.getElementById('dlgx').addEventListener('click',()=>document.getElementById('dlg').close());
@@ -903,5 +1248,6 @@ document.getElementById('dlg').addEventListener('click',e=>{if(e.target.id==='dl
 document.getElementById('guess').addEventListener('click',e=>{const on=document.body.classList.toggle('guess');e.currentTarget.setAttribute('aria-pressed',on);renderTypes();applyFilter();});
 document.getElementById('reset').addEventListener('click',()=>{ORDER.splice(0,ORDER.length,...ORIG_ORDER);FILTER=null;render();renderTypes();applyFilter();});
 </script>
-</body>
-</html>
+
+
+</body></html>
