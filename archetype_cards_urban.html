@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 48 48%27 fill=%27none%27 stroke-width=%275%27 stroke-linecap=%27round%27%3E%3Cpath d=%27M24 24c-6-10-18-8-18 0s12 10 18 0%27 stroke=%27%23D0336B%27/%3E%3Cpath d=%27M24 24c6 10 18 8 18 0s-12-10-18 0%27 stroke=%27%231E88C8%27/%3E%3C/svg%3E">
+<title>システムの振る舞いカード｜食のシステム編</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F4F5FB; --ink:#23263A; --ink-2:#4A4E66; --ink-3:#6B7088; --rule:#E2E4F0;
+  --plus:#D0336B; --minus:#1E88C8; --prob:#C2412D; --probbg:#FFE9E5; --data:#E8790C; --databg:#FFF1DC;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background-color:#F6F5F0;background-image:linear-gradient(rgba(90,140,200,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(90,140,200,.10) 1px,transparent 1px);background-size:24px 24px;background-attachment:fixed;color:var(--ink);
+  font-family:'M PLUS Rounded 1c','Hiragino Maru Gothic ProN','Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,sans-serif;line-height:1.55}
+.wrap{max-width:1600px;margin:0 auto;padding:28px 24px 48px}
+header h1{margin:0;font-size:clamp(24px,3vw,34px);font-weight:800;letter-spacing:.02em;color:#1F2A44;line-height:1.2}
+header p{margin:0;color:var(--ink-2);font-size:14.5px;max-width:46em}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:18px 0 22px}
+.btn{font:inherit;font-size:14px;font-weight:700;border:2px solid var(--rule);border-bottom-width:4px;background:#fff;color:var(--ink);
+  border-radius:12px;padding:7px 14px;cursor:pointer}
+.btn:hover{border-color:#B9BCD3}
+.btn[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn:focus-visible,.card:focus-visible{outline:3px solid #1C6FD1;outline-offset:3px}
+.bar .note{margin-left:auto;font-size:13px;color:#3B5683;font-weight:700}
+
+.grid{display:grid;grid-template-columns:repeat(var(--cols,3),minmax(0,1fr));gap:var(--gap,22px)}
+.card{zoom:var(--z,1);width:400px;justify-self:center}
+.card{position:relative;aspect-ratio:1/1.48;cursor:pointer;border-radius:20px;outline:none}
+.inner{position:absolute;inset:0}
+.back{visibility:hidden}
+.card.flipped .back{visibility:visible}
+.card.flipped .front{visibility:hidden}
+.face{position:absolute;inset:0;background:#fff;
+  border:2px solid var(--rule);border-bottom-width:5px;border-radius:20px;overflow:hidden;display:flex;flex-direction:column}
+
+.card:hover .face{border-color:var(--c)}
+
+/* 表 */
+.front .top{background:var(--c);color:#fff;padding:20px 20px 16px;text-align:center}
+.front .nm{font-size:27px;font-weight:800;letter-spacing:.04em;line-height:1.25}
+.front .tag{font-size:14px;opacity:.92;margin-top:4px}
+.front .en{font-size:12.5px;font-weight:700;opacity:.8;margin-top:2px}
+.front .q{display:none;font-size:46px;font-weight:800;line-height:1.1}
+.front .body{padding:14px 18px 0;flex:1;display:flex;flex-direction:column;gap:8px}
+.lbl{font-size:12px;font-weight:800;color:var(--ink-3)}
+.front .ttl{font-size:15.5px;font-weight:800;line-height:1.4}
+.chart{width:100%;height:auto;display:block}
+.legend{display:flex;flex-direction:column;gap:5px}
+.legend span{display:flex;align-items:center;gap:6px}
+.legend i{flex:none;width:18px;height:0;border-top:4px solid var(--sc);border-radius:2px}
+.legend i.dash{border-top-style:dashed;border-top-width:3px}
+.read{font-size:13px;color:var(--ink);background:#F7F7FC;border-radius:12px;padding:8px 11px;line-height:1.55}
+
+
+.foot{display:flex;justify-content:space-between;align-items:center;padding:10px 18px 12px;font-size:12px;color:var(--ink-3)}
+.foot b{color:var(--c);font-size:13px}
+
+/* 裏 */
+.back .hd{padding:14px 18px 8px;display:flex;justify-content:space-between;align-items:baseline;gap:8px;border-bottom:2px solid var(--rule)}
+.back .hd b{font-size:18px;color:var(--c)}
+.back .hd small{font-size:11.5px;color:var(--ink-3);font-weight:700}
+.back .body{padding:10px 16px 0;flex:1;display:flex;flex-direction:column;gap:8px;overflow:auto}
+.prob{font-size:13.5px;font-weight:800;color:var(--prob);background:var(--probbg);border-radius:10px;padding:6px 11px}
+.cldbox{position:relative}
+.cld{width:100%;height:auto;display:block;background:#FAFAFE;border-radius:12px}
+.zoom{position:absolute;right:6px;bottom:6px;font:inherit;font-size:11.5px;font-weight:700;border:1.5px solid var(--rule);background:#fff;color:var(--ink-2);border-radius:8px;padding:2px 8px;cursor:pointer}
+.zoom:hover{border-color:var(--c);color:var(--ink)}
+dialog{border:none;border-radius:20px;padding:18px 20px;width:min(860px,94vw);color:var(--ink)}
+dialog::backdrop{background:rgba(35,38,58,.55)}
+dialog h2{margin:0 0 4px;font-size:20px}
+dialog .prob{margin:6px 0 10px}
+dialog .cld{background:#FAFAFE}
+dialog .close{float:right}
+.key{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:11.5px;color:var(--ink-3)}
+.key em{font-style:normal;font-weight:800}
+.story{margin:0;padding:0;list-style:none;counter-reset:s;display:flex;flex-direction:column;gap:3px}
+.story li{counter-increment:s;font-size:13px;display:flex;gap:7px;align-items:baseline}
+.story li::before{content:counter(s);flex:none;width:19px;height:19px;border-radius:50%;background:var(--c);color:#fff;font-size:11px;font-weight:800;
+  display:inline-flex;align-items:center;justify-content:center;transform:translateY(3px)}
+.again{font-size:11.5px;color:var(--ink-3);font-weight:700;white-space:nowrap}
+.hint{font-size:13px;background:#EEF8F4;color:#0F6F56;border-radius:10px;padding:7px 11px}
+.hint b{margin-right:4px}
+.src{font-size:11px;color:var(--ink-3);line-height:1.45}
+
+/* あてっこモード：表の名前をかくす */
+body.guess .front .nm,body.guess .front .tag,body.guess .front .en,body.guess .front .shape{display:none}
+.btn:active{transform:translateY(2px);border-bottom-width:2px}
+body.guess .front .q{display:block}
+body.guess .front .top{background:#3A3E57}
+
+.front .top{position:relative;padding:22px 20px 16px 66px}
+.ico{position:absolute;left:14px;top:14px;width:46px;height:46px;padding:5px;border-radius:14px;background:rgba(255,255,255,.18)}
+.ico svg{width:100%;height:100%;display:block}
+body.guess .ico{display:none}
+.front .nm{font-size:29px}
+.front .tag{font-size:15px;font-weight:700}
+.front .ttl{font-size:20px;line-height:1.4;margin-top:2px}
+.gbox{border:2px dashed var(--rule);border-radius:14px;padding:9px 10px 4px;display:flex;flex-direction:column;gap:6px}
+.lg{display:flex;gap:8px;align-items:flex-start;font-size:15.5px;line-height:1.4}
+.lg i{margin-top:10px}
+.lg b{font-weight:800;color:var(--ink)}
+.lg em{font-style:normal;font-size:11px;font-weight:700;color:var(--ink-3);background:#EEF0F7;border-radius:6px;padding:1px 6px;margin-left:6px}
+.lg small{display:block;font-size:13px;color:var(--ink-3)}
+.gsrc{font-size:12px;color:var(--ink-3);text-align:right;margin:-4px 0 2px}
+.read{position:relative;font-size:14px;font-weight:500;background:color-mix(in srgb,var(--c) 10%,#fff);border-radius:16px;padding:10px 13px;margin-top:6px}
+.read::before{content:"";position:absolute;left:26px;top:-9px;border:9px solid transparent;border-top:0;border-bottom-color:color-mix(in srgb,var(--c) 10%,#fff)}
+.foot{justify-content:center}
+.pill{background:var(--c);color:#fff;font-weight:800;font-size:14px;border-radius:999px;padding:6px 18px;border-bottom:3px solid rgba(0,0,0,.18)}
+.prob{font-size:15px}
+.story li{font-size:14px}
+.hint{font-size:13.5px}
+.hint b{display:block;margin:0 0 1px}
+
+.sec{font-size:20px;font-weight:800;margin:30px 0 4px}
+.secp{margin:0 0 14px;font-size:13.5px;color:var(--ink-2);max-width:46em}
+.sec+.grid{margin-top:12px}
+.where{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.place{display:inline-block;font-size:13px;font-weight:800;border-radius:999px;padding:2px 10px;border:2px solid}
+.place.jp{color:#B3261E;background:#FFF0EE;border-color:#F3B8B0}
+.place.world{color:#1C5FA8;background:#EDF4FD;border-color:#A9C8EE}
+.placeinfo{font-size:12.5px;color:var(--ink-3)}
+header .secp{margin-top:8px}
+.stats{display:flex;flex-direction:column;gap:10px;padding:6px 2px 8px}
+.st{display:flex;align-items:baseline;gap:10px}
+.st b{flex:none;min-width:5.2em;font-size:24px;font-weight:800;line-height:1.1}
+.st span{font-size:13px;color:var(--ink-2);line-height:1.4}
+.hint{display:flex;flex-direction:column;gap:2px;padding:7px 8px}
+.hint>b{font-size:12.5px;margin-bottom:2px}
+.lev{display:grid;grid-template-columns:118px minmax(0,1fr);gap:6px;align-items:baseline;border-radius:7px;padding:2px 5px}
+.lev .ln{font-size:10.5px;white-space:nowrap;font-weight:800;color:#0F6F56;line-height:1.3}
+.lev .ln small{display:block;font-size:10px;font-weight:700;color:#4E8C77}
+.lev .ln em{display:block;font-style:normal;font-size:10px;color:#fff;background:#0F6F56;border-radius:999px;padding:0 6px;width:max-content;margin-top:1px}
+.lev .lt{font-size:12.5px;color:var(--ink);line-height:1.4}
+.lev.key{background:#fff;box-shadow:inset 0 0 0 2px #9ED9C4}
+.story li{font-size:13px}
+dialog .read{font-size:14px;margin-top:12px}
+dialog .read::before{display:none}
+.gsrc a,.src a{color:#1C5FA8;text-decoration:underline;text-underline-offset:2px}
+.gsrc a:hover,.src a:hover{color:#0B3D75}
+.gsrc{text-align:left}
+.shape{display:flex;align-items:center;gap:8px;background:#F7F7FC;border-radius:12px;padding:5px 10px;min-width:0}
+.shape .sl{font-size:11.5px;font-weight:800;color:var(--ink-2);line-height:1.35}
+.shape .sl small{display:block;font-size:11px;font-weight:700;color:var(--ink-3);margin-top:2px}
+.shape svg{width:96px;height:auto;flex:none}
+header h1{margin-bottom:0}
+body.en .front .nm{font-size:23px;line-height:1.2}
+body.en .front .ttl{font-size:18px}
+
+body.en .lev{display:block;padding:2px 5px}
+body.en .lev .ln{display:block;white-space:normal}
+body.en .lev .ln small{display:inline;margin-left:6px}
+body.en .story li{font-size:12.5px}
+body.en .lev .lt{font-size:12px}
+
+.grip{position:absolute;right:10px;bottom:10px;z-index:5;font-size:11.5px;font-weight:800;color:var(--ink-3);
+  background:#fff;border:1.5px solid var(--rule);border-radius:999px;padding:3px 9px;cursor:grab;touch-action:none;user-select:none}
+.grip:hover{color:var(--ink);border-color:#B9BCD3}
+.card.dragging{position:fixed;z-index:100;pointer-events:none;transform:rotate(2deg) scale(1.02);filter:drop-shadow(0 18px 30px rgba(35,38,58,.28))}
+.ph{border:3px dashed #B9BCD3;border-radius:20px;background:rgba(255,255,255,.5)}
+body.is-dragging{user-select:none;cursor:grabbing}
+body.is-dragging .card{cursor:grabbing}
+.zoomctl{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.7);border-radius:14px;padding:3px 6px}
+.zoomctl #cols{font-size:13px;font-weight:800;color:#173A73;min-width:3em;text-align:center}
+.zoomctl .btn{padding:5px 10px}
+.btn:disabled{opacity:.4;cursor:default}
+#lang{margin-left:0}
+.card .face{box-shadow:0 8px 0 -3px rgba(23,58,115,.10)}
+
+.drawer{position:fixed;top:0;right:0;bottom:0;z-index:50;width:min(400px,92vw);overflow:auto;background:rgba(255,255,255,.96);
+  backdrop-filter:blur(6px);box-shadow:-12px 0 30px rgba(23,58,115,.18);padding:calc(14px + env(safe-area-inset-top,0px)) 16px calc(18px + env(safe-area-inset-bottom,0px));
+  border-left:4px solid #A9C8EE;animation:slidein .25s ease-out}
+.drawer[hidden]{display:none}
+@keyframes slidein{from{transform:translateX(30px);opacity:0}to{transform:none;opacity:1}}
+.dhd{display:flex;justify-content:space-between;align-items:center}
+.dhd b{font-size:19px;color:#173A73}
+.drawer p{margin:2px 0 0;font-size:13px;font-weight:700;color:#3B5683}
+@media (min-width:1100px){body.drawer-open .wrap{margin-right:400px}}
+.tgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+.tcard{font:inherit;color:var(--ink);text-align:center;background:#fff;border:2px solid var(--rule);border-bottom-width:4px;border-radius:16px;
+  padding:12px 10px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;transition:transform .15s,border-color .15s}
+.tcard:hover{transform:translateY(-2px);border-color:var(--c)}
+.tcard.on{border-color:var(--c);box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 30%,transparent)}
+.tcard b{font-size:16px;font-weight:800;line-height:1.3}
+.tcard .tg{font-size:12px;color:var(--ink-3);min-height:2.6em;line-height:1.3}
+.tcard svg{width:100%;max-width:210px;height:auto;margin-top:auto}
+.tcard .te{font-size:12.5px;font-weight:800;color:var(--c)}
+.tcard .tn{font-size:11px;font-weight:700;color:var(--ink-3);background:#F1F3F9;border-radius:999px;padding:1px 9px;margin-top:3px}
+.card{transition:opacity .2s,filter .2s}
+.card.dim{opacity:.22;filter:grayscale(.7)}
+.card.hit .face{outline:4px solid var(--c);outline-offset:3px}
+/* ===== はがき比率（1:1.48）に収める ===== */
+.front .top{padding:14px 18px 12px 66px}
+.front .nm{font-size:25px}
+.front .tag{font-size:13.5px;margin-top:2px}
+.front .en{font-size:11.5px}
+.front .body{padding:10px 16px 0;gap:6px;overflow:hidden}
+.front .ttl{font-size:18px;line-height:1.35}
+.gbox{padding:7px 9px 3px;gap:4px}
+.lg{font-size:14.5px}
+.lg small{font-size:12px}
+.foot{padding:8px 14px 12px;gap:10px;justify-content:space-between}
+.back .hd{padding:11px 70px 7px 16px}
+.back .hd b{font-size:17px}
+.back .body{padding:8px 14px 10px;gap:6px}
+.prob{font-size:13.5px;padding:5px 10px}
+.key{font-size:10.5px;gap:2px 10px}
+.story li{font-size:12.5px;line-height:1.4}
+.hint{padding:6px 8px}
+.lev .lt{font-size:12px;line-height:1.35}
+.grip{top:10px;right:10px;bottom:auto;background:rgba(255,255,255,.92)}
+body.en .front .nm{font-size:21px}
+body.en .front .ttl{font-size:16px}
+body.en .lg{font-size:13px}
+body.en .story li{font-size:11px;line-height:1.3}
+body.en .lev .lt{font-size:10.8px;line-height:1.3}
+body.en .lev .ln{font-size:10px}
+body.en .prob{font-size:12.5px}
+.grip{padding:2px 8px;font-size:14px;line-height:1.2}
+.front .top{padding-right:46px}
+.back .hd{padding-right:48px}
+.card .cld{max-height:205px}
+body.en .card .cld{max-height:178px}
+dialog .cld{width:100%;max-height:68vh;height:auto}
+.cldbox{display:flex;justify-content:center;background:#FAFAFE;border-radius:12px}
+.cldbox .cld{width:auto;max-width:100%}
+.back .body{gap:5px}
+.hint>b{font-size:11.5px}
+.lev{grid-template-columns:112px minmax(0,1fr)!important;padding:1px 4px}
+.lev .ln{font-size:10px}
+.lev .ln small{font-size:9px}
+
+/* ===== カードにマウスを当てたとき ===== */
+.card{transition:transform .25s ease,opacity .2s,filter .2s}
+.card:not(.dragging):hover,.card:not(.dragging):focus-visible{transform:scale(1.045);z-index:4}
+.card:not(.dragging):hover .face{box-shadow:0 22px 36px -10px rgba(23,58,115,.35);border-color:var(--c)}
+.card.dragging{transform:rotate(2deg) scale(1.02)}
+
+/* ===== 上のボタン（アイコンつき） ===== */
+.btn.ib{display:inline-flex;align-items:center;gap:7px}
+.btn[hidden]{display:none!important}
+.btn.ib svg{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.btn.sq{padding:6px 8px}
+/* ===== 案A：図鑑・フィールドノート風 ===== */
+.brand{display:flex;align-items:center;gap:16px}
+.brand .logo{width:48px;height:48px;flex:none}
+.brand .eyebrow{display:block;font-size:12px;font-weight:800;letter-spacing:.22em;color:#5F6478}
+.bar{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px;margin:20px 0 24px;padding:4px;background:#fff;border:1.5px solid #E4E1D6;border-radius:14px;box-shadow:0 2px 0 rgba(31,42,68,.04)}
+.bar .btn{height:40px;border:none;border-radius:10px;background:transparent;color:#1F2A44;padding:0 13px;font-size:13.5px}
+.bar .btn.sq{width:40px;padding:0;justify-content:center}
+.bar .btn:hover{background:#F1EFE7;border:none}
+.bar .btn[aria-pressed="true"],.bar .btn[aria-expanded="true"]{background:#1F2A44;color:#fff}
+.bar .btn:active{transform:translateY(1px)}
+.bar .btn:disabled{opacity:.35;background:transparent}
+.bar .sep{width:1px;height:26px;background:#DAD8CF;margin:0 4px}
+.zoomctl{background:transparent!important;padding:0!important;gap:2px!important}
+.zoomctl #cols{color:#1F2A44!important;min-width:2.8em}
+.helpw{position:relative;display:inline-flex}
+.brand .logo{width:54px;height:54px}
+@media (max-width:640px){.bar{display:flex;flex-wrap:nowrap;justify-content:space-between;gap:0}.bar .btn.sq,.bar .btn.ib{width:36px!important}.zoomctl #cols{min-width:2.2em!important;font-size:12px!important}.bar .sep{display:none}
+  .bar .btn .bl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .bar .btn.ib{width:40px;padding:0;justify-content:center}.brand .logo{width:42px;height:42px}}
+.helppop{position:absolute;top:calc(100% + 8px);right:0;z-index:20;white-space:nowrap;background:#1F2A44;color:#fff;font-size:12.5px;font-weight:700;border-radius:10px;padding:8px 12px;box-shadow:0 10px 24px -10px rgba(31,42,68,.5)}
+.helppop[hidden]{display:none}
+.drawer{border-left-color:#E4E1D6!important;background:rgba(255,255,255,.97)!important}
+.dhd b{color:#1F2A44!important}
+.drawer p{color:#5F6478!important}
+body.en .ebj{display:none}
+@media (max-width:640px){.ebj{display:none}}
+.hyp{font-size:11px;font-weight:800;color:#8A4B00;background:#FFF1DC;border:1.5px solid #F2C27E;border-radius:999px;padding:1px 8px}
+.cnote{font-size:11px;line-height:1.45;color:#8A4B00;background:#FFF7EA;border-radius:8px;padding:4px 8px}
+.cnote b{margin-right:4px}
+.thq{font-size:34px;font-weight:800;color:var(--c);width:96px;text-align:center;line-height:1}
+.prob.tq{background:#EEF0F7;color:#2F3A5C}
+.cands{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.cand{display:flex;flex-direction:column;align-items:center;gap:2px;border:2px dashed color-mix(in srgb,var(--c) 45%,#fff);border-radius:12px;padding:5px 4px}
+.cand svg{width:92px;height:auto}.cand b{font-size:12px;color:var(--c)}
+.others{margin:0;padding-left:18px;font-size:12.5px;line-height:1.5}
+.drawbox{border:2px dashed #B9BCD3;border-radius:12px;min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-align:center}
+.drawbox b{font-size:13px;color:#2F3A5C}.drawbox span{font-size:11px;color:var(--ink-3)}
+body.en .others{font-size:11.5px}
+body.en .drawbox{min-height:42px}
+body.en .cand svg{width:76px}
+body.en .cand{padding:3px 4px}
+button.cand{font:inherit;background:#fff;cursor:pointer;transition:transform .15s,background .15s}
+button.cand:hover{background:color-mix(in srgb,var(--c) 8%,#fff);transform:translateY(-1px)}
+button.cand:focus-visible{outline:3px solid #1C6FD1;outline-offset:2px}
+.cand .cgo{font-size:10.5px;font-weight:800;color:#fff;background:var(--c);border-radius:999px;padding:1px 8px;margin-top:2px}
+dialog .dstory{margin:10px 0 0}
+dialog .dstory li{font-size:14px}
+/* ===== データから作る ===== */
+.place.user{color:#5B3F00;background:#FFF4D6;border-color:#EBCB7A}
+.udel{position:absolute;top:10px;right:46px;z-index:5;width:30px;height:28px;border-radius:999px;border:1.5px solid var(--rule);background:rgba(255,255,255,.92);color:#8A2D1E;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+.udel svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.udel:hover{background:#FFE9E5;border-color:#E5533D}
+.card:has(.udel) .front .top{padding-right:84px}
+.card:has(.udel) .back .hd{padding-right:86px}
+.mkdlg{width:min(980px,96vw);max-height:92vh;overflow:auto}
+.mkdlg h2{margin:0 0 8px;font-size:21px;color:#1F2A44}
+.mkdlg .close{position:sticky;top:0;float:right;z-index:2}
+.mks{border-top:1.5px solid #E4E1D6;padding:12px 0}
+.mks h3{margin:0 0 8px;font-size:15.5px;color:#1F2A44}
+.mkrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:6px 0}
+.mkl{display:flex;flex-direction:column;gap:3px;font-size:12.5px;font-weight:700;color:#4A4E66;margin:6px 0}
+.mkl input,.mkl textarea,.mkl select{font:inherit;font-weight:500;font-size:14px;border:1.5px solid #D9D6CB;border-radius:8px;padding:6px 9px;background:#fff;color:#23263A;min-width:0}
+.mkl textarea{resize:vertical}
+.mkl .mkrow{margin:0}.mkl .mkrow input{flex:1}
+.mkl.sm{font-size:11.5px}.mkl.sm input{font-size:13px;padding:4px 8px}
+.mkgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0 12px}
+.mkfile{cursor:pointer}
+.mkmsg{font-size:13px;color:#8A4B00;margin:4px 0;min-height:1em}
+.mknote{font-size:13px;color:#4A4E66;margin:0 0 6px}
+.mkents{border:1.5px solid #E4E1D6;border-radius:10px;padding:6px 10px;max-height:150px;overflow:auto;margin:6px 0}
+.mkents legend{font-size:12.5px;font-weight:700;color:#4A4E66;padding:0 4px}
+.mkchip{display:inline-flex;align-items:center;gap:4px;font-size:13px;margin:2px 10px 2px 0}
+#mkPrev{max-width:440px}
+.btn.mkpri{background:#1F2A44;color:#fff;border-color:#1F2A44}
+#mkCands{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.mkcand{border:2px solid color-mix(in srgb,var(--c) 40%,#fff);border-radius:14px;padding:10px 12px;background:#fff}
+.mkhd{display:flex;align-items:center;gap:8px;font-size:15px;color:var(--c)}
+.mkhd span{margin-left:auto;font-size:11.5px;color:#4A4E66;font-weight:700}
+.mkwhy{font-size:12.5px;background:color-mix(in srgb,var(--c) 8%,#fff);border-radius:8px;padding:5px 8px;margin:6px 0}
+.mkwhy b{margin-right:6px}
+.mkprev{display:flex;gap:8px;align-items:center}.mkprev>svg{width:80px;flex:none}.mkcld{flex:1;min-width:0}.mkcld .cld{width:100%;max-height:150px}
+.mkvars{border:1.5px solid #EEE;border-radius:10px;padding:2px 8px 6px;margin:6px 0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 8px}
+.mkvars legend{font-size:11.5px;font-weight:700;color:#4A4E66;padding:0 4px}
+/* ===== 編のタブ ===== */
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.eds{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap;margin-top:2px}
+.eds .ed{font:inherit;background:none;border:none;padding:2px 0 6px;cursor:pointer;color:#8A8E9F;font-size:19px;font-weight:800;border-bottom:4px solid transparent;transition:color .2s,font-size .2s,border-color .2s}
+.eds .ed:hover{color:#1F2A44}
+.eds .ed[aria-selected="true"]{color:#1F2A44;font-size:clamp(24px,3vw,34px);border-bottom-color:var(--edc,#E8790C)}
+.eds .ed.all{font-size:13px;border:1.5px solid #D9D6CB;border-radius:999px;padding:2px 12px;align-self:center}
+.eds .ed.all[aria-selected="true"]{font-size:13px;background:#1F2A44;color:#fff;border-color:#1F2A44}
+.eds .ed:focus-visible{outline:3px solid #1C6FD1;outline-offset:3px}
+.eds .ed[data-ed="urban"]{--edc:#3F51B5}
+body.ed-urban{background-color:#EEF0F3;background-image:linear-gradient(rgba(63,81,181,.13) 2px,transparent 2px),linear-gradient(90deg,rgba(63,81,181,.13) 2px,transparent 2px),linear-gradient(rgba(63,81,181,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(63,81,181,.06) 1px,transparent 1px);background-size:96px 96px,96px 96px,24px 24px,24px 24px}
+#grid{transition:opacity .18s}
+#grid.edfade{opacity:0}
+.edtag{font-size:11px;font-weight:800;border-radius:6px;padding:1px 6px;color:#fff;background:#E8790C}
+.edtag.urban{background:#3F51B5}
+@media (max-width:640px){.eds{gap:10px}.eds .ed{font-size:14px}.eds .ed[aria-selected="true"]{font-size:21px}}
+.pchip{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;white-space:nowrap;overflow:hidden;font-size:11px;background:color-mix(in srgb,var(--pc) 10%,#fff);border:1.5px solid color-mix(in srgb,var(--pc) 40%,#fff);border-radius:8px;padding:2px 6px 2px 8px}
+.pchip b{color:var(--pc);font-size:11.5px;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.pclr{flex:none}.pchip span{color:var(--ink-3)}
+.pclr{margin-left:auto;font:inherit;font-size:11px;border:none;background:none;color:var(--ink-3);cursor:pointer;padding:0 2px}
+.pclr:hover{color:var(--ink)}
+.projgo{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px}
+.projgo span{font-size:12.5px;color:var(--ink-3)}
+.pgo{position:absolute;left:6px;bottom:6px;font:inherit;font-size:11.5px;font-weight:800;border:1.5px solid #E4E1D6;background:#fff;color:#1F2A44;border-radius:8px;padding:2px 8px;cursor:pointer}
+.pgo:hover{border-color:#1F2A44}
+.pclr{font-weight:700;border:1px solid color-mix(in srgb,var(--pc) 40%,#fff)!important;border-radius:6px;padding:0 6px!important;background:#fff!important}
+@media (prefers-reduced-motion:reduce){
+  .inner{transition:none}
+}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="brand"><svg class="logo" viewBox="0 0 48 48" fill="none" stroke-width="4" stroke-linecap="round" aria-hidden="true"><path d="M24 24c-6-10-18-8-18 0s12 10 18 0" stroke="#D0336B"/><path d="M24 24c6 10 18 8 18 0s-12-10-18 0" stroke="#1E88C8"/><path d="M10 14l-4 2 1 4" stroke="#D0336B"/><path d="M38 34l4-2-1-4" stroke="#1E88C8"/></svg><div><span class="eyebrow" id="eyebrow">SYSTEM BEHAVIOR CARDS<span class="ebj"> ・ システムの振る舞いカード</span></span><h1 id="h1" class="sr">食のシステム編</h1>
+  <div class="eds" role="tablist" aria-label="編"><button type="button" role="tab" class="ed" data-ed="food">食のシステム編</button><button type="button" role="tab" class="ed" data-ed="urban">都市デザイン編</button><button type="button" role="tab" class="ed all" data-ed="all">すべて</button></div></div></header>
+<div class="bar" role="toolbar" aria-label="操作">
+  <button class="btn ib" id="typesBtn" aria-expanded="false" aria-controls="drawer"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg><span class="bl">型の一覧</span></button>
+  <button class="btn ib" id="guess" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 6.1A9.6 9.6 0 0 1 12 6c5 0 9 4.6 10 6-.5.8-1.5 2.1-3 3.4"/><path d="M6.6 6.6C4.5 8 3 10 2 12c1 1.4 5 6 10 6 1.7 0 3.3-.5 4.6-1.3"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg><span class="bl">あてっこモード</span></button>
+  <span class="sep" aria-hidden="true"></span>
+  <span class="zoomctl"><button class="btn ib sq" id="zout" aria-label="小さく"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/><path d="M7.5 10.5h6"/></svg></button><span id="cols">3列</span><button class="btn ib sq" id="zin" aria-label="大きく"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/><path d="M7.5 10.5h6M10.5 7.5v6"/></svg></button></span>
+  <span class="sep" aria-hidden="true"></span>
+  <button class="btn ib" id="mkBtn" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="3"/><path d="M12 8v8M8 12h8"/></svg><span class="bl">データから作る</span></button>
+  <button class="btn ib" id="saveBtn" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5"/><path d="M4.5 19.5h15"/></svg><span class="bl">HTMLに保存</span></button>
+  <button class="btn ib" id="reset"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3.5 4v5h5"/></svg><span class="bl">もとにもどす</span></button>
+  <button class="btn ib" id="lang" lang="en"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span class="bl">English</span></button>
+  <span class="sep" aria-hidden="true"></span>
+  <span class="helpw"><button class="btn ib sq" id="help" aria-expanded="false" aria-controls="helpPop" aria-label="使い方"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .8-1 1.5v.7"/><path d="M12 17h.01"/></svg></button>
+  <span class="helppop" id="helpPop" role="status" hidden><span id="note">クリックでめくる・ドラッグで並びかえ</span></span></span>
+</div>
+<div class="grid" id="grid"></div>
+<aside class="drawer" id="drawer" aria-labelledby="typesT" hidden>
+  <div class="dhd"><b id="typesT">型の一覧</b><button class="btn" type="button" id="drawerX" aria-label="閉じる">✕</button></div>
+  <p id="typesN">押すと、その型のカードが光るよ</p>
+  <div class="tgrid" id="tgrid"></div>
+</aside>
+<dialog id="mkdlg" class="mkdlg"><button class="btn close" type="button" id="mkx">✕</button><div id="mkc"></div></dialog>
+<dialog id="dlg"><button class="btn close" type="button" id="dlgx">閉じる</button><div id="dlgc"></div></dialog>
+</div>
+
+<script id="app">
+// ===== フードシステムのデータ（TET設定 foodlifestyle-health より） =====
+const D={
+  y_f:{hi:'多い',lo:'少ない',name:'野菜をしっかり食べる女性',u:'%',what:'1日に野菜を350g以上食べる人の割合',src:'国民健康・栄養調査',h:[[2014,29.2],[2015,31.4],[2016,27.2],[2017,29.0],[2018,27.0],[2019,26.5],[2022,24.8],[2023,21.9],[2024,22.0]]},
+  y_m:{hi:'多い',lo:'少ない',name:'野菜をしっかり食べる男性',u:'%',what:'1日に野菜を350g以上食べる人の割合',src:'国民健康・栄養調査',h:[[2014,33.2],[2015,33.7],[2016,29.3],[2017,32.3],[2018,30.7],[2019,30.1],[2022,28.9],[2023,25.2],[2024,26.2]]},
+  x1:{hi:'多い',lo:'少ない',base:100,name:'国の呼びかけの多さ',u:'2019年＝100',what:'食育白書に「野菜・栄養・健康」が出てくる多さ',src:'食育白書',h:[[2015,80.2],[2016,83.1],[2017,97.7],[2018,116.4],[2019,100],[2020,92.3],[2021,105.6],[2022,113.2],[2023,92.2],[2024,92.8]]},
+  x2:{hi:'高い',lo:'低い',base:50,name:'野菜への関心',u:'2019年＝50',what:'ネットで野菜が調べられた多さ',src:'Googleトレンド',h:[[2019,50],[2020,70.8],[2021,78.1],[2022,79.1],[2023,76.8],[2024,69.8]]},
+  x3:{hi:'買いやすい',lo:'買いにくい',base:100,name:'野菜の買いやすさ',u:'2019年＝100',what:'お給料で、野菜をどれだけ買えるか',src:'家計調査・消費者物価指数',h:[[2015,87.4],[2016,83.6],[2017,88.1],[2018,87.9],[2019,100],[2020,99.9],[2021,101.6],[2022,98.1],[2023,91.4],[2024,87.7]]},
+  bra:{hi:'多い',lo:'少ない',name:'ブラジル',u:'%',what:'健康的な食事を買うお金がない人の割合（上ほど困る）',src:'世界銀行・FAO',h:[[2017,27.1],[2018,26.4],[2019,26.0],[2020,19.4],[2021,29.8],[2022,24.9],[2023,24.1],[2024,23.7]]},
+  eap:{hi:'多い',lo:'少ない',name:'東アジア・太平洋',u:'%',what:'健康的な食事を買うお金がない人の割合（上ほど困る）',src:'世界銀行・FAO',h:[[2017,29.3],[2018,26.7],[2019,24.7],[2020,26.1],[2021,21.0],[2022,20.5],[2023,19.2],[2024,17.8]]},
+  ssa:{hi:'多い',lo:'少ない',name:'サハラ以南アフリカ',u:'%',what:'健康的な食事を買うお金がない人の割合（上ほど困る）',src:'世界銀行・FAO',h:[[2017,70.6],[2018,69.6],[2019,69.6],[2020,71.0],[2021,70.8],[2022,70.5],[2023,71.0],[2024,71.3]]},
+  ltu:{hi:'多い',lo:'少ない',name:'リトアニア',u:'%',what:'健康的な食事を買うお金がない人の割合（上ほど困る）',src:'世界銀行・FAO',h:[[2017,21.3],[2018,16.7],[2019,13.1],[2020,8.8],[2021,8.9],[2022,8.9],[2023,8.9],[2024,8.2]]},
+  tfp:{hi:'速く増える',lo:'ゆっくり',dec:1,pu:'%',name:'工夫で、作れる量が増えるペース',u:'%',what:'土地や肥料をふやさず、品種や技術の工夫で、作れる量が1年に何%増えたか（10年ごとの平均）',src:'FAO 世界食料農業白書2025',h:[[1960,0.08],[1970,0.54],[1980,0.89],[1990,1.72],[2000,1.99],[2010,1.12]]},
+  chnN:{hi:'多い',lo:'少ない',name:'中国',u:'kg/ha',what:'畑1haあたりに使った窒素肥料の量（kg）',src:'FAOSTAT',h:[[1961,5.21],[1962,7.78],[1963,9.37],[1964,12.04],[1965,17.68],[1966,25.88],[1967,19.05],[1968,20.96],[1969,25.83],[1970,33.16],[1971,33.28],[1972,38.26],[1973,44.3],[1974,38.07],[1975,50.54],[1976,47.74],[1977,71.09],[1978,93.37],[1979,107.11],[1980,121.97],[1981,115.28],[1982,116.9],[1983,123.84],[1984,128.86],[1985,110.71],[1986,107.32],[1987,132.11],[1988,144.41],[1989,145.38],[1990,148.96],[1991,150.86],[1992,155.54],[1993,138.49],[1994,147.38],[1995,182.93],[1996,194.36],[1997,176.48],[1998,176],[1999,185.65],[2000,170.25],[2001,171.65],[2002,190.82],[2003,191.15],[2004,198.11],[2005,200.26],[2006,203.92],[2007,208.51],[2008,210.63],[2009,213.92],[2010,219.35],[2011,225.06],[2012,230.1],[2013,232.68],[2014,235.38],[2015,235.31],[2016,233.54],[2017,228.38],[2018,218.81],[2019,209.11],[2020,201.47],[2021,196.74],[2022,191.55],[2023,192.39]]},
+  asiaN:{hi:'多い',lo:'少ない',name:'アジア',u:'kg/ha',what:'畑1haあたりに使った窒素肥料の量（kg）',src:'FAOSTAT',h:[[1961,4.5],[1962,5.35],[1963,5.97],[1964,6.9],[1965,8.42],[1966,11.16],[1967,10.87],[1968,12.15],[1969,14.04],[1970,16.29],[1971,17.39],[1972,19.44],[1973,21.18],[1974,19.12],[1975,24.7],[1976,24.4],[1977,31.53],[1978,38.22],[1979,41.42],[1980,45.71],[1981,45.85],[1982,47.7],[1983,52.8],[1984,56.54],[1985,54.22],[1986,56.15],[1987,60.97],[1988,67.72],[1989,69.06],[1990,71.43],[1991,72.98],[1992,72.25],[1993,68.38],[1994,71.02],[1995,80.51],[1996,85.68],[1997,82.35],[1998,84.36],[1999,87.53],[2000,83.08],[2001,83.39],[2002,87.36],[2003,89.11],[2004,92.95],[2005,95.52],[2006,98.77],[2007,100.98],[2008,102.41],[2009,107.37],[2010,109.14],[2011,110.92],[2012,110.92],[2013,112.25],[2014,112.98],[2015,112.66],[2016,112.1],[2017,112.29],[2018,110.49],[2019,109.99],[2020,114.18],[2021,111.44],[2022,110.34],[2023,113.44]]},
+  afrN:{hi:'多い',lo:'少ない',name:'アフリカ',u:'kg/ha',what:'畑1haあたりに使った窒素肥料の量（kg）',src:'FAOSTAT',h:[[1961,2.08],[1962,2.22],[1963,2.56],[1964,2.92],[1965,3.17],[1966,3.06],[1967,3.35],[1968,3.73],[1969,4.01],[1970,4.55],[1971,5.15],[1972,5.65],[1973,5.63],[1974,5.72],[1975,6.46],[1976,6.75],[1977,6.84],[1978,7.09],[1979,7.63],[1980,9.01],[1981,9.54],[1982,9.42],[1983,8.7],[1984,9.08],[1985,9.42],[1986,10.08],[1987,9.59],[1988,10.26],[1989,9.83],[1990,10.05],[1991,9.75],[1992,9.48],[1993,10.39],[1994,8.98],[1995,9.28],[1996,10.04],[1997,9.72],[1998,10.03],[1999,10.19],[2000,10.37],[2001,10.47],[2002,11.47],[2003,10.74],[2004,12.21],[2005,11.56],[2006,11.92],[2007,10.68],[2008,10.86],[2009,10.8],[2010,12.08],[2011,11.48],[2012,11.13],[2013,11.66],[2014,11.88],[2015,11.78],[2016,12.98],[2017,14.84],[2018,14.03],[2019,14.12],[2020,16.49],[2021,15.05],[2022,13.26],[2023,14.37]]},
+  fish:{hi:'多い',lo:'少ない',pu:'%',name:'「とりすぎ」の魚のグループの割合',u:'%',what:'魚を種類と海の場所でグループに分けたとき（例：大西洋のタラ）、ふえるより速くとられているグループの割合',src:'FAO（SDG指標14.4.1）',h:[[1974,10],[1975,9.63],[1976,9.27],[1977,8.9],[1978,8.54],[1979,13.02],[1980,13.3],[1981,13.58],[1982,15.12],[1983,16.67],[1984,17.42],[1985,18.18],[1986,21.25],[1987,24.32],[1988,25.48],[1989,26.63],[1990,18.13],[1991,20.68],[1992,23.22],[1993,24.04],[1994,24.86],[1995,25.68],[1996,24.35],[1997,23.03],[1998,24.43],[1999,25.82],[2000,27.21],[2001,26.31],[2002,25.41],[2003,24.51],[2004,23.61],[2005,25.62],[2006,27.63],[2007,30.3],[2008,32.98],[2009,30.45],[2010,29.68],[2011,28.92],[2012,30.46],[2013,32],[2014,32.67],[2015,33.33],[2016,33.74],[2017,34.15],[2018,34.79],[2019,35.43],[2020,36.55],[2021,35.5]]},
+  congT:{"hi": "高い", "lo": "低い", "pu": "%", "name": "東京圏の通勤電車の混雑率", "u": "%", "what": "朝のピーク1時間・主な31区間の平均（年度）", "src": "MLIT混雑率", "h": [[1975, 221], [1985, 212], [1989, 202], [1998, 183], [2003, 171], [2008, 171], [2013, 165], [2014, 165], [2015, 164], [2016, 165], [2017, 163], [2018, 163], [2019, 163], [2020, 107], [2021, 108], [2022, 123], [2023, 136], [2024, 139], [2025, 143]]},
+  midoriOld:{"dp":1,"hi": "多い", "lo": "少ない", "pu": "%", "name": "みどり率（以前の測り方）", "u": "%", "what": "緑・公園・水面が区部に占める割合", "src": "都みどり率", "h": [[2003, 20.0], [2008, 19.6], [2013, 19.8]]},
+  midoriNew:{"dp":1,"hi": "多い", "lo": "少ない", "pu": "%", "name": "みどり率（新しい測り方）", "u": "%", "what": "緑・公園・水面が区部に占める割合", "src": "都みどり率", "h": [[2018, 24.2], [2023, 24.0]]},
+  tele:{"hi": "多い", "lo": "少ない", "pu": "%", "name": "都内企業のテレワーク実施率", "u": "%", "what": "従業員30人以上の都内企業のうち、実施している割合", "src": "都テレワーク", "h": [[2020.17, 24.0], [2020.25, 62.7], [2020.92, 51.4], [2021.58, 65.0], [2022.0, 57.3], [2024.25, 46.9], [2024.33, 43.5], [2024.42, 47.5], [2025.58, 42.9], [2025.92, 40.0], [2026.0, 43.9]]},
+  toshin:{"hi": "多い", "lo": "少ない", "name": "都心3区に住む人（夜間人口）", "u": "人", "what": "千代田区・中央区・港区に住む人の数（国勢調査）", "src": "国勢調査都心", "h": [[2005, 326038], [2010, 375008], [2015, 442872], [2020, 496345]]},
+  capT:{"hi": "混む", "lo": "すく", "name": "輸送力（1975年度＝100）", "u": "", "what": "", "src": "MLIT混雑率", "h": [[1975, 100], [1989, 149], [1998, 161], [2008, 162], [2014, 162], [2015, 162], [2016, 161], [2017, 166], [2018, 166], [2019, 167], [2020, 166], [2021, 166], [2022, 160], [2023, 158], [2024, 158], [2025, 158]]},
+  paxT:{"hi": "多い", "lo": "少ない", "name": "東京圏の通勤時の輸送人員（1975年度＝100）", "u": "", "what": "朝のピーク1時間に主な31区間を通る人の数（年度）", "src": "MLIT混雑率", "h": [[1975, 100], [1989, 137], [1998, 133], [2008, 125], [2014, 122], [2015, 121], [2016, 121], [2017, 123], [2018, 123], [2019, 124], [2020, 81], [2021, 82], [2022, 89], [2023, 97], [2024, 100], [2025, 102]]}
+};
+
+// ===== 型の定義（tet_tool の ARCH と同じ配置） =====
+const ARCH={
+ escalation:{roles:{Aa:[35,100],R:[165,25],Ba:[295,100],Ta:[100,178],Tb:[230,178]},
+  e:[['Aa','R','+'],['R','Tb','+'],['Tb','Ba','+'],['Ba','R','-'],['R','Ta','-'],['Ta','Aa','+']],L:[['B',100,100,['Aa','R','Ta']],['B',230,100,['R','Tb','Ba']]]},
+ commons:{roles:{Aa:[45,30],Ba:[45,170],T:[165,100],G:[295,100],Lm:[295,22]},
+  e:[['Aa','T','+'],['Ba','T','+'],['T','G','-',1],['G','Aa','+'],['G','Ba','+'],['Lm','G','+']],L:[['B',160,52,['Aa','T','G']],['B',160,148,['Ba','T','G']]]},
+ fixes:{roles:{P:[40,100],F:[290,100],U:[165,178]},
+  e:[['P','F','+'],['F','P','-'],['F','U','+',1],['U','P','+']],L:[['B',165,72,['P','F']],['R',165,128,['F','U','P']]]},
+ success:{roles:{Ae:[45,35],Ar:[45,170],Al:[165,100],Be:[285,35],Br:[285,170]},
+  e:[['Ar','Ae','+'],['Ae','Al','+'],['Al','Ar','+'],['Al','Br','-'],['Br','Be','+'],['Be','Al','-']],L:[['R',88,102,['Ar','Ae','Al']],['R',242,102,['Al','Br','Be']]]},
+ drift:{roles:{G:[50,30],A:[50,172],Gp:[168,100],Pr:[285,30],C:[285,172]},
+  e:[['G','Gp','+'],['Gp','Pr','+'],['Pr','G','-'],['A','Gp','-'],['Gp','C','+'],['C','A','+',1]],L:[['B',168,52,['G','Gp','Pr']],['B',168,150,['A','Gp','C']]]},
+ limits:{roles:{E:[35,110],S:[165,110],B:[295,110],C:[295,25]},
+  e:[['E','S','+'],['S','E','+'],['S','B','+'],['B','S','-'],['C','B','+']],L:[['R',100,110,['E','S']],['B',230,110,['S','B']]]},
+ under:{roles:{Eg:[35,55],D:[160,55],Lm:[290,55],N:[290,170],I:[160,170]},
+  e:[['Eg','D','+'],['D','Eg','+'],['D','Lm','+'],['Lm','D','-'],['Lm','N','+'],['N','I','+',1],['I','Lm','-']],L:[['R',97,55,['Eg','D']],['B',225,55,['D','Lm']],['B',245,125,['Lm','N','I']]]},
+ burden:{roles:{S:[150,110],Q:[150,0],E:[312,110],F:[150,220]},
+  e:[['S','Q','+'],['Q','S','-'],['Q','E','+'],['E','F','-'],['S','F','+'],['F','S','-',1]],L:[['B',92,55,['S','Q']],['R',238,110,['Q','E','F','S']],['B',92,165,['S','F']]]}
+};
+
+// ===== カードの中身 =====
+const CARDS=[
+ {id:'drift',c:'#7A4EAB',emo:'🎯',nm:'目標のなし崩し',en:'Drifting goals',tag:'目標が、だんだん下がっていく',
+  ttl:'野菜をしっかり食べる人が、へってきた',
+  series:[{k:'y_f'},{k:'y_m',dash:1}],shared:1,
+  read:'10年で、女性も男性も約7ポイントダウン。「350gなんて無理〜」って思ってない？',
+  prob:'野菜を食べる人が、少しずつへっていく',
+  names:{G:'目指す量\n（350g）',A:'野菜を食べる\n人の割合',Gp:'目標との差',Pr:'「無理」と思う\n気持ちの強さ',C:'野菜を食べる\n工夫の数'},
+  pr:['A'],data:['A'],
+  story:['350gに、なかなか届かない','「無理かも…」と思う','目標をこっそり下げる','工夫しなくなって、もっとへる'],
+  lev:{t:'健康日本21の350g目標を保ち、給食・社食に野菜の基準を',b:'SNSで「今日の一皿」を見せ合い、周りのふつうを上げる',a:'野菜クーポンや割引で、もう一皿ふやす余裕を',key:'b'}},
+ {id:'limits',c:'#14A37F',emo:'🚧',nm:'成功の限界',en:'Limits to success',tag:'伸びたあと、頭打ち',
+  ttl:'野菜への関心、2022年でストップ！',
+  series:[{k:'x2'}],
+  read:'ぐんぐん伸びたのに、2022年から下がり始めた。同じころ、野菜は買いにくくなっていた（「野菜の買いやすさ」のグラフ）。ブレーキは値段かも？',
+  prob:'関心が、途中で伸びなくなる',
+  names:{E:'野菜を試す\n人の数',S:'野菜への\n関心',B:'「高い」と\n感じる度合い',C:'野菜の値段'},
+  pr:['S'],data:['S'],
+  story:['野菜を試す人がふえる','「いいね」が広がって、関心アップ','でも「高い！」と感じる','ブレーキがかかって、ストップ'],
+  lev:{t:'産地支援や備蓄で、野菜の値段を安定させる政策',b:'「安くておいしい食べ方」を口コミで広める',a:'野菜クーポン・ポイントで、値上がりしても買える余裕を',key:'a'}},
+ {id:'under',c:'#00879A',emo:'🏗️',nm:'成長と投資不足',en:'Growth and underinvestment',tag:'人気に、準備が追いつかない',
+  ttl:'野菜が買いやすかったのは、2021年まで',
+  series:[{k:'x3'}],
+  read:'そのあと野菜の値上がりがお給料の伸びを追いこして、2024年には2015年ごろと同じくらい買いにくく…。野菜を作る・運ぶしくみは、間に合ってた？',
+  prob:'買いたい人が、途中でへってしまう',
+  names:{Eg:'野菜をすすめる\n取り組み',D:'野菜を買いたい\n人の数',Lm:'野菜の\n品薄さ',N:'投資が必要と\nいう認識',I:'流通・産地\nへの投資'},
+  pr:['D'],data:['Lm'],dataNote:'（買いやすさの反対）',
+  story:['野菜をすすめて、買いたい人がふえる','野菜が足りなくなり、値段が上がる','「足りない」と気づき、作る・運ぶしくみづくりを始める','でも間に合わず、高いままで人がはなれる'],
+  lev:{t:'人気のうちに、産地・流通への投資を政策で先回り',b:'旬・地元の野菜を口コミで広め、産地を応援する空気に',a:'値上がりの時期だけ補助して、買う余裕を保つ',key:'t'}},
+ {id:'burden',c:'#E8790C',emo:'💊',nm:'問題の転嫁',en:'Shifting the burden',tag:'すぐ効く方法に、頼りきり',
+  ttl:'国の呼びかけは、上がったり下がったり',
+  series:[{k:'x1'}],
+  read:'呼びかけは波のように上下。そのあいだも、野菜を食べる人はへり続けた（「野菜をしっかり食べる人」のグラフ）…。',
+  prob:'野菜不足が、ちっとも直らない',
+  names:{S:'野菜が足りない\n人の割合',Q:'国の呼びかけ\nの量',E:'「呼びかけた」\nという安心感',F:'手軽に野菜を\n食べるしくみ'},
+  pr:['S'],data:['Q'],
+  story:['野菜不足が話題になる','「野菜を食べよう！」と呼びかけて、少し良くなる','「呼びかけたからOK」と、やった気になる','手軽に食べるしくみ（安い・すぐ食べられる）が育たず、また不足'],
+  lev:{t:'呼びかけより、給食・社食の野菜基準など「しくみ」の政策へ',b:'友だち・家族で作って食べた体験をシェアし合う',a:'「高い」より「1食分いくら」で見る金銭感覚に',key:'b'}},
+ {grp:'world',id:'fixes',c:'#E5533D',bad:1,nm:'応急処置の失敗',en:'Fixes that fail',tag:'その場しのぎが、あとで裏目に',
+  ttl:'ブラジル：いったん減ったのに、前より増えた',
+  series:[{k:'bra'}],
+  read:'2020年に一時的に改善（26.0%→19.4%）したあと、また悪化（29.8%）。この年はコロナで国の緊急給付があった年。短期的な対策だけでは、長く続く改善につながらないのかも？',
+  prob:'食事に困る人が、結局へらない',
+  names:{P:'健康な食事を\n買えない割合',F:'緊急の\n現金給付',U:'財政の\n負担'},
+  pr:['P'],data:['P'],
+  story:['コロナで、食事に困る人がふえそう','国が急いでお金を配る → いったん減る','でもお金が続かず、支援が小さくなる','前より多くの人が困ることに'],
+  lev:{t:'給付の終わり方を決め、仕事・収入の政策とセットに',b:'地域の食の助け合いを口コミで広げ、残しておく',a:'給付が終わっても、食費に回せる家計の余裕を',key:'t'}},
+ {grp:'world',id:'success',c:'#C2457E',bad:1,nm:'成功には成功を',en:'Success to the successful',tag:'勝つほど有利になり、差が開く',
+  ttl:'地域の差が、どんどん広がっている',
+  series:[{k:'eap'},{k:'ssa',dash:1}],shared:1,
+  read:'東アジア・太平洋は29.3%→17.8%に減ったのに、サハラ以南アフリカは70%前後のまま。差は41→53ポイントに広がった。',
+  prob:'うまくいかない地域が、取り残される',
+  names:{Ae:'東アジアの\n食の豊かさ',Ar:'東アジアへの\n投資額',Al:'東アジアへの\nかたより',Be:'アフリカの\n食の豊かさ',Br:'アフリカへの\n投資額'},
+  pr:['Be'],data:['Ae','Be'],dataNote:'（買えない人の反対）',
+  story:['少しうまくいった地域に、投資が集まる','仕事や工場がふえて、もっと豊かに','もう一方の地域には、お金が回らない','差がどんどん広がる'],
+  lev:{t:'国際支援や投資を、取り残された地域へ重点的に',b:'地域の成功例を、農家どうしの口コミで広げる',a:'少額でも借りられるしくみで、お金の余裕を',key:'t'}},
+ {grp:'world',id:'limits',c:'#14A37F',bad:1,nm:'成功の限界',en:'Limits to success',tag:'伸びたあと、頭打ち',
+  ttl:'リトアニア：ぐんぐん減ったのに、9%前後でストップ',
+  series:[{k:'ltu'}],
+  read:'最初は大きく改善（21.3%→8.8%）。でもそのあとは、改善の幅が小さくなった。取り組みが進むほど、残った人に届けるのがむずかしく（お金や手間がかかるように）なるのかも？',
+  prob:'改善が、あるところで止まる',
+  names:{E:'給料の水準',S:'食事を買える\n人の割合',B:'支援の届き\nにくさ',C:'年金だけで\n暮らす人の数'},
+  pr:['S'],data:['S'],dataNote:'（買えない人の反対）',
+  story:['給料が上がり、食事を買える人がふえる','お金が回って、さらに給料が上がる','でも、年金だけの高齢者など届きにくい人が残る','それ以上、なかなか減らない'],
+  lev:{t:'届きにくい人（高齢者など）にしぼった制度を',b:'地域の見守り・声かけで、支えがあることを伝える',a:'年金だけの人に食費の手当を出し、健康な食事の余裕を',key:'a'}},
+ {grp:'world',src:'fao',id:'under',c:'#00879A',nm:'成長と投資不足',en:'Growth and underinvestment',tag:'人気に、準備が追いつかない',
+  ttl:'世界の農業：工夫で増えた分が、2010年代にほぼ半分に',
+  bars:{k:'tfp',name:'100kgとれていた畑が、10年後に何kg増えたか',
+    what:'土地や肥料はそのままで、新しい品種や技術の工夫だけで増えた分（世界の平均）'},
+  read:'2000年代は10年で＋22kg。2010年代は＋12kgと、ほぼ半分に。とれる量が減ったのではなく、工夫で増える分が小さくなった。理由は土地の劣化や気候変動など（FAO）。',
+  prob:'工夫で作れる量の増え方が、途中で弱まる',
+  names:{Eg:'新しい品種・\n技術の広がり',D:'工夫による\n収穫の伸び',Lm:'土地の劣化・\n気候の影響',N:'研究が必要\nという認識',I:'農業研究\nへの投資額'},
+  pr:['D'],data:['D'],
+  story:['新しい品種や技術で、たくさん作れるようになる','もうかるので、さらに新しい技術が広がる','でも、やせた土地への広がりや土地の劣化がブレーキに','研究への投資が遅れて、伸びが弱まる'],
+  lev:{t:'農業研究・土づくりへの公的投資をふやす',b:'新しい技術を、農家どうしの口コミで広める',a:'新しい技術を試す資金（補助・融資）で余裕を',key:'t'}},
+ {grp:'world',src:'fao',id:'commons',c:'#2E86C1',bad:1,nm:'共有地の悲劇',en:'Tragedy of the commons',tag:'みんなで使いすぎて、なくなる',
+  ttl:'世界の海：とりすぎの魚が、10のうち1つ→約3つ半に',
+  pict:{k:'fish',years:[1974,1990,2008,2021],
+    name:'世界の魚を「10グループ」とすると…',
+    what:'赤い魚＝とりすぎのグループ（魚がふえるより速く、人がとっている）。FAOが「大西洋のタラ」のような魚のまとまりを調べた結果'},
+  read:'1974年は10グループのうち1つだけだったのが、2021年は約3つ半がとりすぎに。だれのものでもない海の魚は、みんながとるほど減っていく。',
+  prob:'海の魚が減り、1回の漁でとれる量が減る',
+  names:{Aa:'A国の\n漁獲量',Ba:'B国の\n漁獲量',T:'漁獲量の\n合計',G:'1回の漁で\nとれる量',Lm:'魚の資源量'},
+  pr:['G'],data:[],
+  story:['それぞれの国や漁師が、もっと魚をとる','海全体で、とる量がふえすぎる','魚が回復できず、1回でとれる量が減る','それでも、とり合いが続く'],
+  lev:{t:'とってよい量の上限（漁獲枠）を、国どうしで決める',b:'「とりすぎていない魚を選ぼう」を口コミで広める',a:'漁を休む間の収入を補い、守れる余裕を',key:'t'}},
+ {grp:'world',src:'fao',id:'burden',c:'#E8790C',nm:'問題の転嫁',en:'Shifting the burden',tag:'すぐ効く方法に、頼りきり',
+  ttl:'中国：肥料が45倍に。そして、減らし始めた',
+  series:[{k:'chnN'}],
+  read:'5kg（1961年）→235kg（2014年）と約45倍に。2015年、国が「肥料をもうふやさない」計画を始め、192kg（2023年）に。FAOは、肥料の使いすぎが土の傷みを「かくす」と指摘。',
+  prob:'収穫の減り（土のやせ）が、根本から直らない',
+  names:{S:'収穫の\n少なさ',Q:'化学肥料\nの量',E:'土の傷み\n（酸性・塩）',F:'土づくりの\n取り組み'},
+  pr:['S'],data:['Q'],
+  story:['土がやせて、収穫が減る','肥料をふやすと、収穫がもどる','でも使いすぎで、土がさらに傷む','土を元気にする工夫が後回しになり、もっと肥料が必要に'],
+  lev:{t:'肥料の使いすぎを減らすルールづくり',b:'土づくりの成功例を、農家どうしの口コミで広める',a:'肥料を減らしても収入が守られる補助を',key:'b'}},
+ {grp:'world',src:'fao',id:'success',c:'#C2457E',nm:'成功には成功を',en:'Success to the successful',tag:'勝つほど有利になり、差が開く',
+  ttl:'肥料を使える地域と使えない地域、差が広がった',
+  series:[{k:'asiaN'},{k:'afrN'}],shared:1,
+  read:'アジアは4.5kg→113kg、アフリカは2.1kg→14kg（1961→2023年）。FAOは、アフリカの収穫が少ない理由の一つに、肥料などをほとんど使えないことを挙げている。',
+  prob:'収穫の少ない地域が、取り残される',
+  names:{Ae:'アジアの\n収穫量',Ar:'アジアで使う\n肥料の量',Al:'アジアへの\nかたより',Be:'アフリカの\n収穫量',Br:'アフリカで\n使う肥料の量'},
+  pr:['Be'],data:['Ar','Br'],
+  story:['収穫がふえた地域は、もうけで肥料や機械を買える','さらに収穫がふえ、お金や投資も集まる','収穫の少ない地域には、肥料を買うお金が回らない','差がどんどん広がる'],
+  lev:{t:'収穫の少ない地域への、肥料・種の支援政策',b:'使い方のコツを、農家グループで教え合う',a:'肥料を買うお金を借りやすく・補助して余裕を',key:'a'}},
+ {grp:'jp',src:'paper',hyp:1,id:'burden',c:'#E8790C',nm:'問題の転嫁',en:'Shifting the burden',tag:'すぐ効く方法に、頼りきり',
+  ttl:'塩は減ったのに、軽い高血圧は減らない',
+  pairs:{what:'論文の本文に書かれた、始めと終わりの値（男性・年齢調整なし）',items:[
+    {nm:'食塩',sub:'1日あたり',u:'g',a:[1995,15],b:[2019,10.9]},
+    {nm:'重い高血圧',sub:'Grade 2',u:'%',a:[1995,10.4],b:[2019,7.3]},
+    {nm:'軽い高血圧',sub:'Grade 1',u:'%',a:[1995,28.2],b:[2018,32.3]}]},
+  note:'年齢調整なし（高齢化の影響を含む）。2019年は血圧の測り方が変わったため、軽い高血圧は2018年の値。',
+  read:'食塩は15g→10.9gに減り、重い高血圧も減りました。一方、軽い高血圧は28.2%→32.3%と減っていません。論文は「減塩ばかりが強調され、食品群のバランスのよい栄養が手薄」と指摘しています。',
+  prob:'軽い高血圧が、なかなか減らない',
+  names:{S:'軽い高血圧\nの人の割合',Q:'減塩の呼びかけ\n・治療',E:'「減塩でOK」\nの安心感',F:'食事全体の\nバランス・運動'},
+  pr:['S'],data:['S','Q'],
+  story:['血圧の高さが問題になる','減塩の呼びかけや治療で、重い高血圧は減る','「塩さえ減らせばOK」と、ほかの対策が後回しに','食事全体のバランスや運動が育たず、軽い高血圧は減らない'],
+  lev:{t:'減塩だけでなく、食品群のバランスも目標と施策に入れる（論文の提言）',b:'男女で違う食習慣に合わせた声かけ・口コミ',a:'野菜や魚を選びやすくする手当・ポイント',key:'t'}},
+ {grp:'jp',src:'paper',think:1,id:'think',c:'#4A5578',nm:'型を考えるカード',en:'Which pattern is it?',tag:'この動き、どの型？',
+  ttl:'食べる量は減ったのに、太る人が増えた？',
+  pairs:{what:'論文の本文に書かれた、始めと終わりの値（男性・年齢調整なし）',items:[
+    {nm:'エネルギー',sub:'1日あたり',u:'kcal',a:[1995,2327],b:[2019,2141]},
+    {nm:'過体重・肥満',sub:'BMI 25以上',u:'%',a:[1995,23.8],b:[2019,33.0],goal:28}]},
+  note:'過体重・肥満の目標は28%未満（健康日本21、2022年まで）。食事記録では、食べた量が少なめに記録されることがあります。',
+  read:'エネルギーは2327→2141kcalに減ったのに、過体重・肥満は23.8%→33.0%に増えて、目標の28%を超えました。論文は、エネルギーだけが決め手ではなく、食事の西洋化（肉・脂が増え、魚・野菜が減った）や、体を動かす量の減少をあげています。',
+  prob:'食べる量は減ったのに、太る人が増えた？',
+  cands:['burden','fixes'],
+  candView:{"burden": {"prob": "太る人が、根本から減らない", "names": {"S": "過体重・肥満\nの人の割合", "Q": "食事制限の\n強さ", "E": "「量だけでOK」\nの安心感", "F": "食事の質・\n運動の習慣"}, "story": ["太る人が増えて、問題になる", "食事の量を制限する対策をする", "「量さえ気にすればOK」と、食事の中身や運動が後回しに", "食事の質や運動の習慣が育たず、太る人は減らない"]}, "fixes": {"prob": "減らしたはずが、また太りやすくなる", "names": {"P": "過体重・肥満\nの人の割合", "F": "食事制限の\n強さ", "U": "欠食・間食\nの回数"}, "story": ["太る人が増えて、問題になる", "食事の量を制限すると、その場は体重が減る", "でも食事をぬいて、そのぶん間食がふえる", "しばらくすると、また太りやすくなる"]}},
+  others:['食べた量を、少なめに記録していない？（過少申告）','食事の中身は？（肉・脂が増え、魚・野菜が減った）','体を動かす量は？（歩数の減少）','年齢の構成が変わった影響は？'],
+  names:{},pr:[],data:[],story:[],
+  lev:{t:'目標を「食べる量」だけでなく「食事の中身・運動」にも広げる',b:'男性に多い早食い・夜遅い食事を、職場や仲間で見直す',a:'魚や野菜を選びやすい値段・手当',key:'t'}},
+ {grp:'jp',think:1,id:'think',c:'#4A5578',nm:'型を考えるカード',en:'Which pattern is it?',tag:'この動き、どの型？',
+  ttl:'野菜をしっかり食べる人が、へってきた。どの型？',
+  series:[{k:'y_f'},{k:'y_m',dash:1}],shared:1,
+  read:'女性は29.2%→22.0%、男性は33.2%→26.2%（2014→2024年）。大きな山や谷はなく、波打ちながら少しずつ下がっています。',
+  prob:'野菜をしっかり食べる人が、少しずつへっているのはなぜ？',
+  cands:['burden','fixes'],
+  candView:{"burden": {"prob": "野菜不足が、根本から直らない", "names": {"S": "野菜が足りない\n人の割合", "Q": "野菜ジュース・\nサプリの利用", "E": "「とれている」\nという安心感", "F": "野菜を料理して\n食べる習慣"}, "story": ["野菜が足りないことが気になる", "野菜ジュースやサプリでおぎなう（その場はしのげる）", "「とれている」と安心して、料理は後回しに", "野菜を料理して食べる習慣が育たず、野菜不足が続く"]}, "fixes": {"prob": "野菜をとろうとしても、また足りなくなる", "names": {"P": "野菜が足りない\n人の割合", "F": "野菜の\nまとめ買いの量", "U": "使いきれずに\n捨てる野菜の量"}, "story": ["野菜が足りないことが気になる", "安い日にまとめ買いすると、その場は野菜がとれる", "でも、しばらくすると使いきれずに捨てる野菜がふえる", "「どうせ余る」と買わなくなり、また野菜が足りなくなる"]}},
+  others:['高齢の人ほど野菜を多く食べるのに、なぜ下がる？（若い世代は？）','野菜ジュースやサプリの利用は、ふえている？','使いきれずに捨てる野菜（食品ロス）は、どのくらい？','2020・21年は調査なし。2023年の値上がりの影響は？'],
+  names:{},pr:[],data:[],story:[],
+  lev:{t:'給食・社食に、野菜の量の基準をつくる',b:'使いきりレシピや保存のコツを、口コミで広める',a:'少量パック・カット野菜を選びやすい値段に',key:'t'}},
+ {grp:'jp',think:1,up:1,id:'think',c:'#4A5578',nm:'型を考えるカード',en:'Which pattern is it?',tag:'上がるとしたら、どの型？',
+  ttl:'2024年、男性で少し上向いた。これから上がるなら？',
+  series:[{k:'y_f',from:2019},{k:'y_m',from:2019,dash:1}],shared:1,
+  read:'男性は25.2%→26.2%、女性は21.9%→22.0%（2023→2024年）。わずかな上がりですが、ここから上がっていくとしたら、どんな道すじが考えられる？',
+  prob:'野菜をしっかり食べる人が、これから上がっていくとしたら？',
+  cands:['limits','success'],
+  candView:{"limits": {"prob": "上がり始めても、どこかで頭打ちになる？", "names": {"E": "野菜メニューや\n情報の広がり", "S": "野菜を食べる\n人の割合", "B": "値段・手間の\n負担感", "C": "野菜の値段"}, "story": ["野菜を食べる人が少しふえる", "店のメニューやSNSのレシピが広がる", "それを見て、さらに食べる人がふえる", "でも値段や手間の負担感が強まり、やがて頭打ちに"]}, "success": {"prob": "野菜料理が選ばれるほど、さらに選ばれやすくなる？", "names": {"Ae": "野菜料理を\n食べる回数", "Ar": "野菜料理の\n品ぞろえ・情報", "Al": "野菜料理への\nかたより", "Be": "ほかの料理を\n食べる回数", "Br": "ほかの料理の\n品ぞろえ・情報"}, "story": ["野菜料理が少し多く選ばれる", "店やSNSで、野菜料理の品ぞろえ・情報がふえる", "さらに野菜料理が選ばれ、ほかの料理から置きかわる", "良い方向に、差がどんどん開いていく"]}},
+  others:['1ポイントの上がりは、たまたま（調査の誤差）では？','男女や年代で、上がり方はちがう？','野菜の値段が下がったら、さらに上がる？','この上がり方だと、350gに届く人の割合が目標に近づくのは何年後？'],
+  names:{},pr:[],data:[],story:[],
+  lev:{t:'健康日本21の目標と、達成までの道すじを示し続ける',b:'野菜料理の写真やレシピを、仲間で見せ合う',a:'野菜が安い時期を、買いやすさの支援で長く保つ',key:'t'}},
+ {"ed": "urban", "grp": "jp", "info": "通勤と鉄道のデータ", "id": "fixes", "c": "#E5533D", "bad": 1, "nm": "応急処置の失敗", "en": "Fixes that fail", "tag": "その場しのぎが、あとで裏目に", "ttl": "輸送力は約1.6倍に。混雑は下げ止まり、コロナ後はまた上昇中", "series": [{"k": "congT", "cont": 1}, {"k": "capT", "cont": 1, "dash": 1}], "shared": 1, "ch": 150, "note": "コロナで2020年度に急減し、その後また上昇。", "read": "1975年度から輸送力は約1.6倍（最大は2019年度の約1.7倍）にふえ、混雑率は221%から下がりましたが、2008〜2019年度は160%台で止まりました。コロナ後は107%から143%（2025年度）へ戻りつつあります。", "prob": "輸送力をふやしても、混雑がなかなか解消しない", "names": {"P": "通勤電車の\n混雑度", "F": "公共交通の\n輸送能力", "U": "郊外・沿線の\n居住人口"}, "pr": ["P"], "data": ["P"], "story": ["通勤電車の混雑度が上がる", "輸送能力をふやすと、その場は混雑がやわらぐ", "でも通勤圏が広がり、時間をかけて郊外・沿線に住む人がふえる", "通勤需要がふえ、また混雑が戻る"], "lev": {"t": "職住近接やピーク時の料金の差など、需要の側にも働く都市計画", "b": "混雑情報を活用して、時間や経路をずらす人を口コミでふやす", "a": "オフピーク通勤の経済的メリットをつくる", "key": "t"}},
+ {"ed": "urban", "grp": "jp", "info": "通勤と鉄道のデータ", "id": "burden", "c": "#E8790C", "nm": "問題の転嫁", "en": "Shifting the burden", "tag": "すぐ効く方法に、頼りきり", "ttl": "通勤の人数は、コロナ前の8割強のまま。働き方の変化は根づく？", "series": [{"k": "paxT", "cont": 1}], "read": "朝のピークに通る人は、2019年度の124から2020年度は81に。2025年度は102で、コロナ前より2割ほど少ないままです。輸送力で混雑をしのぐほど、働き方を変える力は弱まらない？", "prob": "混雑が、根本から解決しない", "names": {"S": "通勤電車の\n混雑度", "Q": "公共交通の\n輸送能力", "E": "通勤の\nストレス", "F": "時差出勤・\nテレワークの実施率"}, "signs": {"Q>E": "-", "E>F": "+"}, "pr": ["S"], "data": [], "story": ["混雑度が上がり、輸送能力をふやす", "その場は混雑がやわらぎ、通勤のストレスも下がる", "ストレスが下がると、時差出勤・テレワークに取り組む理由が弱まる", "根本の分散が育たず、混雑はまた戻る"], "lev": {"t": "時差出勤・テレワークを、混雑対策の柱として計画に入れる", "b": "時差出勤・テレワークの成功例を、企業どうしで共有", "a": "オフピーク通勤の経済的メリット（オフピーク定期など）", "key": "t"}, "bad": 1},
+ {"ed": "urban", "grp": "jp", "info": "働き方のデータ", "id": "limits", "c": "#14A37F", "nm": "成功の限界", "en": "Limits to success", "tag": "伸びたあと、頭打ち", "ttl": "テレワークは一気に広がったが、4割台で止まった", "series": [{"k": "tele"}], "note": "企業として実施しているかの割合（社員の利用率とは別）。", "read": "2020年3月の24.0%から、翌月には62.7%に。その後は少しずつ下がり、2024〜2026年は40〜48%前後です。混雑がやわらいで通勤のストレスが下がると、分散を後押しする力も弱まる？", "prob": "テレワークが、ある程度で広がらない", "names": {"E": "定時一斉出社を\n行う企業の割合", "S": "時差出勤・\nテレワークの実施率", "B": "通勤の\nストレス", "C": "公共交通の\n輸送能力"}, "signs": {"E>S": "-", "S>E": "-", "S>B": "-", "B>S": "+", "C>B": "-"}, "pr": ["S"], "data": ["S"], "story": ["テレワークが広がると、定時一斉出社の企業がへる", "一斉出社の企業がへるほど、さらにテレワークが広がる", "でもテレワークで電車がすくと、通勤のストレスが下がる", "ストレスが下がると「出社でもいい」となり、頭打ちに"], "lev": {"t": "時差出勤・テレワークを就業規則に入れ、定時一斉出社の企業をへらす", "b": "「出社しなくても大丈夫」の例を職場で共有", "a": "在宅勤務手当やオフピーク通勤のメリット", "key": "t"}, "pos": {"E": [-25, 110], "S": [165, 110], "B": [355, 110], "C": [355, 12]}, "L": [["R", 70, 110, ["E", "S"]], ["B", 262, 110, ["S", "B"]]]},
+ {"ed": "urban", "grp": "jp", "info": "都心の人口のデータ", "id": "success", "c": "#C2457E", "nm": "成功には成功を", "en": "Success to the successful", "tag": "勝つほど有利になり、差が開く", "ttl": "都心に住む人は1.5倍に。昼と夜の偏りは変わり始めた？", "series": [{"k": "toshin"}], "read": "都心3区に住む人は、32.6万人（2005年）→49.6万人（2020年）と約1.5倍に。「働く場所」として固まってきた都心で、暮らしの側が伸び始めた？", "prob": "夜・休日の都心の人口が、なかなかふえない", "names": {"Ae": "都心の\n雇用集積度", "Ar": "オフィス中心\nの開発量", "Al": "都心を就業中心地\nと捉える人の割合", "Be": "夜・休日の\n都心の人口", "Br": "都心の\n生活利便性"}, "pr": ["Be"], "data": ["Be"], "story": ["都心を「働く場所」と捉える人が多い", "オフィス開発が進み、雇用がさらに集まる", "生活利便性が育たず、夜・休日の人口がふえない", "昼の街に固まる。いまは住む人がふえ始めた"], "lev": {"t": "住宅・保育所・店を、オフィス開発とセットで計画するルール", "b": "夜や休日に楽しめる場所を、住む人どうしで広める", "a": "子育て世帯が住み続けられる家賃の支援", "key": "t"}},
+ {"ed": "urban", "grp": "jp", "info": "暑さと気温のデータ", "src": "都環境局熱", "id": "commons", "c": "#2E86C1", "nm": "共有地の悲劇", "en": "Tragedy of the commons", "tag": "みんなで使いすぎて、なくなる", "ttl": "東京の夜は、40年で熱帯夜が2倍以上に", "pairs": {"what": "5年移動平均の、始めと終わりの値（気象庁の観測による）", "items": [{"nm": "熱帯夜", "sub": "年間の日数", "u": "日", "a": [1961, 14], "b": [1998, 35.2]}, {"nm": "年平均気温", "sub": "東京", "u": "℃", "a": [1905, 13.5], "b": [1996, 16.4]}]}, "note": "東京都の資料にある値（1990年代まで）。東京の観測場所は2014年に移転しています。", "read": "熱帯夜は5年平均で14日（1961年）から35.2日（1998年）に。年平均気温も100年で約3℃上がりました。暑いから冷やし、冷やすから暑い。建物一つひとつの冷房が、みんなの「涼しさ」を少しずつ使っていない？", "prob": "街全体の暑さが、強まり続ける", "names": {"Aa": "ある建物の\n人工排熱", "Ba": "となりの建物の\n人工排熱", "T": "人工排熱の量\n（空調・車）", "G": "ヒートアイランド\n現象の強さ", "Lm": "都市の緑地率"}, "pr": ["G"], "data": ["G"], "story": ["暑い日、建物ごとに冷房を強める", "人工排熱がふえ、時間をかけてヒートアイランド現象が強まる", "街が暑くなるほど、どの建物もさらに冷房を強める", "一つひとつの暑さ対策が、みんなの街を暑くする"], "lev": {"t": "排熱の少ない設備や、緑化を開発のルールに組みこむ", "b": "涼しい木かげの道や公園を、地域で見つけて広める", "a": "省エネ設備や屋上・壁面緑化の補助", "key": "t"}, "signs": {"T>G": "+", "G>Aa": "+", "G>Ba": "+", "Lm>G": "-"}, "loops": ["R", "R"], "pos": {"Aa": [15, 22], "Ba": [15, 178], "T": [165, 100], "G": [350, 100], "Lm": [350, 0]}, "L": [["R", 175, 46, ["Aa", "T", "G"]], ["R", 175, 154, ["Ba", "T", "G"]]]},
+ {"ed": "urban", "grp": "jp", "info": "緑のデータ", "think": 1, "up": 1, "id": "think", "c": "#4A5578", "nm": "型を考えるカード", "en": "Which pattern is it?", "tag": "上がるとしたら、どの型？", "ttl": "区部のみどりは横ばい。街の快適さを上げる道すじは？", "series": [{"k": "midoriOld"}, {"k": "midoriNew", "dash": 1}], "shared": 1, "ch": 150, "note": "2018年から測り方が変わり、値が上がって見えます。", "read": "都市の緑地率にあたるみどり率は、同じ測り方の中では20.0%→19.8%（2003→2013年）、24.2%→24.0%（2018→2023年）とほぼ横ばいです。緑をふやすと、街はどう動く？", "prob": "街の快適さや暮らしの質が上がっていくとしたら？", "cands": ["limits", "under"], "candView": {"limits": {"prob": "暮らしの質が上がり始めても、どこかで頭打ちになる？", "names": {"E": "夜・休日の\n都心の人口", "S": "都市の\n生活の質", "B": "都心の地価・\n住宅価格", "C": "都市の\n緑地率"}, "story": ["生活の質が上がると、夜・休日の人口がふえる", "賑わいが育ち、さらに生活の質が上がる", "緑がふえるほど人気が出て、地価・住宅価格も上がる", "住める人が限られ、やがて頭打ちに"], "data": ["C"], "pos": {"E": [-20, 110], "S": [165, 110], "B": [355, 110], "C": [355, 10]}, "L": [["R", 72, 110, ["E", "S"]], ["B", 262, 110, ["S", "B"]]]}, "under": {"prob": "住む人がふえても、緑や広場が追いつかない？", "names": {"Eg": "都市の\n生活の質", "D": "夜・休日の\n都心の人口", "Lm": "ヒートアイランド\n現象の強さ", "N": "緑が必要\nという認識", "I": "都市の\n緑地率"}, "story": ["生活の質が上がり、都心の人口がふえる", "建物や人が集まり、ヒートアイランドが強まる", "緑が必要だと気づき、公開空地や緑をふやし始める", "でも間に合わないと、住みにくくなって人がはなれる"], "data": ["I"], "pos": {"Eg": [-15, 55], "D": [170, 55], "Lm": [365, 55], "N": [365, 190], "I": [170, 190]}, "L": [["R", 78, 55, ["Eg", "D"]], ["B", 268, 55, ["D", "Lm"]], ["B", 285, 128, ["Lm", "N", "I"]]]}}, "others": ["公開空地・広場がふえると、歩行者の快適性はどう変わる？", "みどり率が横ばいでも、都心の公開空地はふえている？", "地価が上がると、住める人はかたよらない？", "測り方の変わったデータは、どう読めばよい？"], "names": {}, "pr": [], "data": [], "story": [], "lev": {"t": "容積率の上乗せと引きかえに、公開空地・緑をつくるルール", "b": "街区の企業・住民で、風の道や緑の約束をつくる", "a": "緑化や公開空地を維持する費用の補助", "key": "t"}}
+];
+
+// 型の典型の形（tet_tool の botSVG2 と同じ線）
+const TYP={
+ drift:[[[0,.8],[.35,.68],[.65,.48],[1,.22]]],
+ escalation:[[[0,.9],[.2,.74],[.4,.72],[.6,.54],[.8,.52],[1,.12]],[[0,.82],[.2,.84],[.4,.62],[.6,.64],[.8,.42],[1,.1]]],
+ commons:[[[0,.4],[.4,.7],[.65,.82],[.82,.55],[1,.08]]],
+ fixes:[[[0,.5],[.15,.74],[.28,.76],[.5,.45],[.75,.25],[1,.12]]],
+ success:[[[0,.5],[.35,.62],[.65,.8],[1,.92]],[[0,.48],[.35,.36],[.65,.2],[1,.08]]],
+ limits:[[[0,.15],[.3,.25],[.5,.55],[.7,.78],[1,.84]]],
+ under:[[[0,.2],[.4,.72],[.6,.8],[.8,.68],[1,.48]]],
+ burden:[[[0,.7],[.12,.88],[.24,.6],[.38,.78],[.52,.48],[.66,.64],[.8,.32],[.92,.45],[1,.18]]]};
+
+
+// 型の名前に合わせたピクトグラム（白い線）
+const ICON={
+ escalation:'<path d="M8 34V14M8 14l-4 5M8 14l4 5"/><path d="M20 34V9M20 9l-4 5M20 9l4 5"/><path d="M32 34V4M32 4l-4 5M32 4l4 5"/>',
+ think:'<circle cx="20" cy="20" r="14"/><path d="M15.5 15.5a4.5 4.5 0 1 1 6.3 4.1c-1.2.6-1.8 1.4-1.8 2.7v1"/><path d="M20 28.5h.01"/>',
+ commons:'<circle cx="20" cy="21" r="7"/><path d="M20 14V4M17 7l3-3 3 3"/><path d="M14 26l-8 7M6 29v4h4"/><path d="M26 26l8 7M34 29v4h-4"/>',
+ fixes:'<path d="M3 15h34M3 25h34"/><rect x="15" y="11" width="10" height="18" rx="2"/><path d="M30 25c0 3 3 4 3 7a3 3 0 0 1-6 0c0-3 3-4 3-7z"/>',
+ success:'<path d="M6 34h28"/><path d="M8 28l9-9 6 4 11-13"/><path d="M28 10h6v6"/><path d="M8 28l9 1 6-1"/>',
+ drift:'<path d="M5 12h8v7h8v7h8v7h6"/><path d="M9 12V3l8 3-8 3"/>',
+ limits:'<path d="M4 7h32"/><path d="M8 7l-3-4M16 7l-3-4M24 7l-3-4M32 7l-3-4"/><path d="M5 35c8 0 12-6 15-14s6-9 10-9"/><path d="M26 10l4 2-3 4"/>',
+ under:'<path d="M13 27h14l-2 9H15z"/><path d="M20 27V11"/><path d="M20 19c-6 0-9-4-9-8 6 0 9 3 9 8z"/><path d="M20 15c5 0 9-3 9-8-6 0-9 3-9 8z"/><path d="M17 30l2 2-2 3"/>',
+ burden:'<g transform="rotate(-35 20 20)"><rect x="3" y="14" width="34" height="12" rx="6"/><rect x="14" y="14" width="12" height="12"/></g><circle cx="17" cy="20" r=".8" fill="#fff"/><circle cx="21" cy="18" r=".8" fill="#fff"/><circle cx="19" cy="23" r=".8" fill="#fff"/><circle cx="23" cy="21" r=".8" fill="#fff"/>'
+};
+const icon=id=>`<svg viewBox="0 0 40 40" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[id]}</svg>`;
+
+// ===== 日本語／English =====
+let LANG=(new URLSearchParams(location.search).get('lang')==='en')?'en':'ja';
+const UI={
+ ja:{title:'システムの振る舞いカード｜食のシステム編',guess:'あてっこモード',guessT:'型の名前をかくす',reset:'もとにもどす',resetT:'カードを表にもどし、並びも最初にもどす',note:'クリックでめくる・ドラッグで並びかえ',lang:'English',
+  graph:'📊 このグラフは…',stats:'🔢 数字で見ると…',data:'データ：',sep:'、',typ:'この型の<br>よくある形',typBad:'上ほど困る向き',flip:'めくってみよう ↻',back:'表にもどす ↻',
+  same:'同じ向き',opp:'反対向き',delay:'時間がかかる',front:'表のグラフ',loop:'🔄 ぐるっと一周すると…',again:'↺ 1へ',hint:'💡 ぬけ出すヒント：3つの力をどうかける？',
+  levT:['トップダウン','政策・規制'],levB:['ボトムアップ','口コミ・周りの意識'],levA:['アフォーダビリティ','お金の余裕・感覚'],
+  src:'出典：',srcSep:'／',zoom:'図を大きく',close:'閉じる',probL:'⚠ 問題：',point:'📊 データのポイント：',jp:'日本',world:'世界',
+  infoJp:'野菜を食べることのデータ',infoW:'健康的な食事を買うお金がない人のデータ',infoSofa:'FAO 世界食料農業白書2025',infoStat:'FAO（FAOSTAT）のデータ',
+  probTag:'⚠ 問題',projL:'予測（目安）',projDel:'消す',projBtn:'🔮 この型で未来を描く',projRe:'🔮 もう一度描く',projShort:'（形の目安）',projChip:'🔮 未来の目安：',projNote:'型の形をのばした目安で、予測値ではありません',projClr:'未来の線を消す',projGo:'🔮 この型で未来を描く（表で見る）',projGoSub:'表のグラフに、2035年までの形の目安が描かれます',focusTag:'★ 注目',qL:'❓ 問い：',thinkNm:'型を考えるカード',thinkTag:'この動き、どの型？',thinkEn:'Which pattern is it?',candOpen:'で読むとどうなるかを見る',candGo:'この型で読むと ▸',candH:'で読むと…',candNote:'これは一つの読み方（仮説）です。もう一方の型や、ほかの説明とも比べてみよう。',infoPaper:'論文（国民健康・栄養調査）のデータ',hyp:'論文の考察にもとづく仮説',noteL:'注',cands:'候補の型',others:'ほかの説明も考えよう',draw:'あなたなら、どんなループを描く？',drawSub:'変数と矢印を書きこんでみよう',typThink:'どの型の形に<br>近いかな？',h1:'食のシステム編',edFood:'食のシステム編',edUrban:'都市デザイン編',edAll:'すべて',edL:'編',tagFood:'食',tagUrban:'都市',titleFood:'システムの振る舞いカード｜食のシステム編',titleUrban:'システムの振る舞いカード｜都市デザイン編',titleAll:'システムの振る舞いカード',help:'使い方',cols:'列',zout:'小さく（列をふやす）',zin:'大きく（列をへらす）',grip:'移動',gripT:'ドラッグして並びかえ',order:'並びを元にもどす',base:'2019年＝',yr:'年',dec:'年代',about:'約',cardAria:'のカード。めくると因果ループ図',loopAria:'の因果ループ図'},
+ en:{title:'System Behavior Cards | Food Systems',guess:'Guess mode',guessT:'Hide pattern names',reset:'Reset',resetT:'Flip all cards back and restore the original order',note:'Click to flip, drag to rearrange',lang:'日本語',
+  graph:'📊 This graph shows…',stats:'🔢 By the numbers…',data:'Data: ',sep:', ',typ:'Typical shape<br>of this pattern',typBad:'up = worse',flip:'Flip me ↻',back:'Back to front ↻',
+  same:'same direction',opp:'opposite direction',delay:'delay',front:'graph on the front',loop:'🔄 Going around the loop…',again:'↺ back to 1',hint:'💡 Ways out: how to use the three levers?',
+  levT:['Top-down','Policy & regulation'],levB:['Bottom-up','Word of mouth & awareness'],levA:['Affordability','Financial room & money sense'],
+  src:'Sources: ',srcSep:' / ',zoom:'Enlarge',close:'Close',probL:'⚠ Problem: ',point:'📊 Data point: ',jp:'Japan',world:'World',
+  infoJp:'Data on eating vegetables',infoW:"Data on people who can't afford a healthy diet",infoSofa:'FAO, The State of Food and Agriculture 2025',infoStat:'FAO (FAOSTAT) data',
+  probTag:'⚠ Problem',projL:'Projection (rough)',projDel:'Remove',projBtn:'🔮 Draw the future',projRe:'🔮 Draw again',projShort:'(rough shape)',projChip:'🔮 Future (rough): ',projNote:'A rough extension of the pattern’s shape, not a forecast',projClr:'Remove the future line',projGo:'🔮 Draw the future with this pattern (front)',projGoSub:'A rough shape up to 2035 appears on the front graph',focusTag:'★ Focus',qL:'❓ Question: ',thinkNm:'Which pattern is it?',thinkTag:'Which pattern does this movement fit?',thinkEn:'型を考えるカード',candOpen:': see this reading',candGo:'Read it this way ▸',candH:': one way to read it',candNote:'This is one possible reading (a hypothesis). Compare it with the other pattern and other explanations.',infoPaper:'Data from a paper (NHNS)',hyp:'Hypothesis based on the paper',noteL:'Note',cands:'Candidate patterns',others:'Consider other explanations',draw:'What loop would you draw?',drawSub:'Write in variables and arrows',typThink:'Which pattern<br>shape is it?',h1:'Food Systems',edFood:'Food Systems',edUrban:'Urban Design',edAll:'All',edL:'Edition',tagFood:'Food',tagUrban:'Urban',titleFood:'System Behavior Cards | Food Systems',titleUrban:'System Behavior Cards | Urban Design',titleAll:'System Behavior Cards',help:'How to use',cols:' cols',zout:'Smaller (more columns)',zin:'Larger (fewer columns)',grip:'Move',gripT:'Drag to rearrange',order:'Reset order',base:'2019 = ',yr:'',dec:'s',about:'~',cardAria:' card. Flip to see the causal loop diagram',loopAria:' causal loop diagram'}
+};
+const u=k=>UI[LANG][k];
+const EN=[{"tag": "The goal slowly slips down", "ttl": "Fewer people are eating enough vegetables", "read": "Over 10 years, both women and men dropped about 7 points.", "prob": "The share eating enough vegetables slowly falls", "names": {"G": "Target\n(350 g/day)", "A": "Share eating\n350 g+", "Gp": "Gap to target", "Pr": "\"Too hard\"\nfeeling", "C": "Veg-eating\nefforts"}, "story": ["Few people reach 350 g", "People feel \"that's impossible\"", "The target quietly slips lower", "Less effort, so the share falls further"], "lev": {"t": "Keep the 350 g target of Health Japan 21; set vegetable standards for school and work meals", "b": "Share \"today's veggie dish\" on social media to raise the norm", "a": "Vegetable coupons or discounts give room for one more dish"}}, {"tag": "Grows, then hits a ceiling", "ttl": "Interest in vegetables stalled in 2022", "read": "Interest rose fast, then began to fall from 2022. Around the same time, vegetables became harder to afford (see the \"Vegetable affordability\" graph). Is price the brake?", "prob": "Interest stops growing partway", "names": {"E": "People trying\nvegetables", "S": "Interest in\nvegetables", "B": "Sense that veg\nis \"too pricey\"", "C": "Vegetable\nprices"}, "story": ["More people try vegetables", "Word spreads and interest rises", "But people feel \"too expensive!\"", "The brake kicks in and growth stops"], "lev": {"t": "Stabilize vegetable prices through support for growers and stockpiles", "b": "Spread cheap, tasty ways to eat vegetables by word of mouth", "a": "Coupons or points so people can still buy when prices rise"}}, {"tag": "Demand outpaces preparation", "ttl": "Vegetables were most affordable until 2021", "read": "After that, vegetable prices outpaced wage growth, and by 2024 affordability was back to about the 2015 level. Did farming and distribution keep up?", "prob": "Would-be buyers drop off partway", "names": {"Eg": "Veg promotion\nefforts", "D": "Would-be\nveg buyers", "Lm": "Vegetable\nscarcity", "N": "Perceived need\nto invest", "I": "Investment in\nsupply chains"}, "dataNote": " (opposite of affordability)", "story": ["Promotion increases would-be buyers", "Vegetables run short and prices rise", "People notice and start building supply", "Too late: high prices drive buyers away"], "lev": {"t": "Use policy to invest early in farms and distribution", "b": "Spread the word about seasonal, local vegetables to support growers", "a": "Temporary subsidies during price spikes keep room to buy"}}, {"tag": "Relying on the quick fix", "ttl": "Government messaging goes up and down", "read": "Messaging rises and falls like waves, while the share eating enough vegetables keeps falling (see the \"eating enough vegetables\" graph).", "prob": "The vegetable shortfall never really gets fixed", "names": {"S": "Share eating\ntoo little veg", "Q": "Government\nmessaging", "E": "\"We campaigned\"\ncomplacency", "F": "Easy ways to\neat vegetables"}, "story": ["Low vegetable intake becomes a topic", "\"Eat your vegetables!\" campaigns help a little", "A \"we campaigned, job done\" feeling sets in", "Easy, cheap ways to eat veg never grow; the shortfall returns"], "lev": {"t": "Shift from campaigns to systems, e.g., veg standards for school meals", "b": "Share cooking and eating experiences with friends and family", "a": "Think \"cost per meal\" instead of \"vegetables are expensive\""}}, {"tag": "Quick fixes backfire later", "ttl": "Brazil: it fell, then rose higher than before", "read": "It improved temporarily in 2020 (26.0% → 19.4%), then worsened (29.8%). 2020 was the year of COVID emergency cash aid. Short-term measures alone may not bring lasting improvement.", "prob": "People struggling to eat well don't really decrease", "names": {"P": "Share unable to\nafford healthy diet", "F": "Emergency\ncash aid", "U": "Fiscal\nburden"}, "story": ["COVID threatens more people's food", "The government rushes out cash, and numbers fall", "The money runs out and aid shrinks", "More people struggle than before"], "lev": {"t": "Plan how aid ends, and pair it with job and income policies", "b": "Spread and keep local food-sharing networks", "a": "Help households keep room in the budget for food after aid ends"}}, {"tag": "Winners keep winning; the gap widens", "ttl": "The gap between regions keeps widening", "read": "East Asia & Pacific fell from 29.3% to 17.8%, while Sub-Saharan Africa stayed around 70%. The gap grew from 41 to 53 points.", "prob": "Struggling regions get left behind", "names": {"Ae": "East Asia\ndiet quality", "Ar": "Investment in\nEast Asia", "Al": "Tilt toward\nEast Asia", "Be": "Africa\ndiet quality", "Br": "Investment in\nAfrica"}, "dataNote": " (opposite of 'can't afford')", "story": ["Investment flows to the region that did a bit better", "More jobs and factories make it richer", "The other region gets little money", "The gap keeps growing"], "lev": {"t": "Target international aid and investment to regions left behind", "b": "Spread local success stories among farmers", "a": "Small loans that give people financial room"}}, {"tag": "Grows, then hits a ceiling", "ttl": "Lithuania: a fast drop, then stuck around 9%", "read": "It improved a lot at first (21.3% → 8.8%), then the gains got smaller. As progress is made, reaching the remaining people may become harder and more costly.", "prob": "Improvement stalls at some point", "names": {"E": "Wage\nlevel", "S": "Share able to\nafford meals", "B": "Difficulty of\nreaching people", "C": "Pension-only\nhouseholds"}, "dataNote": " (opposite of 'can't afford')", "story": ["Wages rise and more people can afford meals", "Money circulates and wages rise further", "But hard-to-reach people, like pension-only elders, remain", "It barely falls any further"], "lev": {"t": "Design programs aimed at hard-to-reach people, such as older adults", "b": "Community check-ins let people know support exists", "a": "Food allowances for pension-only households"}}, {"tag": "Demand outpaces preparation", "ttl": "World farming: gains from innovation nearly halved in the 2010s", "bars": {"name": "Extra kg, 10 years later, from a field that yielded 100 kg", "what": "Gains from new crop varieties and technology alone, with the same land and fertilizer (world average)"}, "read": "In the 2000s, innovation added +22 kg per decade; in the 2010s only +12 kg, almost half. Output didn't fall; the gain from innovation got smaller. Causes include land degradation and climate change (FAO).", "prob": "Gains from innovation weaken partway", "names": {"Eg": "Spread of new\nvarieties & tech", "D": "Yield gains from\ninnovation", "Lm": "Land degradation\n& climate effects", "N": "Perceived need\nfor research", "I": "Investment in\nfarm research"}, "story": ["New varieties and technology raise output", "Profits spread new technology further", "But degraded land and poorer fields act as a brake", "Research investment lags, and growth weakens"], "lev": {"t": "Increase public investment in farm research and soil health while growth lasts", "b": "Spread new techniques from farmer to farmer", "a": "Grants or loans give farmers room to try new technology"}}, {"tag": "Overused by all, until it's gone", "ttl": "World oceans: overfished stocks rose from 1 in 10 to about 3.5 in 10", "pict": {"name": "If the world's fish were \"10 groups\"…", "what": "Red fish = overfished groups (caught faster than they can recover). From FAO assessments of fish stocks such as \"Atlantic cod\"."}, "read": "In 1974 only 1 in 10 groups was overfished; by 2021 about 3.5 in 10. Fish in the open sea belong to no one, so the more everyone catches, the fewer remain.", "prob": "Fish decline, and each trip catches less", "names": {"Aa": "Country A's\ncatch", "Ba": "Country B's\ncatch", "T": "Total\ncatch", "G": "Catch per\nfishing trip", "Lm": "Fish stock"}, "story": ["Each country and fisher catches more", "The total catch grows too large", "Fish can't recover, and each trip catches less", "Yet the race to catch continues"], "lev": {"t": "Countries agree on catch limits (quotas)", "b": "Spread \"choose fish that aren't overfished\" by word of mouth", "a": "Compensate fishers' income during closed seasons"}}, {"tag": "Relying on the quick fix", "ttl": "China: fertilizer use rose 45×, then began to fall", "read": "5 kg (1961) → 235 kg (2014), about 45 times. In 2015 the government launched a plan to stop increasing fertilizer use; 192 kg in 2023. FAO notes that overuse can \"hide\" soil damage.", "prob": "Falling yields (poor soil) are never fixed at the root", "names": {"S": "Low\nyields", "Q": "Chemical\nfertilizer use", "E": "Soil damage\n(acid, salt)", "F": "Soil-building\npractices"}, "story": ["Soil wears out and yields fall", "More fertilizer brings yields back", "But overuse damages the soil further", "Soil care is put off, so even more fertilizer is needed"], "lev": {"t": "Rules and support to cut fertilizer overuse", "b": "Spread soil-building successes from farmer to farmer", "a": "Subsidies that protect income while using less fertilizer"}}, {"tag": "Winners keep winning; the gap widens", "ttl": "Fertilizer access: the gap between regions widened", "read": "Asia rose from 4.5 kg to 113 kg; Africa from 2.1 kg to 14 kg (1961 → 2023). FAO cites very limited fertilizer use as one reason for low yields in Africa.", "prob": "Low-yield regions get left behind", "names": {"Ae": "Yields in\nAsia", "Ar": "Fertilizer\nuse in Asia", "Al": "Tilt toward\nAsia", "Be": "Yields in\nAfrica", "Br": "Fertilizer use\nin Africa"}, "story": ["Higher-yield regions use profits to buy fertilizer and machines", "Yields rise more, attracting money and investment", "Low-yield regions can't afford fertilizer", "The gap keeps growing"], "lev": {"t": "Support for fertilizer and seeds in low-yield regions", "b": "Farmer groups share know-how", "a": "Easier loans and subsidies to buy fertilizer"}}, {"tag": "Relying on the quick fix", "ttl": "Less salt, but mild high blood pressure isn't falling", "pairs": {"what": "Start and end values stated in the paper (men, not age-adjusted)", "items": [{"nm": "Salt", "sub": "per day"}, {"nm": "Severe hypertension", "sub": "Grade 2"}, {"nm": "Mild hypertension", "sub": "Grade 1"}]}, "note": "Not age-adjusted (includes aging). Measurement changed in 2019, so mild hypertension uses 2018.", "read": "Salt fell from 15 g to 10.9 g, and severe hypertension also fell. Mild hypertension, however, did not fall (28.2% → 32.3%). The paper notes that campaigns emphasize salt reduction rather than balanced nutrition from food groups.", "prob": "Mild high blood pressure isn't really falling", "names": {"S": "Share with mild\nhypertension", "Q": "Salt campaigns\n& treatment", "E": "\"Less salt is\nenough\" feeling", "F": "Balanced diet\n& exercise"}, "story": ["High blood pressure becomes a concern", "Salt campaigns and treatment reduce severe cases", "\"Less salt is enough\" puts other measures off", "Balanced diet and exercise lag; mild cases stay"], "lev": {"t": "Add food-group balance, not just salt, to targets (the paper's proposal)", "b": "Messages tailored to men's and women's habits", "a": "Support or points that make vegetables and fish easier to choose"}}, {"tag": "Which pattern does this movement fit?", "ttl": "People eat less, yet more are overweight?", "pairs": {"what": "Start and end values stated in the paper (men, not age-adjusted)", "items": [{"nm": "Energy", "sub": "per day"}, {"nm": "Overweight/obesity", "sub": "BMI ≥ 25"}]}, "note": "Target: under 28% (Health Japan 21, by 2022). Food records can under-report intake.", "read": "Energy intake fell from 2327 to 2141 kcal, yet overweight/obesity rose from 23.8% to 33.0%, above the 28% target. The paper suggests energy is not the only factor, pointing to a westernized diet (more meat and fat, less fish and vegetables) and less physical activity.", "prob": "People eat less, yet more are overweight?", "others": ["Is food intake under-reported?", "What about diet quality? (more meat/fat, less fish/veg)", "What about physical activity? (fewer steps)", "What about changes in age structure?"], "lev": {"t": "Broaden targets from \"how much\" to diet quality and activity", "b": "Rethink fast eating and late meals (common in men) with coworkers and friends", "a": "Support that makes fish and vegetables easier to afford"}, "candView": {"burden": {"prob": "Overweight isn't reduced at the root", "names": {"S": "Share\noverweight", "Q": "Strictness of\ndieting", "E": "\"Only amount\nmatters\" feeling", "F": "Diet quality &\nactivity habits"}, "story": ["More people become overweight", "Measures focus on limiting how much people eat", "\"Only the amount matters\" puts diet quality and exercise off", "Healthy eating and activity habits never grow, so overweight stays"]}, "fixes": {"prob": "Cutting back, yet weight comes back", "names": {"P": "Share\noverweight", "F": "Strictness of\ndieting", "U": "Skipped meals\n& snacking"}, "story": ["More people become overweight", "Limiting food lowers weight for a while", "But meals get skipped, and snacking increases", "After a while, weight gain becomes easier again"]}}}, {"tag": "Which pattern does this movement fit?", "ttl": "Fewer people eat enough vegetables. Which pattern?", "read": "Women 29.2% → 22.0%, men 33.2% → 26.2% (2014 → 2024). No big peak or valley; it slowly falls while wobbling.", "prob": "Why is the share eating enough vegetables slowly falling?", "candView": {"burden": {"prob": "The vegetable shortfall is never fixed at the root", "names": {"S": "Share eating\ntoo little veg", "Q": "Veg juice &\nsupplement use", "E": "\"I'm covered\"\nfeeling", "F": "Habit of cooking\n& eating veg"}, "story": ["People worry they eat too few vegetables", "They make up for it with veg juice or supplements", "Feeling \"covered\", cooking is put off", "The cooking habit never grows, so the shortfall continues"]}, "fixes": {"prob": "Trying to eat more veg, yet falling short again", "names": {"P": "Share eating\ntoo little veg", "F": "Amount of veg\nbought in bulk", "U": "Amount of veg\nthrown away"}, "story": ["People worry they eat too few vegetables", "Buying in bulk on sale days helps for now", "After a while, more vegetables go to waste", "\"It always goes bad,\" so people buy less and fall short again"]}}, "others": ["Older people eat more vegetables, so why is it falling? (What about younger people?)", "Is the use of veg juice and supplements rising?", "How many vegetables are thrown away (food loss)?", "No survey in 2020–21. What about the 2023 price rise?"], "lev": {"t": "Set vegetable standards for school and workplace meals", "b": "Spread use-it-all recipes and storage tips by word of mouth", "a": "Make small packs and cut vegetables easier to afford"}}, {"tag": "If it rises, which pattern?", "ttl": "In 2024, men edged up. If it keeps rising, how?", "read": "Men 25.2% → 26.2%, women 21.9% → 22.0% (2023 → 2024). A small rise, but if it keeps rising, what path could it take?", "prob": "If the share eating enough vegetables starts rising, how might it go?", "candView": {"limits": {"prob": "Even if it starts rising, will it level off?", "names": {"E": "Spread of veg\nmenus & info", "S": "Share eating\n350 g+", "B": "Sense of cost\n& effort", "C": "Vegetable\nprices"}, "story": ["A few more people eat enough vegetables", "Veg menus in shops and recipes on social media spread", "Seeing them, even more people eat vegetables", "But the sense of cost and effort grows, and it levels off"]}, "success": {"prob": "The more veg dishes are chosen, the easier they are to choose?", "names": {"Ae": "Times eating\nveg dishes", "Ar": "Veg dish options\n& info", "Al": "Tilt toward\nveg dishes", "Be": "Times eating\nother dishes", "Br": "Other dish\noptions & info"}, "story": ["Veg dishes are chosen a little more often", "Shops and social media offer more veg dishes and info", "Veg dishes are chosen even more, replacing other dishes", "The gap widens in a good direction"]}}, "others": ["Is a 1-point rise just chance (survey error)?", "Does the rise differ by sex or age?", "Would it rise more if vegetable prices fell?", "At this pace, how many years until the share nears the target?"], "lev": {"t": "Keep showing the Health Japan 21 target and a path to reach it", "b": "Share photos and recipes of veg dishes with friends", "a": "Use affordability support to keep cheap-vegetable periods going"}}, {"info": "Commuting and rail data", "tag": "Quick fixes backfire later", "ttl": "Capacity up ~1.6×; crowding stalled, now rising again", "note": "Fell sharply with COVID in FY2020, then rose again.", "read": "Since FY1975 capacity grew about 1.6× (peak ~1.7× in FY2019) and crowding fell from 221%, but in FY2008–2019 it stayed in the 160% range. After COVID it is climbing back from 107% to 143% (FY2025).", "prob": "Adding capacity doesn't really end the crowding", "names": {"P": "Commuter train\ncrowding", "F": "Public transport\ncapacity", "U": "Suburban & line-\nside population"}, "story": ["Commuter crowding rises", "Adding capacity eases crowding for now", "But the commuting area widens and suburban population grows", "Commuting demand rises, and crowding returns"], "lev": {"t": "Planning that also shapes demand: homes near jobs, peak pricing", "b": "Spread the use of crowding info to shift times and routes", "a": "Create economic benefits for off-peak commuting"}}, {"info": "Commuting and rail data", "tag": "Relying on the quick fix", "ttl": "Commuters remain ~80% of pre-COVID. Will new work styles stick?", "read": "Peak-hour passengers fell from 124 (FY2019) to 81 (FY2020) and are 102 in FY2025, still about 20% below pre-COVID. The more we rely on capacity to absorb crowding, does the push to change work styles weaken?", "prob": "Crowding is never solved at the root", "names": {"S": "Commuter train\ncrowding", "Q": "Public transport\ncapacity", "E": "Commuting\nstress", "F": "Staggered hours\n& telework rate"}, "story": ["Crowding rises, and capacity is added", "Crowding eases for now, and commuting stress falls", "With less stress, the reason to stagger hours or telework weakens", "The root shift never grows, and crowding returns"], "lev": {"t": "Make staggered hours and telework a pillar of congestion plans", "b": "Firms share staggered-hour and telework successes", "a": "Economic benefits of off-peak commuting (off-peak passes)"}}, {"info": "Work-style data", "tag": "Grows, then hits a ceiling", "ttl": "Telework spread fast, then stalled in the 40% range", "note": "Share of firms, not of employees using it.", "read": "From 24.0% in March 2020 to 62.7% the next month, then slowly down to around 40–48% in 2024–2026. As crowding eases and commuting stress falls, does the push for dispersal weaken?", "prob": "Staggered hours and telework stop spreading", "names": {"E": "Firms with fixed\nsame-time starts", "S": "Staggered hours\n& telework rate", "B": "Commuting\nstress", "C": "Public transport\ncapacity"}, "story": ["As telework spreads, firms with fixed same-time starts decline", "Fewer such firms spread telework further", "But telework empties trains, and commuting stress falls", "With less stress, \"coming in is fine\", and it levels off"], "lev": {"t": "Put staggered hours and telework into work rules to reduce fixed same-time starts", "b": "Share \"it worked without coming in\" stories at work", "a": "Telework allowances and off-peak benefits make choice easier"}}, {"info": "Central-city population data", "tag": "Winners keep winning; the gap widens", "ttl": "Downtown residents up 1.5×. Is the day–night imbalance changing?", "read": "Residents of the 3 central wards rose about 1.5×, from 326,000 (2005) to 496,000 (2020). In a center locked in as a \"place to work\", is the living side starting to grow?", "prob": "Night and weekend population downtown stays low", "names": {"Ae": "Downtown job\nconcentration", "Ar": "Office-centered\ndevelopment", "Al": "Share seeing downtown\nas a job center", "Be": "Night & weekend\ndowntown population", "Br": "Downtown daily\nconvenience"}, "story": ["Many see downtown as a place to work", "Office development grows and jobs concentrate further", "Daily convenience lags, so night and weekend population stays low", "The center locks into a daytime city, but residents are now increasing"], "lev": {"t": "Rules planning housing, childcare and shops with office development", "b": "Residents share places to enjoy on nights and weekends", "a": "Rent support so families can stay downtown"}}, {"info": "Heat and temperature data", "tag": "Overused by all, until it's gone", "ttl": "Tokyo's tropical nights more than doubled in 40 years", "pairs": {"what": "Start and end of 5-year moving averages (JMA observations)", "items": [{"nm": "Tropical nights", "sub": "days per year"}, {"nm": "Annual mean temp.", "sub": "Tokyo"}]}, "note": "From a Tokyo government document (to the 1990s). The station moved in 2014.", "read": "Tropical nights rose from 14 (1961) to 35.2 days (1998) on a 5-year average, and the annual mean temperature rose about 3°C in 100 years. Heat drives cooling, and cooling drives heat. Is each building’s AC slowly using up everyone’s coolness?", "prob": "Heat across the whole city keeps strengthening", "lev": {"t": "Put low-waste-heat equipment and greenery into development rules", "b": "Find and share shady streets and parks in the neighborhood", "a": "Subsidies for efficient equipment and green roofs and walls"}, "names": {"Aa": "One building's\nwaste heat", "Ba": "Next building's\nwaste heat", "T": "Waste heat\n(AC & cars)", "G": "Heat island\nstrength", "Lm": "Urban green\nratio"}, "story": ["On hot days, each building turns up its AC", "Waste heat grows and, over time, the heat island strengthens", "The hotter the city, the more every building cools", "Each building’s own fix makes everyone’s city hotter"]}, {"info": "Greenery data", "tag": "If it rises, which pattern?", "ttl": "The wards' greenery is flat. How could city comfort rise?", "note": "The method changed in 2018, making values look higher.", "read": "The green ratio (urban green ratio) is nearly flat within each method: 20.0% → 19.8% (2003 → 2013) and 24.2% → 24.0% (2018 → 2023). If greenery grows, how would the city move?", "prob": "If city comfort and quality of life start rising, how might it go?", "candView": {"limits": {"prob": "Even if quality of life starts rising, will it level off?", "names": {"E": "Night & weekend\ndowntown population", "S": "Urban quality\nof life", "B": "Downtown land\n& housing prices", "C": "Urban green\nratio"}, "story": ["As quality of life rises, night and weekend population grows", "Liveliness grows, raising quality of life further", "More greenery makes the area popular and pushes up land and housing prices", "Fewer people can afford to live there, and it levels off"]}, "under": {"prob": "More residents, but greenery and plazas can’t keep up?", "names": {"Eg": "Urban quality\nof life", "D": "Night & weekend\ndowntown population", "Lm": "Heat island\nstrength", "N": "Perceived need\nfor greenery", "I": "Urban green\nratio"}, "story": ["Quality of life rises and downtown population grows", "Buildings and people concentrate, strengthening the heat island", "The need is noticed and open space and greenery start growing", "If it comes too late, the city gets less livable and people leave"]}}, "others": ["How does pedestrian comfort change as plazas grow?", "Even with a flat green ratio, is downtown open space growing?", "Do rising land prices skew who can live there?", "How should we read data whose method changed?"], "lev": {"t": "Extra floor area in exchange for open space and greenery", "b": "Neighbors and firms agree on wind and green rules", "a": "Support for maintaining greenery and open space"}}];
+const DEN={"y_f": {"hi": "More", "lo": "Less", "name": "Women eating enough vegetables", "what": "Share eating 350 g+ of vegetables a day"}, "y_m": {"hi": "More", "lo": "Less", "name": "Men eating enough vegetables", "what": "Share eating 350 g+ of vegetables a day"}, "x1": {"hi": "More", "lo": "Less", "name": "Amount of government messaging", "u": "2019 = 100", "what": "How often \"vegetables, nutrition, health\" appear in the Shokuiku (food education) White Paper"}, "x2": {"hi": "High", "lo": "Low", "name": "Interest in vegetables", "u": "2019 = 50", "what": "How often vegetables were searched online"}, "x3": {"hi": "Easier", "lo": "Harder", "name": "Vegetable affordability", "u": "2019 = 100", "what": "How many vegetables wages can buy"}, "bra": {"hi": "More", "lo": "Less", "name": "Brazil", "what": "Share who can't afford a healthy diet (up = worse)"}, "eap": {"hi": "More", "lo": "Less", "name": "East Asia & Pacific", "what": "Share who can't afford a healthy diet (up = worse)"}, "ssa": {"hi": "More", "lo": "Less", "name": "Sub-Saharan Africa", "what": "Share who can't afford a healthy diet (up = worse)"}, "ltu": {"hi": "More", "lo": "Less", "name": "Lithuania", "what": "Share who can't afford a healthy diet (up = worse)"}, "tfp": {"hi": "Faster", "lo": "Slower", "name": "Pace of gains from innovation", "what": "Yearly % gain in output from varieties and technology, without more land or fertilizer (decade average)"}, "chnN": {"hi": "More", "lo": "Less", "name": "China", "what": "Nitrogen fertilizer used per hectare of cropland (kg)"}, "asiaN": {"hi": "More", "lo": "Less", "name": "Asia", "what": "Nitrogen fertilizer used per hectare of cropland (kg)"}, "afrN": {"hi": "More", "lo": "Less", "name": "Africa", "what": "Nitrogen fertilizer used per hectare of cropland (kg)"}, "fish": {"hi": "More", "lo": "Less", "name": "Share of overfished stocks", "what": "Fish grouped by species and sea area (e.g., Atlantic cod): share caught faster than they recover"}, "congT": {"hi": "High", "lo": "Low", "name": "Commuter train crowding, Tokyo area", "what": "Average of 31 main sections, morning peak hour (fiscal year)"}, "midoriOld": {"dp": 1, "hi": "More", "lo": "Less", "name": "Green ratio (old method)", "what": "Share of the 23 wards covered by green, parks and water"}, "midoriNew": {"hi": "More", "lo": "Less", "name": "Green ratio (new method)", "what": "Share of the 23 wards covered by green, parks and water"}, "tele": {"hi": "More", "lo": "Less", "name": "Telework rate of Tokyo companies", "what": "Share of Tokyo firms (30+ staff) practicing telework"}, "toshin": {"hi": "More", "lo": "Less", "name": "Residents of the 3 central wards", "u": "people", "what": "People living in Chiyoda, Chuo and Minato (census)"}, "capT": {"name": "Capacity (FY1975 = 100)"}, "paxT": {"hi": "More", "lo": "Less", "name": "Peak-hour passengers, Tokyo area (FY1975 = 100)", "what": "People passing 31 main sections in the morning peak hour (fiscal year)"}};
+const REFS_EN={"paper": [["Fauzi et al. (2022) J. Clin. Med. 11:2350", "https://doi.org/10.3390/jcm11092350"], ["MHLW, National Health and Nutrition Survey (Japan)", "https://www.mhlw.go.jp/bunya/kenkou/kenkou_eiyou_chousa.html"]], "国民健康・栄養調査": [["MHLW, National Health and Nutrition Survey (Japan)", "https://www.mhlw.go.jp/bunya/kenkou/kenkou_eiyou_chousa.html"]], "Googleトレンド": [["Google Trends", "https://trends.google.co.jp/trends/"]], "家計調査・消費者物価指数": [["Statistics Bureau of Japan, Family Income and Expenditure Survey", "https://www.stat.go.jp/data/kakei/"], ["Statistics Bureau of Japan, Consumer Price Index", "https://www.stat.go.jp/data/cpi/"]], "食育白書": [["MAFF, White Paper on Shokuiku (Japan)", "https://www.maff.go.jp/j/syokuiku/wpaper/"]], "世界銀行・FAO": [["World Bank & FAO, Food Prices for Nutrition", "https://www.worldbank.org/en/programs/icp/brief/foodpricesfornutrition"], ["Our World in Data (chart data)", "https://ourworldindata.org/grapher/share-healthy-diet-unaffordable"]], "FAO 世界食料農業白書2025": [["FAO, The State of Food and Agriculture 2025, Figure 4", "https://doi.org/10.4060/cd7067en-fig04"]], "FAO（SDG指標14.4.1）": [["FAO (SDG indicator 14.4.1) / Our World in Data", "https://ourworldindata.org/grapher/share-of-fish-stocks-overexploited"]], "FAOSTAT": [["FAOSTAT (fertilizers) / Our World in Data", "https://ourworldindata.org/grapher/nitrogen-fertilizer-application-per-hectare-of-cropland"], ["FAOSTAT", "https://www.fao.org/faostat/en/"]], "MLIT混雑率": [["MLIT press release: Urban rail crowding survey (FY2025)", "https://www.mlit.go.jp/report/press/tetsudo04_hh_000139.html"], ["Material 1 (PDF)", "https://www.mlit.go.jp/report/press/content/002013569.pdf"]], "都環境局熱": [["Tokyo Bureau of Environment (JMA data)", "https://www.kankyo.metro.tokyo.lg.jp/documents/d/kankyo/council-9th_data-files-shiryouhen_7"]], "都みどり率": [["Tokyo Metropolitan Government, Green ratio survey (2023)", "https://www.metro.tokyo.lg.jp/tosei/hodohappyo/press/2024/10/28/16.html"], ["Tokyo Metropolitan Government material (2003–2013)", "https://www.toshiseibi.metro.tokyo.lg.jp/keikaku/shingikai/pdf/riyou02_10.pdf"]], "OECD2022": [["OECD (2022) Redesigning Ireland’s Transport for Net Zero", "https://doi.org/10.1787/b798a4c1-en"], ["Proust et al. (2012) IJERPH 9:2134", "https://doi.org/10.3390/ijerph9062134"]], "都テレワーク": [["Tokyo Metropolitan Government, Telework rate survey", "https://www.hataraku.metro.tokyo.lg.jp/hatarakikata/telework/20260216_chousakextukapdf.pdf"]], "国勢調査都心":[["Toshima City, Population by area (2010 census, change from 2005)", "https://www.city.toshima.lg.jp/documents/9394/2-1.pdf"], ["Same (2015 census)", "https://www.city.toshima.lg.jp/070/documents/2-1.pdf"], ["Same (2020 census)", "https://www.city.toshima.lg.jp/070/documents/2-1-r3.pdf"]]};
+const DD=k=>LANG==='en'?{...D[k],...DEN[k]}:D[k];
+const loc=(c,ix)=>{if(c.user)return uLoc(c);if(LANG!=='en')return c;const e=EN[ix];return {...c,...e,nm:c.en,en:c.nm,
+  pict:c.pict?{...c.pict,...e.pict}:undefined,bars:c.bars?{...c.bars,...e.bars}:undefined,
+  pairs:c.pairs?{...c.pairs,...e.pairs,items:c.pairs.items.map((it,i)=>({...it,...((e.pairs&&e.pairs.items[i])||{})}))}:undefined};};
+// 文字の幅（日本語は1文字分、英数字は約0.58文字分）
+const tw=(t,fs)=>[...t].reduce((w,ch)=>w+(ch.charCodeAt(0)>255?fs:fs*.58),0);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let N=0;
+
+function typSVG(id,col,flip){
+  const W=120,H=60,x0=8,x1=W-6,yT=6,y0=H-8,X=t=>x0+(x1-x0)*t,Y=v=>yT+(y0-yT)*(flip?v:(1-v));
+  const curve=P=>{let d=`M${X(P[0][0])},${Y(P[0][1])}`;for(let i=1;i<P.length;i++){const[a,b]=P[i-1],[c,e]=P[i],mx=(a+c)/2;d+=` C${X(mx)},${Y(b)} ${X(mx)},${Y(e)} ${X(c)},${Y(e)}`;}return d;};
+  return `<svg viewBox="0 0 ${W} ${H}" aria-hidden="true"><path d="M${x0},${yT}V${y0}H${x1}" fill="none" stroke="#23263A" stroke-opacity=".25" stroke-width="1.5" stroke-dasharray="2 4"/>`+
+    TYP[id].map(P=>`<path class="dl" d="${curve(P)}" fill="none" stroke="${col}" stroke-width="5" stroke-linecap="round"/>`).join('')+`</svg>`;
+}
+
+// 実データのグラフ（縦軸の上下の意味と、2019年の基準線をのせる）
+
+// ===== 型を考えるカード：選んだ型の形で、将来（目安）を描く =====
+const PICK={};
+const PROJ_TO=2035;
+const SHAPE={
+ limits:t=>0.7*(1-Math.exp(-4*t)),
+ under:t=>0.65*Math.sin(Math.PI*t*0.95)-0.2*t,
+ fixes:t=>0.4*Math.sin(Math.PI*t*1.1)-0.55*t,
+ burden:t=>0.18*Math.sin(4*Math.PI*t)-0.35*t,
+ drift:t=>-0.55*t,
+ commons:t=>0.35*t-(t>0.6?1.7*(t-0.6):0),
+ success:t=>0.6*t,
+ escalation:t=>-0.45*t+0.1*Math.sin(4*Math.PI*t)
+};
+function projPoints(card,ss){
+  const id=card.proj;if(!id||!SHAPE[id])return null;
+  const base=ss.reduce((p,q)=>q.h[q.h.length-1][0]>p.h[p.h.length-1][0]?q:p);
+  const [yL,vL]=base.h[base.h.length-1],all=base.h.map(p=>p[1]);
+  const A=0.6*((Math.max(...all)-Math.min(...all))||Math.abs(vL)*0.3||1),gdir=card.bad?-1:1,to=Math.max(PROJ_TO,Math.ceil(yL)+5);
+  const pct=(base.pu||base.u)==='%'&&Math.max(...all)<=100;const out=[];
+  for(let k=0;k<=24;k++){const t=k/24,y=yL+(to-yL)*t;let v=vL+gdir*A*SHAPE[id](t);v=Math.max(0,v);if(pct)v=Math.min(100,v);out.push([y,v]);}
+  return {pts:out,to,yL,type:id,pu:base.pu||'',dp:base.dp};
+}
+function animateProj(el){
+  if(RM.matches)return;const p=el.querySelector('.front path.proj');if(!p)return;const L=p.getTotalLength();
+  p.animate([{strokeDasharray:L+' '+L,strokeDashoffset:L},{strokeDasharray:L+' '+L,strokeDashoffset:0}],{duration:1600,easing:'cubic-bezier(.3,.1,.2,1)'});
+  el.querySelectorAll('.front .projend').forEach(n=>n.animate([{opacity:0},{opacity:0,offset:.85},{opacity:1}],{duration:1700}));
+}
+function setPick(ix,id){
+  const flipped=[...document.querySelectorAll('#grid .card.flipped')].map(c=>+c.dataset.ix).filter(i=>i!==ix);
+  if(id)PICK[ix]=id;else delete PICK[ix];
+  render();applyFilter();
+  flipped.forEach(i=>{const c=document.querySelector(`#grid .card[data-ix="${i}"]`);if(c){c.classList.add('flipped');c.setAttribute('aria-pressed','true');}});
+  const el=document.querySelector(`#grid .card[data-ix="${ix}"]`);
+  if(el&&id){el.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>animateProj(el),350);}
+}
+function dataSVG(card){
+  const ss=card.series.map(s=>{const o={...DD(s.k),...s};if(s.from)o.h=o.h.filter(p=>p[0]>=s.from);return o;});
+  const hi=ss[0].hi,lo=ss[0].lo,lw=Math.max(tw(hi,10.5),tw(lo,10.5));
+  const PJ=projPoints(card,ss);
+  const W=320,H=(card.ch||184)-(PJ?30:0),x0=Math.max(40,lw*1.15+20),x1=W-22,yT=16,y0=H-26;
+  const yrs=ss.flatMap(s=>s.h.map(p=>p[0])).concat(PJ?[PJ.to]:[]),ya=Math.min(...yrs),yb=Math.max(...yrs);
+  const X=y=>x0+(x1-x0)*(y-ya)/(yb-ya||1);
+  const vals=ss.flatMap(s=>s.h.map(p=>p[1])).concat(ss[0].base!=null?[ss[0].base]:[]).concat(PJ?PJ.pts.map(p=>p[1]):[]);
+  let a=Math.min(...vals),b=Math.max(...vals),pd=(b-a)*.15||1;a-=pd;b+=pd;const Y=v=>y0-(y0-yT)*(v-a)/(b-a);
+  const col2=`color-mix(in srgb, ${card.c} 40%, #9AA0B5)`;
+  let g=`<path d="M${x0},${yT-6}V${y0}H${x1+8}" fill="none" stroke="#23263A" stroke-opacity=".28" stroke-width="1.5" stroke-dasharray="2 4"/>
+   <text x="${x0-5}" y="${yT+4}" font-size="12.5" text-anchor="end" fill="#4A4E66" font-weight="800">↑${hi}</text>
+   <text x="${x0-5}" y="${y0}" font-size="12.5" text-anchor="end" fill="#4A4E66" font-weight="800">↓${lo}</text>`;
+  if(ss[0].base!=null){const by=Y(ss[0].base);
+    g+=`<path d="M${x0},${by}H${x1+8}" stroke="#9AA0B5" stroke-width="1.2" stroke-dasharray="4 3"/><text x="${(x0+x1)/2+20}" y="${by+13}" font-size="11" text-anchor="middle" fill="#6B7088" stroke="#fff" stroke-width="3" paint-order="stroke">${u('base')}${ss[0].base}</text>`;}
+  const dec=ss[0].dec,yl=t=>dec?t+u('dec'):(Number.isInteger(t)?t:Math.floor(t));
+  if(PJ){const pc='#6B4EFF',xs=X(PJ.yL);
+    g+=`<rect x="${xs}" y="${yT-6}" width="${X(PJ.to)-xs}" height="${y0-yT+6}" fill="${pc}" opacity=".07" rx="4"/>`;
+    let d='';PJ.pts.forEach(([yy,vv],k)=>{d+=(k?'L':'M')+X(yy).toFixed(1)+','+Y(vv).toFixed(1);});
+    g+=`<path d="${d}" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path class="proj" d="${d}" fill="none" stroke="${pc}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>`;
+    const e=PJ.pts[PJ.pts.length-1],ev=PJ.dp!=null?Number(e[1]).toFixed(PJ.dp):(Math.abs(e[1])>=10000?new Intl.NumberFormat(LANG==='en'?'en':'ja',{notation:'compact',maximumFractionDigits:1}).format(e[1]):(Math.round(e[1]*10)/10));
+    g+=`<g class="projend"><circle cx="${X(e[0])}" cy="${Y(e[1])}" r="4" fill="#fff" stroke="${pc}" stroke-width="2.5"/></g><text x="${X(PJ.to)-4}" y="${yT+6}" font-size="11" font-weight="800" text-anchor="end" fill="${pc}">${u('projL')}</text>`;}
+  (dec?ss[0].h.map(p=>p[0]):[...new Set([ya,Math.round((ya+yb)/2),yb])]).forEach(t=>g+=`<text x="${X(t)}" y="${H-8}" font-size="${dec?10.5:12}" text-anchor="middle" fill="#6B7088">${yl(t)}</text>`);
+  ss.forEach((s,i)=>{
+    const pts=s.h.map(([yr,v])=>[X(yr),Y(v),yr,v]),c=i?col2:card.c;const dfs=s.h.slice(1).map((p,j)=>p[0]-s.h[j][0]).filter(x=>x>0).sort((a,b)=>a-b),stp=dec?10:Math.max(1,dfs[Math.floor(dfs.length/2)]||1);
+    const segs=[[pts[0]]];for(let k=1;k<pts.length;k++){if(!s.cont&&pts[k][2]-pts[k-1][2]>stp*1.5){g+=`<path d="M${pts[k-1][0]},${pts[k-1][1]}L${pts[k][0]},${pts[k][1]}" stroke="${c}" stroke-width="2" stroke-dasharray="3 4" fill="none" opacity=".7"/>`;segs.push([]);}segs[segs.length-1].push(pts[k]);}
+    segs.forEach(P=>{if(P.length<2)return;let d=`M${P[0][0]},${P[0][1]}`;
+      for(let k=0;k<P.length-1;k++){const p0=P[k-1]||P[k],p1=P[k],p2=P[k+1],p3=P[k+2]||p2;
+        d+=` C${p1[0]+(p2[0]-p0[0])/6},${p1[1]+(p2[1]-p0[1])/6} ${p2[0]-(p3[0]-p1[0])/6},${p2[1]-(p3[1]-p1[1])/6} ${p2[0]},${p2[1]}`;}
+      g+=`<path class="dl" d="${d}" fill="none" stroke="${c}" stroke-width="${i?(card.shared?5:3.5):6}" ${i&&!card.shared?'stroke-dasharray="6 5"':''} stroke-linecap="round" stroke-linejoin="round"/>`;});
+    const f=pts[0],l=pts[pts.length-1],T=(x,y,v,an)=>`<text x="${x}" y="${y}" font-size="14" font-weight="800" fill="#23263A" stroke="#fff" stroke-width="3" paint-order="stroke" text-anchor="${an}">${v}</text>`;
+    g+=`<circle cx="${f[0]}" cy="${f[1]}" r="3.6" fill="#23263A"/><circle cx="${l[0]}" cy="${l[1]}" r="3.6" fill="#23263A"/>`;
+    const off=card.shared?(i?-10:19):-10;const pu=s.pu||'';const fN=v=>s.dp!=null?Number(v).toFixed(s.dp):Math.abs(v)>=10000?new Intl.NumberFormat(LANG==='en'?'en':'ja',{notation:'compact',maximumFractionDigits:1}).format(v):v;g+=(s.h.length<=3&&f[0]-x0>40?T(f[0]-6,f[1]+off,fN(f[3])+pu,'end'):T(f[0]+6,f[1]+off,fN(f[3])+pu,'start'))+T(l[0],l[1]+off,fN(l[3])+pu,'middle');
+    if(ss.length===1&&pts.length>3){const mid=pts.slice(1,-1);const mx=mid.reduce((p,q)=>q[3]>p[3]?q:p),mn=mid.reduce((p,q)=>q[3]<p[3]?q:p);
+      [mx,mn].forEach((q,k)=>{const lo=k===1,rg=(b-a)*.12,ex=lo?(q[3]<Math.min(f[3],l[3])-rg):(q[3]>Math.max(f[3],l[3])+rg);if(!ex)return;
+        g+=`<circle cx="${q[0]}" cy="${q[1]}" r="3" fill="#23263A"/>`+T(q[0],q[1]+(lo?19:-10),fN(q[3])+pu+(LANG==='en'?' ('+yl(q[2])+')':'（'+yl(q[2])+'）'),'middle');});}
+  });
+  const leg=ss.map((s,i)=>`<div class="lg"><i class="${i&&!card.shared?'dash':''}" style="--sc:${i?col2:card.c}"></i><div><b>${esc(s.name)}</b>${i&&s.what===ss[0].what?'':`<small>${esc(s.what)}</small>`}</div></div>`).join('');
+  return {svg:`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(card.ttl)}">${g}</svg>`,leg,src:[...new Set(ss.map(s=>s.src))]};
+}
+
+// 因果ループ図（tet_tool の archSVG を、食の言葉で描けるようにしたもの）
+function cldSVG(card){
+  const def0=ARCH[card.id],def={...def0,L:(card.L||def0.L).map((l,i)=>card.loops&&card.loops[i]?[card.loops[i],...l.slice(1)]:l)},U='m'+(++N),pos={...def0.roles,...(card.pos||{})},BX={},FS=12.5,LH=14;
+  const lines=k=>(card.names[k]||k).split('\n');
+  Object.keys(pos).forEach(k=>{const ls=lines(k);const w=Math.max(56,Math.max(...ls.map(x=>tw(x,FS)))+16);const pp=card.pr.includes(k)?5:0;BX[k]=[w/2+pp,(ls.length===2?21:14)+pp];});
+  const exitP=(k,tx,ty)=>{const[x,y]=pos[k],[hw,hh]=BX[k],dx=tx-x,dy=ty-y;if(!dx&&!dy)return[x,y];const sc=Math.min((hw+4)/Math.abs(dx||1e-9),(hh+4)/Math.abs(dy||1e-9));return[x+dx*sc,y+dy*sc];};
+  const loopsOf=(a,b)=>def.L.filter(l=>{const n=l[3];const i=n.indexOf(a);return i>=0&&n[(i+1)%n.length]===b;});
+  const mutual=(a,b)=>def.e.some(q=>q[0]===b&&q[1]===a);
+  let g='';
+  def.e.forEach(([a,b,p0,dly])=>{const p=(card.signs&&card.signs[a+'>'+b])||p0;const[x1,y1]=pos[a],[x2,y2]=pos[b],mx=(x1+x2)/2,my=(y1+y2)/2,dx=x2-x1,dy=y2-y1,L=Math.hypot(dx,dy)||1;let cx,cy;const lp=loopsOf(a,b);
+    if(mutual(a,b)){cx=mx+dy*.3;cy=my-dx*.3;}
+    else if(lp.length===1&&lp[0][3].length>2){const ns=lp[0][3],lx=ns.reduce((t,k)=>t+pos[k][0],0)/ns.length,ly=ns.reduce((t,k)=>t+pos[k][1],0)/ns.length;let vx=mx-lx,vy=my-ly;const l=Math.hypot(vx,vy)||1;cx=mx+vx/l*L*.22;cy=my+vy/l*L*.22;}
+    else{cx=mx+dy*.08;cy=my-dx*.08;}
+    const[sx,sy]=exitP(a,cx,cy),[ex,ey]=exitP(b,cx,cy),col=p==='+'?'#D0336B':'#1E88C8';
+    g+=`<path d="M${sx},${sy} Q${cx},${cy} ${ex},${ey}" fill="none" stroke="${col}" stroke-width="1.8" marker-end="url(#${U}${p==='+'?'p':'n'})"/>`;
+    const t=.78,qx=(1-t)**2*sx+2*(1-t)*t*cx+t*t*ex,qy=(1-t)**2*sy+2*(1-t)*t*cy+t*t*ey,tx=2*(1-t)*(cx-sx)+2*t*(ex-cx),ty=2*(1-t)*(cy-sy)+2*t*(ey-cy),tl=Math.hypot(tx,ty)||1;
+    let nx=ty/tl,ny=-tx/tl;const ox=cx-(sx+ex)/2,oy=cy-(sy+ey)/2;if(nx*ox+ny*oy<0){nx=-nx;ny=-ny;}
+    g+=`<text x="${qx+nx*9}" y="${qy+ny*9+4}" font-size="13" font-weight="800" fill="${col}" text-anchor="middle">${p==='+'?'+':'−'}</text>`;
+    if(dly){const hx=.25*sx+.5*cx+.25*ex,hy=.25*sy+.5*cy+.25*ey;g+=`<text x="${hx}" y="${hy+4}" font-size="12" font-weight="700" text-anchor="middle" fill="#555">∥</text>`;}});
+  def.L.forEach(([k,x,y])=>{const c=k==='R'?'#D0336B':'#1E88C8';g+=`<circle cx="${x}" cy="${y}" r="11" fill="#fff" stroke="${c}" stroke-width="1.5"/><text x="${x}" y="${y+4.5}" font-size="12" font-weight="800" text-anchor="middle" fill="${c}">${k}</text>`;});
+  Object.keys(pos).forEach(k=>{const[x,y]=pos[k],m=lines(k),isP=card.pr.includes(k),isD=card.data.includes(k),hw=BX[k][0]-(isP?5:0),hh=BX[k][1]-(isP?5:0);
+    if(isP)g+=`<rect x="${x-hw-5}" y="${y-hh-5}" width="${hw*2+10}" height="${hh*2+10}" rx="11" fill="#FFE9E5" stroke="#E5533D" stroke-width="2"/><text x="${x-hw-3}" y="${y-hh-9}" font-size="10.5" font-weight="800" fill="#C2412D">${card.focus?u('focusTag'):u('probTag')}</text>`;
+    g+=`<rect x="${x-hw}" y="${y-hh}" width="${hw*2}" height="${hh*2}" rx="8" fill="${isD?'#FFF1DC':'#fff'}" stroke="${isD?'#E8790C':'#D9DBEA'}" stroke-width="1.3"/>`;
+    m.forEach((ln,i)=>g+=`<text x="${x}" y="${y+(i-(m.length-1)/2)*LH+4.5}" font-size="${FS}" font-weight="700" text-anchor="middle" fill="${isD?'#9A4E00':'#23263A'}">${esc(ln)}</text>`);});
+  let x0=-34,y0=-16,x1=364,y1=224;
+  Object.keys(pos).forEach(k=>{const[x,y]=pos[k],[hw,hh]=BX[k];x0=Math.min(x0,x-hw-16);x1=Math.max(x1,x+hw+16);y0=Math.min(y0,y-hh-20);y1=Math.max(y1,y+hh+16);});
+  def.L.forEach(([k,x,y])=>{x0=Math.min(x0,x-16);x1=Math.max(x1,x+16);});
+  return `<svg class="cld" viewBox="${x0} ${y0} ${x1-x0} ${y1-y0}" role="img" aria-label="${esc(card.nm)}${u('loopAria')}"><defs>
+   <marker id="${U}p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#D0336B"/></marker>
+   <marker id="${U}n" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#1E88C8"/></marker></defs>${g}</svg>`;
+}
+
+// 並び順（CARDSの番号）：日本と世界をまぜて、同じ型がとなり合わないようにする
+const ORDER=[0,4,1,8,2,5,7,3,6,9,10,11,12,13,14,15,16,17,18,19,20];
+const ORIG_ORDER=[...ORDER];
+// 日本か世界かのタグ
+const edTag=c=>EDITION==='all'?`<span class="edtag ${edOf(c)}">${edOf(c)==='urban'?u('tagUrban'):u('tagFood')}</span>`:'';
+const place0=c=>c.grp==='user'?`<span class="place user">${mk('mine')}</span><span class="placeinfo">${esc(c.usrc||'')}</span><span class="hyp">${mk('hyp')}</span>`:c.grp==='world'
+  ?`<span class="place world">${u('world')}</span><span class="placeinfo">${c.src==='fao'?(c.id==='under'?u('infoSofa'):u('infoStat')):u('infoW')}</span>`
+  :`<span class="place jp">${u('jp')}</span><span class="placeinfo">${c.src==='paper'?u('infoPaper'):u('infoJp')}</span>${c.hyp&&c.grp!=='user'?`<span class="hyp">${u('hyp')}</span>`:''}`;
+const place=c=>edTag(c)+place0(c).replace(/(<span class="placeinfo">)[^<]*(<\/span>)/,(m,a,b)=>c.info&&c.grp!=='user'?a+esc(c.info)+b:m);
+
+// 魚の絵（10グループのうち、とりすぎの分を赤くぬる）
+function pictBox(c){
+  const P=c.pict,h=D[P.k].h,val=y=>(h.find(p=>p[0]===y)||[0,0])[1];
+  const W=330,rowH=38,H=P.years.length*rowH+6,x0=52,fw=22;let g='',defs='';
+  const fish=(x,y,id,frac)=>{const d=`M${x},${y} c6,-9 16,-9 20,0 c-4,9 -14,9 -20,0z M${x+20},${y} l6,-6 v12z`;
+    defs+=`<clipPath id="${id}"><rect x="${x-1}" y="${y-10}" width="${28*frac}" height="20"/></clipPath>`;
+    return `<path d="${d}" fill="#DCE6F2"/><path class="fr" d="${d}" fill="#E5533D" clip-path="url(#${id})"/><circle cx="${x+5}" cy="${y-1.5}" r="1.4" fill="#23263A"/>`;};
+  P.years.forEach((y,r)=>{const v=val(y)/10,yy=18+r*rowH;
+    g+=`<text x="0" y="${yy+4}" font-size="13" font-weight="800" fill="#4A4E66">${y}${u('yr')}</text>`;
+    for(let n=0;n<10;n++){const fr=Math.max(0,Math.min(1,v-n));g+=fish(x0+n*fw+2,yy,'f'+(++N),fr);}
+    g+=`<text x="${W}" y="${yy+4}" font-size="14" font-weight="800" text-anchor="end" fill="#C2412D">${(()=>{const n=Math.floor(v),fr=v-n,ex=Math.abs(fr)<.02,ab=ex?'':u('about');if(LANG==='en')return ab+(fr>=.8?n+1:fr>=.4?n+.5:n)+' / 10';return ab+(fr>=.8?(n+1)+'つ':fr>=.4?n+'つ半':n+'つ');})()}</text>`;});
+  return {svg:`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(c.ttl)}"><defs>${defs}</defs>${g}</svg>`,
+    leg:`<div class="lg"><div><b>${esc(P.name)}</b><small>${esc(P.what)}</small></div></div>`,src:[D[P.k].src]};
+}
+// 10年ごとの棒グラフ（年あたりの伸び率を「100kgが10年で何kg増えたか」に直す）
+function barBox(c){
+  const B=c.bars,h=D[B.k].h.map(([y,r])=>[y,Math.round((Math.pow(1+r/100,10)-1)*100)]);
+  const W=320,H=180,x0=4,x1=W-4,y0=H-26,yT=26,mx=Math.max(...h.map(p=>p[1])),bw=(x1-x0)/h.length;let g='';
+  h.forEach(([y,v],i)=>{const bh=(y0-yT)*v/mx,x=x0+i*bw+bw*.18,w=bw*.64,last=i===h.length-1,top=v===mx;
+    g+=`<rect class="bar" x="${x}" y="${y0-bh}" width="${w}" height="${Math.max(bh,1.5)}" rx="5" fill="${c.c}" opacity="${last||top?1:.45}"/>`;
+    g+=`<text x="${x+w/2}" y="${y0-bh-6}" font-size="14" font-weight="800" text-anchor="middle" fill="#23263A">+${v}kg</text>`;
+    g+=`<text x="${x+w/2}" y="${H-8}" font-size="11" text-anchor="middle" fill="#6B7088">${y}${u('dec')}</text>`;});
+  g+=`<path d="M${x0},${y0}H${x1}" stroke="#23263A" stroke-opacity=".3" stroke-width="1.5"/>`;
+  return {svg:`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(c.ttl)}">${g}</svg>`,
+    leg:`<div class="lg"><div><b>${esc(B.name)}</b><small>${esc(B.what)}</small></div></div>`,src:[D[B.k].src]};
+}
+
+// 始めと終わりの2点を結ぶグラフ（論文の本文にある値だけを使う）
+function pairBox(c){
+  const P=c.pairs,n=P.items.length,W=320,H=150,pw=W/n;let g='';const F=(v,u)=>u==='%'?v.toFixed(1):String(v);
+  P.items.forEach((it,i)=>{
+    const x0=i*pw+16,x1=(i+1)*pw-16,yT=44,y0=H-30,vals=[it.a[1],it.b[1]].concat(it.goal!=null?[it.goal]:[]);
+    let lo=Math.min(...vals),hi=Math.max(...vals),pd=(hi-lo)*.25||1;lo-=pd;hi+=pd;const Y=v=>y0-(y0-yT)*(v-lo)/(hi-lo);
+    const up=it.b[1]>it.a[1],col=up?'#D0336B':'#1E88C8';
+    g+=`<text x="${(x0+x1)/2}" y="14" font-size="12.5" font-weight="800" text-anchor="middle" fill="#23263A">${esc(it.nm)} <tspan fill="${col}">${up?'↑':'↓'}</tspan></text>
+      <text x="${(x0+x1)/2}" y="28" font-size="10" text-anchor="middle" fill="#6B7088">${esc(it.sub)}</text>`;
+    if(it.goal!=null){g+=`<path d="M${x0-6},${Y(it.goal)}H${x1+6}" stroke="#E8790C" stroke-width="1.5" stroke-dasharray="4 3"/><text x="${x1+6}" y="${Y(it.goal)-4}" font-size="9.5" text-anchor="end" fill="#B35A00" font-weight="700">${LANG==='en'?'target':'目標'} ${it.goal}${it.u}</text>`;}
+    g+=`<path class="dl" d="M${x0},${Y(it.a[1])}L${x1},${Y(it.b[1])}" stroke="${col}" stroke-width="5" stroke-linecap="round" fill="none"/>
+      <circle cx="${x0}" cy="${Y(it.a[1])}" r="4" fill="#23263A"/><circle cx="${x1}" cy="${Y(it.b[1])}" r="4" fill="#23263A"/>
+      <text x="${x0}" y="${Y(it.a[1])+(up?18:-9)}" font-size="13" font-weight="800" text-anchor="middle" fill="#23263A" stroke="#fff" stroke-width="3" paint-order="stroke">${F(it.a[1],it.u)}</text>
+      <text x="${x1}" y="${Y(it.b[1])+(up?-9:18)}" font-size="13" font-weight="800" text-anchor="middle" fill="${col}" stroke="#fff" stroke-width="3" paint-order="stroke">${F(it.b[1],it.u)}</text>
+      <text x="${x0}" y="${H-12}" font-size="10" text-anchor="middle" fill="#6B7088">${it.a[0]}</text>
+      <text x="${x1}" y="${H-12}" font-size="10" text-anchor="middle" fill="#6B7088">${it.b[0]}</text>
+      <text x="${(x0+x1)/2}" y="${H-12}" font-size="10" text-anchor="middle" fill="#6B7088">${esc(it.u)}</text>`;
+    if(i)g+=`<path d="M${i*pw},36V${H-26}" stroke="#E2E4F0" stroke-width="1.5"/>`;
+  });
+  return {svg:`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(c.ttl)}">${g}</svg>`,
+    leg:`<div class="lg"><div><small>${esc(P.what)}</small></div></div>`,src:[c.src]};
+}
+function statsBox(c){
+  const svg=`<div class="stats">${c.stats.map(x=>`<div class="st"><b style="color:${c.c}">${esc(x.v)}</b><span>${esc(x.l)}</span></div>`).join('')}</div>`;
+  return {svg,leg:'',src:['FAO 世界食料農業白書2025']};
+}
+
+// 出典（クリックで開ける）
+const REFS={
+ "MLIT混雑率":[["国土交通省 報道発表「都市鉄道の混雑率調査結果を公表（令和7年度実績）」", "https://www.mlit.go.jp/report/press/tetsudo04_hh_000139.html"], ["資料1（PDF）", "https://www.mlit.go.jp/report/press/content/002013569.pdf"]],
+ "都環境局熱":[["東京都環境局 資料（気象庁のデータ）", "https://www.kankyo.metro.tokyo.lg.jp/documents/d/kankyo/council-9th_data-files-shiryouhen_7"]],
+ "都みどり率":[["東京都「みどり率」調査結果（令和5年）", "https://www.metro.tokyo.lg.jp/tosei/hodohappyo/press/2024/10/28/16.html"], ["東京都 資料（平成15〜25年）", "https://www.toshiseibi.metro.tokyo.lg.jp/keikaku/shingikai/pdf/riyou02_10.pdf"]],
+ "OECD2022":[["OECD（2022）Redesigning Ireland’s Transport for Net Zero", "https://doi.org/10.1787/b798a4c1-en"], ["Proust ほか（2012）IJERPH 9:2134", "https://doi.org/10.3390/ijerph9062134"]],
+ "都テレワーク":[["東京都「テレワーク実施率調査」", "https://www.hataraku.metro.tokyo.lg.jp/hatarakikata/telework/20260216_chousakextukapdf.pdf"]],
+ "国勢調査都心":[["国土交通省 資料（国勢調査 2005〜2015年）", "https://www.mlit.go.jp/common/001259112.pdf"], ["練馬区 統計書「特別区勢一覧」（2020年国勢調査）", "https://www.city.nerima.tokyo.jp/kusei/tokei/tokeisho/R3toukeisho.files/15tokubetuku.pdf"]],
+ 'paper':[['Fauzi ほか（2022）J. Clin. Med. 11:2350','https://doi.org/10.3390/jcm11092350'],['厚生労働省「国民健康・栄養調査」','https://www.mhlw.go.jp/bunya/kenkou/kenkou_eiyou_chousa.html']],
+ '国民健康・栄養調査':[['厚生労働省「国民健康・栄養調査」','https://www.mhlw.go.jp/bunya/kenkou/kenkou_eiyou_chousa.html']],
+ 'Googleトレンド':[['Google トレンド','https://trends.google.co.jp/trends/']],
+ '家計調査・消費者物価指数':[['総務省統計局「家計調査」','https://www.stat.go.jp/data/kakei/'],['総務省統計局「消費者物価指数」','https://www.stat.go.jp/data/cpi/']],
+ '食育白書':[['農林水産省「食育白書」','https://www.maff.go.jp/j/syokuiku/wpaper/']],
+ '世界銀行・FAO':[['世界銀行・FAO「Food Prices for Nutrition」','https://www.worldbank.org/en/programs/icp/brief/foodpricesfornutrition'],['Our World in Data（グラフのデータ）','https://ourworldindata.org/grapher/share-healthy-diet-unaffordable']],
+ 'FAO 世界食料農業白書2025':[['FAO『世界食料農業白書2025』図4','https://doi.org/10.4060/cd7067en-fig04']],
+ 'FAO（SDG指標14.4.1）':[['FAO（SDG指標14.4.1）／Our World in Data','https://ourworldindata.org/grapher/share-of-fish-stocks-overexploited']],
+ 'FAOSTAT':[['FAOSTAT（肥料）／Our World in Data','https://ourworldindata.org/grapher/nitrogen-fertilizer-application-per-hectare-of-cropland'],['FAOSTAT','https://www.fao.org/faostat/en/']]
+};
+const refLinks=(src,sep)=>src.flatMap(k=>(LANG==='en'?REFS_EN:REFS)[k]||[[k,'']]).map(([t,u])=>u?`<a href="${u}" target="_blank" rel="noopener">${esc(t)}</a>`:esc(t)).join(sep);
+function render(){
+  const html=(c0,ix)=>{const c=loc(c0,ix);c.proj=c.series?PICK[ix]:undefined;const d=c.stats?statsBox(c):c.pict?pictBox(c):c.bars?barBox(c):c.pairs?pairBox(c):dataSVG(c);return `
+  <div class="card" data-ix="${ix}" tabindex="0" role="button" aria-pressed="false" aria-label="${esc(c.nm)}${u('cardAria')}" style="--c:${c.c}">
+   <span class="grip" title="${u('gripT')}" aria-hidden="true">⠿</span>${c.user?`<button type="button" class="udel" title="${mk('del')}" aria-label="${mk('del')}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/><path d="M10 11v6M14 11v6"/></svg></button>`:''}
+   <div class="inner">
+    <section class="face front">
+      <div class="top"><span class="ico">${icon(c.id)}</span><div class="nm">${esc(c.nm)}</div><div class="tag">${esc(c.tag)}</div><div class="en">${esc(c.en)}</div><div class="q" aria-hidden="true">？</div></div>
+      <div class="body">
+        <div class="where">${place(c)}</div>
+        <div class="ttl">${esc(c.ttl)}</div>
+        <div class="gbox">
+          ${c.stats?'':`<div class="legend">${d.leg}</div>`}
+          ${c.proj?(()=>{const T=TYPES.find(t=>t.id===c.proj);return `<div class="pchip" style="--pc:#6B4EFF" title="${u('projNote')}"><b>${u('projChip')}${esc(T[LANG][0])}</b><button type="button" class="pclr" aria-label="${u('projClr')}" title="${u('projClr')}">✕ ${u('projDel')}</button></div>`;})():''}
+          ${d.svg}
+          ${c.note?`<div class="cnote"><b>${u('noteL')}</b>${esc(c.note)}</div>`:''}
+          <div class="gsrc">${u('data')}${refLinks(d.src,u('sep'))}</div>
+        </div>
+      </div>
+      <div class="foot"><div class="shape">${c.think?`<span class="sl">${u('typThink')}</span><span class="thq" aria-hidden="true">？</span>`:`<span class="sl">${u('typ')}${c.bad?`<small>${u('typBad')}</small>`:''}</span>${typSVG(c.id,c.c,c.bad)}`}</div><span class="pill">${u('flip')}</span></div>
+    </section>
+    <section class="face back">
+      <div class="hd"><b>${esc(c.nm)}</b><span class="place ${c.grp==='world'?'world':c.grp==='user'?'user':'jp'}">${c.grp==='world'?u('world'):c.grp==='user'?mk('mine'):u('jp')}</span></div>
+      ${c.think?`<div class="body">
+        <div class="prob tq">❓ ${esc(c.prob)}</div>
+        <span class="lbl">${u('cands')}</span>
+        <div class="cands">${c.cands.map(id=>{const T=TYPES.find(t=>t.id===id);return `<button type="button" class="cand" data-cand="${id}" style="--c:${T.c}" aria-label="${esc(T[LANG][0])}${u('candOpen')}">${typSVG(id,T.c)}<b>${esc(T[LANG][0])}</b><span class="cgo">${u('candGo')}</span></button>`;}).join('')}</div>
+        <span class="lbl">${u('others')}</span>
+        <ul class="others">${c.others.map(o=>`<li>${esc(o)}</li>`).join('')}</ul>
+        <div class="drawbox"><b>${u('draw')}</b><span>${u('drawSub')}</span></div>
+        <div class="hint"><b>${u('hint')}</b>
+          ${[['t','🏛️',...u('levT')],['b','🙋',...u('levB')],['a','💴',...u('levA')]].map(([k,ic,nm,sub])=>`<div class="lev"><span class="ln">${ic}${nm}<small>${sub}</small></span><span class="lt">${esc(c.lev[k])}</span></div>`).join('')}
+        </div>
+      </div>`:`      <div class="body">
+        <div class="prob">⚠ ${esc(c.prob)}</div>
+        <div class="cldbox">${cldSVG(c)}<button class="zoom" type="button">${u('zoom')}</button>${c.series&&!c.think&&SHAPE[c.id]?`<button class="pgo" type="button">${PICK[ix]?u('projRe'):u('projBtn')}</button>`:''}</div>
+        <div class="key"><span><em style="color:#D0336B">＋</em> ${u('same')}</span><span><em style="color:#1E88C8">−</em> ${u('opp')}</span><span><em>∥</em> ${u('delay')}</span>${c.data.length?`<span><em style="color:#E8790C">■</em> ${u('front')}${c.dataNote?esc(c.dataNote):''}</span>`:''}</div>
+        <ol class="story">${c.story.map((s,i,a)=>`<li>${esc(s)}${i===a.length-1?` <span class="again">${u('again')}</span>`:''}</li>`).join('')}</ol>
+        <div class="hint"><b>${u('hint')}</b>
+          ${[['t','🏛️',...u('levT')],['b','🙋',...u('levB')],['a','💴',...u('levA')]].map(([k,ic,nm,sub])=>`<div class="lev"><span class="ln">${ic}${nm}<small>${sub}</small></span><span class="lt">${esc(c.lev[k])}</span></div>`).join('')}
+        </div>
+      </div>`}
+    </section>
+   </div>
+  </div>`;};
+  document.getElementById('grid').innerHTML=ORDER.filter(visCard).map(i=>html(CARDS[i],i)).join('');
+  document.querySelectorAll('.card').forEach(el=>{
+    const flip=()=>{const done=()=>{el.classList.toggle('flipped');el.setAttribute('aria-pressed',el.classList.contains('flipped'));};
+      const inn=el.querySelector('.inner');
+      if(window.matchMedia('(prefers-reduced-motion: reduce)').matches||!inn.animate){done();return;}
+      if(el._flipping)return;el._flipping=true;
+      inn.animate([{transform:'scaleX(1)'},{transform:'scaleX(0)'}],{duration:170,easing:'ease-in'}).onfinish=()=>{done();
+        inn.animate([{transform:'scaleX(0)'},{transform:'scaleX(1)'}],{duration:210,easing:'ease-out'}).onfinish=()=>{el._flipping=false;};};};
+    el.addEventListener('click',e=>{if(e.target.closest('a,.grip,.cand,.udel,.pclr,.pgo')||justDragged)return;flip();});
+    const ud=el.querySelector('.udel');if(ud){ud.addEventListener('click',e=>{e.stopPropagation();if(confirm(mk('delQ')))deleteUser(+el.dataset.ix);});ud.addEventListener('keydown',e=>e.stopPropagation());}
+    el.querySelectorAll('.cand').forEach(cb=>cb.addEventListener('click',e=>{e.stopPropagation();
+      const c=loc(CARDS[+el.dataset.ix],+el.dataset.ix),id=cb.dataset.cand,v=c.candView[id],T=TYPES.find(t=>t.id===id);
+      const pc={id,focus:c.up,signs:v.signs,pos:v.pos,L:v.L,loops:v.loops,nm:T[LANG][0],names:v.names,pr:[DR[id]||Object.keys(ARCH[id].roles)[0]],data:v.data||[]};
+      document.getElementById('dlgc').innerHTML=`<h2 style="color:${T.c}">${esc(T[LANG][0])}${u('candH')}</h2><div class="prob${c.up?' tq':''}">${c.up?u('qL'):u('probL')}${esc(v.prob)}</div>${cldSVG(pc)}
+        <ol class="story dstory" style="--c:${T.c}">${v.story.map(x=>`<li>${esc(x)}</li>`).join('')}</ol><div class="read" style="--c:${T.c}">${u('candNote')}</div>${c.series?`<div class="projgo"><button type="button" class="btn mkpri" id="projGo">${u('projGo')}</button><span>${u('projGoSub')}</span></div>`:''}`;
+      const pg=document.getElementById('projGo');if(pg)pg.onclick=()=>{document.getElementById('dlg').close();setPick(+el.dataset.ix,id);};
+      document.getElementById('dlg').showModal();}));
+    const pgb=el.querySelector('.pgo');if(pgb){pgb.addEventListener('click',e=>{e.stopPropagation();setPick(+el.dataset.ix,CARDS[+el.dataset.ix].id);});pgb.addEventListener('keydown',e=>e.stopPropagation());}
+    const pcl=el.querySelector('.pclr');if(pcl){pcl.addEventListener('click',e=>{e.stopPropagation();setPick(+el.dataset.ix,null);});pcl.addEventListener('keydown',e=>e.stopPropagation());}
+    el.querySelectorAll('.cand').forEach(cb=>cb.addEventListener('keydown',e=>e.stopPropagation()));
+    const zb=el.querySelector('.zoom');if(zb)zb.addEventListener('click',e=>{e.stopPropagation();const c=loc(CARDS[+el.dataset.ix],+el.dataset.ix);
+      document.getElementById('dlgc').innerHTML=`<h2 style="color:${c.c}">${esc(c.nm)} <small style="font-size:13px;color:#6B7088">${esc(c.en)}</small></h2><div class="prob">${u('probL')}${esc(c.prob)}</div>${cldSVG(c)}<div class="read" style="--c:${c.c}">${u('point')}${esc(c.read)}</div>`;
+      document.getElementById('dlg').showModal();});
+    if(zb)zb.addEventListener('keydown',e=>e.stopPropagation());
+    el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();flip();}});
+  });
+}
+function applyLang(){
+  document.documentElement.lang=LANG;document.body.classList.toggle('en',LANG==='en');
+  applyEd(true);
+  const bl=(id,t,ti)=>{const b=document.getElementById(id);b.querySelector('.bl').textContent=t;if(ti)b.title=ti;};
+  bl('guess',u('guess'),u('guessT'));bl('mkBtn',mk('btn'));bl('saveBtn',mk('save'),mk('saveT'));bl('reset',u('reset'),u('resetT'));
+  document.getElementById('note').textContent=u('note');document.getElementById('help').setAttribute('aria-label',u('help'));document.getElementById('help').title=u('help');['zout','zin'].forEach(k=>{const b=document.getElementById(k);b.title=u(k);b.setAttribute('aria-label',u(k));});layout();document.getElementById('dlgx').textContent=u('close');
+  const lb=document.getElementById('lang');lb.querySelector('.bl').textContent=u('lang');lb.lang=LANG==='en'?'ja':'en';
+  render();renderTypes();applyFilter();
+}
+
+
+
+// ===== 型の一覧 =====
+const TYPES=[
+ {id:'fixes',c:'#E5533D',ja:['応急処置の失敗','その場しのぎが、あとで裏目に'],en:['Fixes that fail','Quick fixes backfire later']},
+ {id:'burden',c:'#E8790C',ja:['問題の転嫁','すぐ効く方法に、頼りきり'],en:['Shifting the burden','Relying on the quick fix']},
+ {id:'drift',c:'#7A4EAB',ja:['目標のなし崩し','目標が、だんだん下がっていく'],en:['Drifting goals','The goal slowly slips down']},
+ {id:'limits',c:'#14A37F',ja:['成功の限界','伸びたあと、頭打ち'],en:['Limits to success','Grows, then hits a ceiling']},
+ {id:'under',c:'#00879A',ja:['成長と投資不足','人気に、準備が追いつかない'],en:['Growth and underinvestment','Demand outpaces preparation']},
+ {id:'escalation',c:'#B83A2E',ja:['エスカレーション','はり合うほど、エスカレート'],en:['Escalation','The more they compete, the worse it gets']},
+ {id:'commons',c:'#2E86C1',ja:['共有地の悲劇','みんなで使いすぎて、なくなる'],en:['Tragedy of the commons',"Overused by all, until it's gone"]},
+ {id:'success',c:'#C2457E',ja:['成功には成功を','勝つほど有利になり、差が開く'],en:['Success to the successful','Winners keep winning; the gap widens']}
+];
+const TXT={ja:{btn:'📘 型の一覧',t:'型の一覧',n:'押すと、その型のカードが光るよ',ng:'あてっこ中は、カードは光りません',good:'良い',bad:'悪い',time:'時間 →',cnt:'データカード',mai:'枚',none:'データカードはまだありません',
+  esc:'AとBがはり合う',win:'勝つ側',lose:'負ける側',all:'すべて表示'},
+ en:{btn:'📘 Pattern guide',t:'Pattern guide',n:'Tap a pattern to highlight its cards',ng:'No highlighting in guess mode',good:'Good',bad:'Bad',time:'time →',cnt:'Data cards: ',mai:'',none:'No data cards yet',
+  esc:'A and B compete',win:'winner',lose:'loser',all:'Show all'}};
+const tt=k=>TXT[LANG][k];
+let FILTER=null;
+function typeSVG(T){
+  const W=200,H=112,x0=34,x1=W-10,yT=12,y0=H-28,X=t=>x0+(x1-x0)*t,Y=v=>yT+(y0-yT)*(1-v);
+  const curve=P=>{let d=`M${X(P[0][0])},${Y(P[0][1])}`;for(let i=1;i<P.length;i++){const[a,b]=P[i-1],[c,e]=P[i],mx=(a+c)/2;d+=` C${X(mx)},${Y(b)} ${X(mx)},${Y(e)} ${X(c)},${Y(e)}`;}return d;};
+  const lines=TYP[T.id];let g=`<path d="M${x0},${yT-4}V${y0}H${x1+4}" fill="none" stroke="#23263A" stroke-opacity=".3" stroke-width="1.5" stroke-dasharray="2 4"/>
+   <text x="${x0-5}" y="${yT+4}" font-size="10" text-anchor="end" fill="#6B7088" font-weight="700">${tt('good')}</text>
+   <text x="${x0-5}" y="${y0}" font-size="10" text-anchor="end" fill="#6B7088" font-weight="700">${tt('bad')}</text>
+   <text x="${x1+4}" y="${H-10}" font-size="10" text-anchor="end" fill="#6B7088">${tt('time')}</text>`;
+  lines.forEach((P,i)=>{const col=i?`color-mix(in srgb, ${T.c} 45%, #B9A0A8)`:T.c;
+    g+=`<path d="${curve(P)}" fill="none" stroke="${col}" stroke-width="7" stroke-linecap="round"/>`;
+    const f=P[0],l=P[P.length-1];g+=`<circle cx="${X(f[0])}" cy="${Y(f[1])}" r="3.5" fill="#23263A"/><circle cx="${X(l[0])}" cy="${Y(l[1])}" r="3.5" fill="#23263A"/>`;});
+  if(T.id==='escalation')g+=`<text x="${x0+6}" y="${yT+2}" font-size="9.5" fill="#6B7088">${tt('esc')}</text>`;
+  if(T.id==='success'){const P=lines[0],Q=lines[1];g+=`<text x="${X(1)-4}" y="${Y(P[P.length-1][1])-7}" font-size="9.5" text-anchor="end" fill="#6B7088">${tt('win')}</text><text x="${X(1)-4}" y="${Y(Q[Q.length-1][1])-7}" font-size="9.5" text-anchor="end" fill="#6B7088">${tt('lose')}</text>`;}
+  return `<svg viewBox="0 0 ${W} ${H}" aria-hidden="true">${g}</svg>`;
+}
+function renderTypes(){
+  document.getElementById('typesT').textContent=tt('t');document.getElementById('typesBtn').querySelector('.bl').textContent=tt('t');
+  document.getElementById('typesN').textContent=document.body.classList.contains('guess')?tt('ng'):tt('n');
+  document.getElementById('tgrid').innerHTML=TYPES.map(T=>{const [nm,tag]=T[LANG],other=T[LANG==='en'?'ja':'en'][0],n=ORDER.filter(i=>visCard(i)&&CARDS[i].id===T.id).length;
+    return `<button type="button" class="tcard${FILTER===T.id?' on':''}" data-t="${T.id}" style="--c:${T.c}" aria-pressed="${FILTER===T.id}">
+      <b>${esc(nm)}</b><span class="tg">${esc(tag)}</span>${typeSVG(T)}<span class="te">${esc(other)}</span>
+      <span class="tn">${n?tt('cnt')+n+tt('mai'):tt('none')}</span></button>`;}).join('');
+  document.querySelectorAll('.tcard').forEach(b=>b.addEventListener('click',()=>{FILTER=FILTER===b.dataset.t?null:b.dataset.t;applyFilter();renderTypes();const h=document.querySelector('#grid .card.hit');if(h)h.scrollIntoView({behavior:'smooth',block:'center'});}));
+}
+document.getElementById('help').addEventListener('click',e=>{e.stopPropagation();const p=document.getElementById('helpPop'),on=p.hidden;p.hidden=!on;e.currentTarget.setAttribute('aria-expanded',on);});
+document.addEventListener('click',e=>{if(!e.target.closest('.helpw')){const p=document.getElementById('helpPop');if(!p.hidden){p.hidden=true;document.getElementById('help').setAttribute('aria-expanded',false);}}});
+function openDrawer(open){const d=document.getElementById('drawer'),b=document.getElementById('typesBtn');
+  d.hidden=!open;b.setAttribute('aria-expanded',open);b.setAttribute('aria-pressed',open);document.body.classList.toggle('drawer-open',open);layout();}
+document.getElementById('typesBtn').addEventListener('click',()=>openDrawer(document.getElementById('drawer').hidden));
+document.getElementById('drawerX').addEventListener('click',()=>openDrawer(false));
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.getElementById('drawer').hidden)openDrawer(false);});
+function applyFilter(){
+  const on=FILTER&&!document.body.classList.contains('guess');
+  document.querySelectorAll('#grid .card').forEach(el=>{const c=CARDS[+el.dataset.ix];
+    el.classList.toggle('dim',!!on&&c.id!==FILTER);el.classList.toggle('hit',!!on&&c.id===FILTER);});
+}
+
+// ===== 編（食のシステム編／都市デザイン編／すべて）=====
+let EDITION=(()=>{const e=new URLSearchParams(location.search).get('ed');return ['food','urban','all'].includes(e)?e:'food';})();
+const edOf=c=>c.ed||'food';
+const visCard=i=>{const c=CARDS[i];return c&&!c.deleted&&(EDITION==='all'||edOf(c)===EDITION);};
+function applyEd(quiet){
+  const nm={food:u('edFood'),urban:u('edUrban'),all:u('edAll')},tt={food:u('titleFood'),urban:u('titleUrban'),all:u('titleAll')};
+  document.getElementById('h1').textContent=nm[EDITION];document.title=tt[EDITION];
+  document.body.classList.toggle('ed-urban',EDITION==='urban');document.body.classList.toggle('ed-all',EDITION==='all');
+  document.querySelectorAll('.eds .ed').forEach(b=>{const on=b.dataset.ed===EDITION;b.setAttribute('aria-selected',on);b.tabIndex=on?0:-1;
+    b.textContent=nm[b.dataset.ed];});
+  document.querySelector('.eds').setAttribute('aria-label',u('edL'));
+  if(!quiet){try{const q=new URL(location.href);if(EDITION==='food')q.searchParams.delete('ed');else q.searchParams.set('ed',EDITION);history.replaceState(null,'',q);}catch(e){}}
+}
+function setEd(e){if(e===EDITION)return;EDITION=e;FILTER=null;applyEd();
+  const g=document.getElementById('grid');g.classList.add('edfade');
+  setTimeout(()=>{render();renderTypes();applyFilter();layout();g.classList.remove('edfade');},180);}
+document.querySelectorAll('.eds .ed').forEach(b=>{b.addEventListener('click',()=>setEd(b.dataset.ed));
+  b.addEventListener('keydown',e=>{if(e.key!=='ArrowRight'&&e.key!=='ArrowLeft')return;const L=[...document.querySelectorAll('.eds .ed')],k=L.indexOf(b),n=L[(k+(e.key==='ArrowRight'?1:L.length-1))%L.length];n.focus();n.click();});});
+// ===== カードの大きさ（列の数）を変える =====
+const BASE_W=400;           // カードのもとの幅
+let COLS=null;              // null＝画面の幅に合わせる
+function layout(){
+  const g=document.getElementById('grid');if(!g)return;
+  const W=g.clientWidth,auto=Math.max(1,Math.min(6,Math.floor((W+22)/350)));
+  const maxC=Math.max(1,Math.min(8,Math.floor((W+10)/170)));
+  let c=COLS==null?auto:Math.max(1,Math.min(maxC,COLS));
+  const gap=c>=5?14:c===4?18:22,z=Math.min(2,((W-gap*(c-1))/c)/BASE_W);
+  g.style.setProperty('--cols',c);g.style.setProperty('--gap',gap+'px');g.style.setProperty('--z',z.toFixed(4));
+  ZOOM=z;CUR=c;
+  document.getElementById('cols').textContent=c+u('cols');
+  document.getElementById('zout').disabled=c>=maxC;document.getElementById('zin').disabled=c<=1||z>=1.999;
+}
+let ZOOM=1,CUR=3;
+document.getElementById('zout').addEventListener('click',()=>{COLS=CUR+1;layout();});
+document.getElementById('zin').addEventListener('click',()=>{COLS=CUR-1;layout();});
+window.addEventListener('resize',layout);
+// ===== ドラッグで並びかえ（マウスはカードのどこでも、タッチは「移動」のつまみから） =====
+let justDragged=false,drag=null;
+const grid=document.getElementById('grid');
+grid.addEventListener('pointerdown',e=>{
+  const el=e.target.closest('.card');if(!el||e.button!==0)return;
+  if(e.target.closest('a,button'))return;
+  if(e.pointerType!=='mouse'&&!e.target.closest('.grip'))return;
+  drag={el,id:e.pointerId,x0:e.clientX,y0:e.clientY,on:false};
+});
+window.addEventListener('pointermove',e=>{
+  if(!drag||e.pointerId!==drag.id)return;
+  const {el}=drag;
+  if(!drag.on){
+    if(Math.hypot(e.clientX-drag.x0,e.clientY-drag.y0)<8)return;
+    const r=el.getBoundingClientRect();
+    drag.on=true;drag.z=ZOOM;drag.dx=e.clientX-r.left;drag.dy=e.clientY-r.top;
+    drag.ph=document.createElement('div');drag.ph.className='ph';drag.ph.style.height=r.height+'px';
+    el.parentNode.insertBefore(drag.ph,el);
+    const z=drag.z;Object.assign(el.style,{width:r.width/z+'px',height:r.height/z+'px',left:r.left/z+'px',top:r.top/z+'px'});
+    el.classList.add('dragging');document.body.classList.add('is-dragging');
+  }
+  e.preventDefault();
+  el.style.left=(e.clientX-drag.dx)/drag.z+'px';el.style.top=(e.clientY-drag.dy)/drag.z+'px';
+  if(e.clientY<70)window.scrollBy(0,-14);else if(e.clientY>innerHeight-70)window.scrollBy(0,14);
+  const t=document.elementsFromPoint(e.clientX,e.clientY).find(n=>n.classList&&n.classList.contains('card')&&n!==el);
+  if(t){const r=t.getBoundingClientRect(),after=e.clientX>r.left+r.width/2;
+    t.parentNode.insertBefore(drag.ph,after?t.nextSibling:t);}
+},{passive:false});
+const endDrag=e=>{
+  if(!drag||(e&&e.pointerId!==drag.id))return;
+  const d=drag;drag=null;if(!d.on)return;
+  d.ph.replaceWith(d.el);d.el.classList.remove('dragging');document.body.classList.remove('is-dragging');
+  ['width','height','left','top'].forEach(k=>d.el.style[k]='');
+  {const shown=[...grid.querySelectorAll('.card')].map(c=>+c.dataset.ix),rest=ORDER.filter(i=>!shown.includes(i));ORDER.splice(0,ORDER.length,...shown,...rest);}
+  justDragged=true;setTimeout(()=>justDragged=false,60);
+};
+window.addEventListener('pointerup',endDrag);
+// ===== カードにマウスを当てると、表のグラフが少し動く =====
+const RM=window.matchMedia('(prefers-reduced-motion: reduce)');
+function play(el){
+  if(RM.matches||el.classList.contains('flipped')||el.classList.contains('dragging'))return;
+  const fr=el.querySelector('.front');if(!fr)return;
+  fr.querySelectorAll('path.dl').forEach((p,i)=>{const L=p.getTotalLength();if(!L)return;
+    const da=p.getAttribute('stroke-dasharray');
+    p.animate(da?[{opacity:0},{opacity:1}]:[{strokeDasharray:L+' '+L,strokeDashoffset:L},{strokeDasharray:L+' '+L,strokeDashoffset:0}],{duration:da?400:650+i*120,easing:'cubic-bezier(.3,.1,.2,1)'});});
+  fr.querySelectorAll('.chart circle').forEach((c,i)=>{c.style.transformBox='fill-box';c.style.transformOrigin='center';
+    c.animate([{transform:'scale(0)'},{transform:'scale(1.6)',offset:.7},{transform:'scale(1)'}],{duration:400,delay:450+i*20,easing:'ease-out',fill:'backwards'});});
+  fr.querySelectorAll('rect.bar').forEach((r,i)=>{r.style.transformBox='fill-box';r.style.transformOrigin='bottom';
+    r.animate([{transform:'scaleY(0)'},{transform:'scaleY(1)'}],{duration:600,delay:i*90,easing:'cubic-bezier(.3,1.4,.5,1)',fill:'backwards'});});
+  fr.querySelectorAll('path.fr').forEach((p,i)=>{p.animate([{transform:'translateX(0)'},{transform:'translateX(-3px)'},{transform:'translateX(2px)'},{transform:'translateX(0)'}],{duration:700,delay:i*40,easing:'ease-in-out'});});
+}
+grid.addEventListener('pointerover',e=>{const el=e.target.closest('.card');if(!el||e.pointerType!=='mouse')return;
+  if(el._hov)return;el._hov=true;play(el);});
+grid.addEventListener('pointerout',e=>{const el=e.target.closest('.card');if(!el)return;
+  if(!e.relatedTarget||!el.contains(e.relatedTarget))el._hov=false;});
+grid.addEventListener('focusin',e=>{const el=e.target.closest('.card');if(el)play(el);});
+window.addEventListener('pointercancel',endDrag);
+
+// ===== データから新しいカードを作る（1 データ入力 → 2 振る舞いの候補 → 3 人が選んで直す） =====
+const UKEY='sbc-user-cards-v1',DKEY='sbc-deleted-v1';
+// HTMLに保存したときに、作ったカードがここに書きこまれる
+const SEED=[]/*SEED*/;
+const DR={fixes:'P',burden:'S',drift:'A',limits:'S',under:'D',escalation:'R',commons:'G',success:'Ae'};
+const DR2={success:'Be',escalation:'Ba'};
+const GEN={ja:{
+ fixes:{P:'{X}',F:'応急処置',U:'意図しない\n結果'},
+ burden:{S:'{X}',Q:'対処療法',E:'副作用',F:'根本的な\n解決策'},
+ drift:{G:'目標の\nレベル',A:'{X}',Gp:'目標との差',Pr:'目標を下げる\n圧力',C:'是正の\n取り組み'},
+ limits:{E:'努力・\n取り組み',S:'{X}',B:'成長を妨げる\n動き',C:'制約'},
+ under:{Eg:'成長への\n取り組み',D:'{X}',Lm:'制約の\n影響',N:'投資の必要性\nの認識',I:'能力への\n投資'},
+ escalation:{Aa:'Aの行動',R:'{X}',Ba:'Bの行動',Ta:'Aにとって\nの脅威',Tb:'Bにとって\nの脅威'},
+ commons:{Aa:'Aの利用量',Ba:'Bの利用量',T:'利用量の\n合計',G:'{X}',Lm:'資源の限界'},
+ success:{Ae:'{X}',Ar:'Aへの資源',Al:'Aへの\nかたより',Be:'{Y}',Br:'Bへの資源'}},
+en:{
+ fixes:{P:'{X}',F:'Quick fix',U:'Unintended\nconsequence'},
+ burden:{S:'{X}',Q:'Symptomatic\nfix',E:'Side effect',F:'Fundamental\nsolution'},
+ drift:{G:'Goal level',A:'{X}',Gp:'Gap to goal',Pr:'Pressure to\nlower the goal',C:'Corrective\naction'},
+ limits:{E:'Effort',S:'{X}',B:'Limiting\naction',C:'Constraint'},
+ under:{Eg:'Growth\neffort',D:'{X}',Lm:'Effect of\nconstraint',N:'Perceived need\nto invest',I:'Investment\nin capacity'},
+ escalation:{Aa:"A's action",R:'{X}',Ba:"B's action",Ta:'Threat to A',Tb:'Threat to B'},
+ commons:{Aa:"A's use",Ba:"B's use",T:'Total use',G:'{X}',Lm:'Resource\nlimit'},
+ success:{Ae:'{X}',Ar:'Resources\nto A',Al:'Tilt toward A',Be:'{Y}',Br:'Resources\nto B'}}};
+const GSTORY={ja:{
+ fixes:['「{X}」が問題になる','すぐ効く手当てで、その場は良くなる','手当ての意図しない結果が、遅れて出てくる','前より悪くなり、また手当てに頼る'],
+ burden:['「{X}」が問題になる','すぐ効く方法で、その場はしのぐ','副作用で、根本的な解決の力が弱まる','根本から直らず、また同じ問題が起きる'],
+ drift:['目標と「{X}」の差が大きい','「無理だ」という声が強まる','目標のほうが、少しずつ下がる','取り組みが弱まり、「{X}」もさらに下がる'],
+ limits:['取り組みで「{X}」が伸びる','伸びた成果が、さらに取り組みを後押しする','でも、伸びるほど制約によるブレーキが強まる','やがて頭打ちになる'],
+ under:['取り組みで「{X}」が伸びる','伸びるほど、制約の影響が大きくなる','能力への投資が必要だと気づく','投資が遅れ、伸びが止まって下がり始める'],
+ escalation:['Aが動くと、Bにとっての脅威が強まる','Bが張り合って、もっと強く動く','今度はAにとっての脅威が強まる','おたがいに強まり、エスカレートしていく'],
+ commons:['それぞれが、みんなの資源を使う','利用量の合計が、資源の限界に近づく','しばらくして「{X}」が下がる','もっと使おうとして、さらに悪くなる'],
+ success:['少しうまくいった側に、資源が集まる','資源で、さらにうまくいく','もう一方には、資源が回らない','差がどんどん広がる']},
+en:{
+ fixes:['"{X}" becomes a problem','A quick fix makes things better for now','Unintended consequences appear later','Things get worse, and the quick fix is used again'],
+ burden:['"{X}" becomes a problem','A quick fix gets us through for now','Side effects weaken the fundamental solution','The root cause stays, and the problem returns'],
+ drift:['The gap between the goal and "{X}" is large','Voices saying "it\'s impossible" grow','The goal slowly slips lower','Effort weakens, and "{X}" falls further'],
+ limits:['Effort makes "{X}" grow','Results encourage even more effort','But the brake from a constraint gets stronger','Eventually it levels off'],
+ under:['Effort makes "{X}" grow','The constraint matters more as it grows','People notice the need to invest','Investment comes late, growth stops and starts to fall'],
+ escalation:["When A acts, the threat to B grows",'B competes and acts even harder','Then the threat to A grows','Both keep escalating'],
+ commons:['Each party uses the shared resource','Total use approaches the resource limit','After a while, "{X}" falls','People try to use more, making it worse'],
+ success:['Resources flow to the side that did a bit better','Resources make it do even better','The other side gets few resources','The gap keeps widening']}};
+const GPROB={ja:{fixes:'「{X}」が、結局よくならない',burden:'「{X}」が、根本から直らない',drift:'「{X}」が、少しずつ下がっていく',limits:'「{X}」が、途中で伸びなくなる',under:'「{X}」が、途中から下がってしまう',escalation:'張り合いが、どんどん激しくなる',commons:'「{X}」が、みんなで使ううちに下がる',success:'「{Y}」の側が、取り残される'},
+ en:{fixes:'"{X}" never really improves',burden:'"{X}" is never fixed at the root',drift:'"{X}" slowly falls',limits:'"{X}" stops growing partway',under:'"{X}" starts falling partway',escalation:'The competition keeps intensifying',commons:'"{X}" falls as everyone uses the resource',success:'The "{Y}" side gets left behind'}};
+const MK={ja:{btn:'データから作る',save:'HTMLに保存',saveT:'作ったカードも入れて、このページをHTMLファイルに保存',saveNg:'保存できませんでした',plotted:'表のグラフの変数',h:'データからカードを作る',s1:'1　時系列データを入れる',s2:'2　振る舞いの候補',s3:'3　型を選んで、直す',
+  file:'CSVファイルを選ぶ',paste:'またはCSVを貼りつける（Excelからのコピーも可）',owid:'Our World in Data のURL',owidGo:'読み込む',
+  owidNg:'このページからはOur World in Dataに直接つなげません。グラフの「Download」→「Full data (CSV)」で保存して、ファイルを選んでください。',
+  read:'読みこむ',pick:'使う系列（2つまで）',col:'値の列',vname:'変数の名前',unit:'単位',dir:'この変数は',good:'増えると良い',bad:'減ると良い',src:'出典の名前',srcU:'出典のURL（任意）',
+  aiGo:'AIで候補を作る',autoGo:'形から候補を出す（AIなし）',aiWait:'AIが考えています…',aiNg:'AIの返答を受け取れなかったため、グラフの形から候補を出しました。',
+  why:'この型だと思う理由',sel:'カードにする',ttl:'カードの見出し',probL:'問題',vars:'変数（増減の言葉は入れず、量の名前で）',story:'ぐるっと一周（1行に1つ）',lev:'ぬけ出すヒント',
+  one:'1つ選ぶと、その型のカードになります。2つ以上選ぶと「型を考えるカード」になります。',make:'カードを追加',need:'候補を1つ以上選んでください',noData:'データが読みこめませんでした。「年,値」の形か、Our World in DataのCSVか確かめてください。',
+  made:'カードを追加しました',del:'このカードを削除',delQ:'このカードを削除しますか？（元にもどせません）',mine:'自作',hyp:'データの形からの仮説',none:'（書きこもう）',
+  shapeR:{drift:'少しずつ下がり続けている',limits:'大きく伸びたあと、伸びがゆるやかになった',under:'伸びたあと、途中から下がり始めた',fixes:'いったん良くなったあと、前より悪くなった',burden:'上がったり下がったりをくり返しながら、良くならない',commons:'しばらく伸びたあと、終わりのほうで急に下がった',success:'2つの系列の差が広がっている',escalation:'2つの系列が、からみ合いながら同じ向きに動いている'}},
+ en:{btn:'Make from data',save:'Save HTML',saveT:'Save this page as an HTML file, including the cards you made',saveNg:'Could not save the file',plotted:'Plotted variable',h:'Make a card from data',s1:'1  Enter time-series data',s2:'2  Candidate behaviors',s3:'3  Choose a pattern and edit',
+  file:'Choose a CSV file',paste:'Or paste CSV (copy from Excel works too)',owid:'Our World in Data URL',owidGo:'Load',
+  owidNg:'This page cannot connect to Our World in Data directly. Use "Download" → "Full data (CSV)" on the chart, save it, and choose the file.',
+  read:'Read',pick:'Series to use (up to 2)',col:'Value column',vname:'Variable name',unit:'Unit',dir:'This variable is',good:'better when higher',bad:'better when lower',src:'Source name',srcU:'Source URL (optional)',
+  aiGo:'Generate candidates with AI',autoGo:'Suggest from the shape (no AI)',aiWait:'AI is thinking…',aiNg:'No answer came back from AI, so candidates were suggested from the shape of the graph.',
+  why:'Why this pattern',sel:'Use for the card',ttl:'Card headline',probL:'Problem',vars:'Variables (quantities, no "increase/decrease" words)',story:'Around the loop (one per line)',lev:'Ways out',
+  one:'Choose one to make a card of that pattern. Choose two or more to make a "Which pattern is it?" card.',make:'Add card',need:'Choose at least one candidate',noData:'Could not read the data. Check that it is "year,value" or an Our World in Data CSV.',
+  made:'Card added',del:'Delete this card',delQ:'Delete this card? (This cannot be undone)',mine:'Mine',hyp:'Hypothesis from the data shape',none:'(write here)',
+  shapeR:{drift:'It keeps slowly falling',limits:'After rising a lot, growth slowed down',under:'After rising, it started falling partway',fixes:'It improved for a while, then got worse than before',burden:'It goes up and down without really improving',commons:'After rising for a while, it dropped sharply near the end',success:'The gap between the two series is widening',escalation:'The two series move the same way, intertwined'}}};
+const mk=k=>MK[LANG][k];
+
+// --- CSV を読む ---
+function parseCSV(t){
+  t=t.replace(/^\uFEFF/,'');const sep=(t.split('\n')[0].match(/\t/g)||[]).length>(t.split('\n')[0].match(/,/g)||[]).length?'\t':',';
+  const rows=[];let row=[],f='',q=false;
+  for(let i=0;i<t.length;i++){const ch=t[i];
+    if(q){if(ch==='"'){if(t[i+1]==='"'){f+='"';i++;}else q=false;}else f+=ch;}
+    else if(ch==='"')q=true;else if(ch===sep){row.push(f);f='';}else if(ch==='\n'||ch==='\r'){if(ch==='\r'&&t[i+1]==='\n')i++;row.push(f);rows.push(row);row=[];f='';}else f+=ch;}
+  if(f||row.length){row.push(f);rows.push(row);}
+  return rows.filter(r=>r.some(x=>x.trim()!==''));
+}
+// 表を「系列 → [年,値]」に直す。OWIDの形（Entity, Code, Year, 値…）と、横長の形（年, 系列1, 系列2…）に対応
+function toSeries(rows){
+  if(rows.length<3)return null;
+  const H=rows[0].map(x=>x.trim()),lo=H.map(x=>x.toLowerCase());
+  const ei=lo.indexOf('entity'),yi=lo.findIndex(x=>x==='year'||x==='年'||x==='年度'||x==='date');
+  const num=v=>{const n=parseFloat(String(v).replace(/[, ]/g,''));return isFinite(n)?n:null;};
+  if(ei>=0&&yi>=0){
+    const vcols=H.map((h,i)=>i).filter(i=>i!==ei&&i!==yi&&lo[i]!=='code'&&rows.slice(1).some(r=>num(r[i])!=null));
+    if(!vcols.length)return null;
+    const byCol={};vcols.forEach(ci=>{const m={};rows.slice(1).forEach(r=>{const y=num(r[yi]),v=num(r[ci]);if(y==null||v==null)return;(m[r[ei]]=m[r[ei]]||[]).push([y,v]);});byCol[H[ci]]=m;});
+    return {kind:'owid',cols:vcols.map(i=>H[i]),byCol};
+  }
+  const y0=yi>=0?yi:0;
+  const vcols=H.map((h,i)=>i).filter(i=>i!==y0&&rows.slice(1).some(r=>num(r[i])!=null));
+  if(!vcols.length||!rows.slice(1).some(r=>num(String(r[y0]).slice(0,4))!=null))return null;
+  const m={};vcols.forEach(ci=>{m[H[ci]||('series '+ci)]=rows.slice(1).map(r=>[num(String(r[y0]).slice(0,4)),num(r[ci])]).filter(p=>p[0]!=null&&p[1]!=null);});
+  return {kind:'wide',cols:['value'],byCol:{value:m}};
+}
+// --- 形から候補を出す（AIなしでも動く） ---
+function shapeCandidates(series,betterLow){
+  const norm=h=>{const v=h.map(p=>p[1]*(betterLow?-1:1)),a=Math.min(...v),b=Math.max(...v),r=(b-a)||1;return v.map(x=>(x-a)/r);};
+  const y=norm(series[0].h),n=y.length,first=y[0],last=y[n-1],mid=y[Math.floor(n/2)];
+  const inner=y.slice(1,-1),mx=Math.max(...inner),mn=Math.min(...inner),imx=y.indexOf(mx);
+  let sgn=0,flips=0;for(let i=1;i<n;i++){const d=Math.sign(y[i]-y[i-1]);if(d&&sgn&&d!==sgn)flips++;if(d)sgn=d;}
+  const osc=flips/Math.max(1,n-2),trend=last-first,early=Math.abs(mid-first),late=Math.abs(last-mid);
+  const tail=y.slice(Math.floor(n*.8)),tailDrop=Math.max(...y.slice(0,Math.floor(n*.8)))-Math.min(...tail);
+  const S={};
+  S.drift=Math.max(0,-trend)*(1-osc)*(mx<=Math.max(first,.6)?1:.5);
+  S.limits=trend>0?Math.max(0,trend)*(early/(early+late+1e-6))*(1-osc):0;
+  S.under=Math.max(0,mx-Math.max(first,last))*(last>first?1.1:.7)*(imx>n*.25&&imx<n*.9?1:.4);
+  S.fixes=Math.max(0,mx-Math.max(first,last))*(last<first?1.2:.4);
+  S.burden=osc*(trend<=0.05?1:.5)*.9;
+  S.commons=(imx>n*.5?1:.3)*Math.max(0,tailDrop-.35)*(trend<.2?1:.5)*1.3;
+  if(series[1]){const z=norm(series[1].h),m=Math.min(y.length,z.length);
+    const g0=Math.abs(y[0]-z[0]),g1=Math.abs(y[m-1]-z[m-1]);
+    const raw=(i,s)=>s.h[i]?s.h[i][1]:null;const gr0=Math.abs(raw(0,series[0])-raw(0,series[1])),gr1=Math.abs(raw(series[0].h.length-1,series[0])-raw(series[1].h.length-1,series[1]));
+    S.success=Math.max(0,(gr1-gr0)/(Math.max(gr0,gr1)||1))*1.2;
+    let cross=0;for(let i=1;i<m;i++)if(Math.sign(y[i]-z[i])!==Math.sign(y[i-1]-z[i-1]))cross++;
+    S.escalation=(cross>=2?.45:0)+(cross>=2&&Math.sign(y[m-1]-y[0])===Math.sign(z[m-1]-z[0])?.1:0);
+  }
+  const list=Object.entries(S).filter(([k,v])=>v>0).sort((a,b)=>b[1]-a[1]).map(([k])=>k);
+  (trend>=0?['limits','under','fixes','burden']:['drift','fixes','burden','commons']).forEach(k=>{if(list.length<2&&!list.includes(k))list.push(k);});
+  return list.slice(0,3);
+}
+function fillT(t,X,Y){return String(t).replaceAll('{X}',X).replaceAll('{Y}',Y||'B');}
+function genericCand(id,X,Y){
+  const L=LANG;return {type:id,why:MK[L].shapeR[id]||'',prob:fillT(GPROB[L][id],X,Y),
+    names:Object.fromEntries(Object.entries(GEN[L][id]).map(([k,v])=>[k,fillT(v,X,Y)])),
+    story:GSTORY[L][id].map(s=>fillT(s,X,Y)),lev:{t:'',b:'',a:''}};
+}
+// --- AIで候補を作る（Claudeの中で開いたときだけ） ---
+// Claude の中で開いたとき（AIが使えるとき）だけ、「データから作る」と「HTMLに保存」を出す
+['mkBtn','saveBtn'].forEach(id=>{const b=document.getElementById(id);if(b)b.hidden=true;});
+let SAMPLE=null;(async()=>{try{if(window.claude&&window.claude.use)SAMPLE=await window.claude.use('sample');}catch(e){SAMPLE=null;}
+  if(SAMPLE){['mkBtn','saveBtn'].forEach(id=>document.getElementById(id).hidden=false);}})();
+async function aiCandidates(series,meta){
+  if(!SAMPLE)return null;
+  const roles=Object.fromEntries(Object.keys(GEN.en).map(id=>[id,Object.keys(ARCH[id].roles)]));
+  const data=series.map(s=>({name:s.name,points:s.h.filter((p,i,a)=>a.length<=40||i%Math.ceil(a.length/40)===0||i===a.length-1)}));
+  const prompt=`You help researchers read time-series data with system archetypes (system dynamics).
+Data (JSON): ${JSON.stringify({variable:meta.vname,unit:meta.unit,betterWhen:meta.betterLow?'lower':'higher',source:meta.src,series:data})}
+Archetypes and the role keys you must use for each: ${JSON.stringify(roles)}
+Archetype ids: fixes (Fixes that fail), burden (Shifting the burden), drift (Drifting goals), limits (Limits to success), under (Growth and underinvestment), escalation, commons (Tragedy of the commons), success (Success to the successful).
+Task: propose 2 or 3 different archetypes whose typical behavior-over-time matches this data, as hypotheses for discussion.
+Rules:
+- Write all text in ${LANG==='en'?'English':'Japanese (simple words for high-school and university students)'}.
+- Variable names must be neutral quantities (amount, number, share, level, strength). Never put direction or change words (increase, decrease, more, less, rise, fall, shortage, 増える, 減る, ふやす, 減らす, 不足, 値上がり) in variable names; direction is shown by arrows.
+- Each variable name at most 14 characters; you may use "\\n" once to break it into two lines.
+- The plotted variable is this role for each type: ${JSON.stringify(DR)}; name it after the data.
+- "why" explains which feature of the data shape fits the archetype (one sentence). Do not claim causation; this is a hypothesis.
+- "story" is 4 short steps around the loop. "lev" gives one short hint each for top-down (policy, regulation), bottom-up (word of mouth, awareness of people around), affordability (financial room, money sense).
+Return only JSON: {"candidates":[{"type":"...","why":"...","prob":"...","names":{"<role key>":"..."},"story":["","","",""],"lev":{"t":"","b":"","a":""}}]}`;
+  try{
+    const r=await SAMPLE.json(prompt,{modelTier:'default'});
+    const c=(r&&r.candidates||[]).filter(x=>ARCH[x.type]&&x.names).slice(0,3).map(x=>{
+      const g=genericCand(x.type,meta.vname,series[1]?series[1].name:'B');
+      const names={};Object.keys(ARCH[x.type].roles).forEach(k=>names[k]=String(x.names[k]||g.names[k]).slice(0,40));
+      return {type:x.type,why:String(x.why||g.why),prob:String(x.prob||g.prob),names,story:(Array.isArray(x.story)&&x.story.length?x.story:g.story).slice(0,5).map(String),lev:{t:String(x.lev?.t||''),b:String(x.lev?.b||''),a:String(x.lev?.a||'')}};});
+    return c.length?c:null;
+  }catch(e){return null;}
+}
+// --- 保存と読み込み ---
+function loadUser(){try{return JSON.parse(localStorage.getItem(UKEY)||'[]');}catch(e){return [];}}
+function saveUser(list){try{localStorage.setItem(UKEY,JSON.stringify(list));}catch(e){}}
+let DELETED=(()=>{try{return JSON.parse(localStorage.getItem(DKEY)||'[]');}catch(e){return [];}})();
+let USER=(()=>{const local=loadUser(),ids=new Set(local.map(r=>r.uid));return SEED.filter(r=>!ids.has(r.uid)&&!DELETED.includes(r.uid)).concat(local);})();
+function registerUser(rec){
+  rec.series.forEach((s,i)=>{D['u_'+rec.uid+'_'+i]={hi:rec.betterLow?(LANG==='en'?'More':'多い'):(LANG==='en'?'More':'多い'),lo:LANG==='en'?'Less':'少ない',name:s.name,u:rec.unit,what:rec.vname+(rec.unit?'（'+rec.unit+'）':''),src:'user:'+rec.uid,h:s.h};});
+  REFS['user:'+rec.uid]=[[rec.src||mk('mine'),rec.srcU||'']];REFS_EN['user:'+rec.uid]=REFS['user:'+rec.uid];
+  const T=TYPES.find(t=>t.id===rec.cands[0].type);
+  const multi=rec.cands.length>1,c0=rec.cands[0];
+  const card={user:1,ed:rec.ed||'food',uid:rec.uid,grp:'user',src:'user:'+rec.uid,usrc:rec.src,bad:rec.betterLow?1:0,
+    id:multi?'think':c0.type,c:multi?'#4A5578':T.c,ttl:rec.ttl,series:rec.series.map((s,i)=>({k:'u_'+rec.uid+'_'+i})),shared:rec.series.length>1?1:0,
+    read:rec.cands.map(c=>c.why).join(' / '),prob:multi?rec.ttl:c0.prob,names:c0.names,pr:[DR[c0.type]],data:[DR[c0.type]].concat(DR2[c0.type]&&rec.series[1]?[DR2[c0.type]]:[]),
+    story:c0.story,lev:{t:c0.lev.t||mk('none'),b:c0.lev.b||mk('none'),a:c0.lev.a||mk('none'),key:'t'},hyp:1};
+  if(multi){card.think=1;card.cands=rec.cands.map(c=>c.type);card.candView=Object.fromEntries(rec.cands.map(c=>[c.type,{prob:c.prob,names:c.names,story:c.story}]));
+    card.others=rec.cands.map(c=>`${TYPES.find(t=>t.id===c.type)[LANG][0]}：${c.why}`);}
+  const ix=CARDS.push(card)-1;return ix;
+}
+USER.forEach(r=>{const ix=registerUser(r);ORDER.push(ix);ORIG_ORDER.push(ix);});
+function uLoc(c){if(c.think)return {...c,nm:u('thinkNm'),tag:u('thinkTag'),en:u('thinkEn')};const T=TYPES.find(t=>t.id===c.id);return {...c,nm:T[LANG][0],tag:T[LANG][1],en:T[LANG==='en'?'ja':'en'][0]};}
+function deleteUser(ix){
+  const c=CARDS[ix];if(!c||!c.user)return;
+  USER=USER.filter(r=>r.uid!==c.uid);saveUser(USER);if(SEED.some(r=>r.uid===c.uid)){DELETED.push(c.uid);try{localStorage.setItem(DKEY,JSON.stringify(DELETED));}catch(e){}}
+  [ORDER,ORIG_ORDER].forEach(a=>{const k=a.indexOf(ix);if(k>=0)a.splice(k,1);});
+  c.deleted=1;render();renderTypes();applyFilter();
+}
+// --- 作成画面 ---
+let MKS=null;
+function openMaker(){
+  MKS={parsed:null,cands:[]};const d=document.getElementById('mkdlg');
+  document.getElementById('mkc').innerHTML=`<h2>${mk('h')}</h2>
+  <section class="mks"><h3>${mk('s1')}</h3>
+    <div class="mkrow"><label class="btn ib mkfile">${mk('file')}<input type="file" id="mkFile" accept=".csv,.tsv,.txt,text/csv" hidden></label></div>
+    <label class="mkl">${mk('paste')}<textarea id="mkPaste" rows="4" placeholder="Entity,Code,Year,Value&#10;World,OWID_WRL,1961,205004683"></textarea></label>
+    <div class="mkrow"><button class="btn" type="button" id="mkRead">${mk('read')}</button></div>
+    <label class="mkl">${mk('owid')}<span class="mkrow"><input id="mkUrl" type="url" placeholder="https://ourworldindata.org/grapher/..."><button class="btn" type="button" id="mkUrlGo">${mk('owidGo')}</button></span></label>
+    <p class="mkmsg" id="mkMsg1" role="status"></p>
+    <div id="mkPick"></div>
+  </section>
+  <section class="mks" id="mkS2" hidden><h3>${mk('s2')}</h3>
+    <div class="mkrow"><button class="btn mkpri" type="button" id="mkAi">${mk('aiGo')}</button></div>
+    <p class="mkmsg" id="mkMsg2" role="status"></p>
+  </section>
+  <section class="mks" id="mkS3" hidden><h3>${mk('s3')}</h3><p class="mknote">${mk('one')}</p>
+    <label class="mkl">${mk('ttl')}<input id="mkTtl"></label>
+    <div id="mkCands"></div>
+    <div class="mkrow"><button class="btn mkpri" type="button" id="mkMake">${mk('make')}</button></div><p class="mkmsg" id="mkMsg3" role="status"></p>
+  </section>`;
+  const $=id=>document.getElementById(id);
+  const readText=t=>{const p=toSeries(parseCSV(t));if(!p){$('mkMsg1').textContent=mk('noData');return;}MKS.parsed=p;$('mkMsg1').textContent='';showPick();};
+  $('mkFile').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>readText(String(r.result));r.readAsText(f);});
+  $('mkRead').addEventListener('click',()=>readText($('mkPaste').value));
+  $('mkUrlGo').addEventListener('click',async()=>{
+    let url=$('mkUrl').value.trim();if(!url)return;
+    try{const U=new URL(url);if(!/ourworldindata\.org$/.test(U.hostname))throw 0;
+      if(U.pathname.startsWith('/grapher/')){U.pathname=U.pathname.replace(/\/$/,'')+'.csv';U.searchParams.set('csvType','filtered');U.searchParams.set('useColumnShortNames','false');}
+      else throw 0;
+      const r=await fetch(U.toString());if(!r.ok)throw 0;readText(await r.text());
+    }catch(e){$('mkMsg1').textContent=mk('owidNg');}
+  });
+  $('mkAi').addEventListener('click',()=>makeCands(true));
+  $('mkMake').addEventListener('click',makeCard);
+  d.showModal();
+}
+function showPick(){
+  const P=MKS.parsed,$=id=>document.getElementById(id);
+  const col=P.cols[0],ents=Object.keys(P.byCol[col]);
+  $('mkPick').innerHTML=`${P.cols.length>1?`<label class="mkl">${mk('col')}<select id="mkCol">${P.cols.map(c=>`<option>${esc(c)}</option>`).join('')}</select></label>`:''}
+   <fieldset class="mkents"><legend>${mk('pick')}</legend><div id="mkEnts"></div></fieldset>
+   <div class="mkgrid"><label class="mkl">${mk('vname')}<input id="mkV" value="${esc(P.kind==='owid'?col:'')}"></label><label class="mkl">${mk('unit')}<input id="mkU"></label>
+   <label class="mkl">${mk('src')}<input id="mkSrc" value="${P.kind==='owid'?'Our World in Data':''}"></label><label class="mkl">${mk('srcU')}<input id="mkSrcU" type="url" value="${esc(document.getElementById('mkUrl').value.trim())}"></label></div>
+   <div class="mkrow"><span>${mk('dir')}</span><label><input type="radio" name="mkDir" value="g" checked> ${mk('good')}</label><label><input type="radio" name="mkDir" value="b"> ${mk('bad')}</label></div>
+   <div id="mkPrev"></div>`;
+  const drawEnts=()=>{const c=$('mkCol')?$('mkCol').value:col,E=Object.keys(P.byCol[c]);
+    $('mkEnts').innerHTML=E.slice(0,300).map((e,i)=>`<label class="mkchip"><input type="checkbox" value="${esc(e)}" ${i===0||/world/i.test(e)&&i<5?'checked':''}> ${esc(e)}</label>`).join('');
+    const boxes=[...$('mkEnts').querySelectorAll('input')];let chk=boxes.filter(b=>b.checked);if(chk.length>2)chk.slice(2).forEach(b=>b.checked=false);
+    boxes.forEach(b=>b.addEventListener('change',()=>{const on=boxes.filter(x=>x.checked);if(on.length>2)b.checked=false;prev();}));prev();};
+  const prev=()=>{const s=curSeries();$('mkS2').hidden=!s.length;if(!s.length){$('mkPrev').innerHTML='';return;}
+    const tmp={c:'#1F2A44',ttl:'',series:s.map((x,i)=>({k:'__p'+i})),shared:s.length>1?1:0};s.forEach((x,i)=>D['__p'+i]={hi:LANG==='en'?'More':'多い',lo:LANG==='en'?'Less':'少ない',name:x.name,u:'',what:'',src:'',h:x.h});
+    $('mkPrev').innerHTML=dataSVG(tmp).svg;};
+  if($('mkCol'))$('mkCol').addEventListener('change',drawEnts);
+  drawEnts();
+}
+function curSeries(){const P=MKS.parsed,$=id=>document.getElementById(id);if(!P)return [];const c=$('mkCol')?$('mkCol').value:P.cols[0];
+  return [...$('mkEnts').querySelectorAll('input:checked')].map(b=>({name:b.value,h:(P.byCol[c][b.value]||[]).slice().sort((a,b)=>a[0]-b[0])})).filter(s=>s.h.length>=4);}
+function meta(){const $=id=>document.getElementById(id);const s=curSeries();
+  return {vname:$('mkV').value.trim()||(s[0]&&s[0].name)||'X',unit:$('mkU').value.trim(),src:$('mkSrc').value.trim(),srcU:$('mkSrcU').value.trim(),betterLow:document.querySelector('input[name=mkDir]:checked').value==='b',series:s};}
+async function makeCands(useAI){
+  const $=id=>document.getElementById(id),m=meta();if(!m.series.length)return;
+  $('mkMsg2').textContent=useAI?mk('aiWait'):'';$('mkAi').disabled=true;
+  let c=useAI?await aiCandidates(m.series,m):null;
+  if(!c){if(useAI)$('mkMsg2').textContent=mk('aiNg');else $('mkMsg2').textContent='';
+    const Y=m.series[1]?m.series[1].name:'B';c=shapeCandidates(m.series,m.betterLow).map(id=>genericCand(id,m.vname,Y));}
+  else $('mkMsg2').textContent='';
+  $('mkAi').disabled=false;
+  MKS.cands=c;$('mkS3').hidden=false;
+  if(!$('mkTtl').value)$('mkTtl').value=m.vname+(LANG==='en'?': which pattern?':'：どの型？');
+  $('mkCands').innerHTML=c.map((x,i)=>{const T=TYPES.find(t=>t.id===x.type);return `<div class="mkcand" style="--c:${T.c}" data-i="${i}">
+    <label class="mkhd"><input type="checkbox" class="mkSel" ${i===0?'checked':''}> <b>${esc(T[LANG][0])}</b><span>${mk('sel')}</span></label>
+    <div class="mkwhy"><b>${mk('why')}</b>${esc(x.why)}</div>
+    <div class="mkprev">${typSVG(x.type,T.c,m.betterLow)}<div class="mkcld"></div></div>
+    <label class="mkl">${mk('probL')}<input class="mkProb" value="${esc(x.prob)}"></label>
+    <fieldset class="mkvars"><legend>${mk('vars')}</legend>${Object.keys(ARCH[x.type].roles).map(k=>`<label class="mkl sm">${esc(/\{X\}|\{Y\}/.test(GEN[LANG][x.type][k])?mk('plotted'):GEN[LANG][x.type][k].replace(/\n/g,''))}<input data-k="${k}" value="${esc(x.names[k]).replace(/\n/g,'\\n')}"></label>`).join('')}</fieldset>
+    <label class="mkl">${mk('story')}<textarea class="mkStory" rows="4">${esc(x.story.join('\n'))}</textarea></label>
+    <fieldset class="mkvars"><legend>${mk('lev')}</legend>${[['t',u('levT')[0]],['b',u('levB')[0]],['a',u('levA')[0]]].map(([k,nm])=>`<label class="mkl sm">${nm}<input data-l="${k}" value="${esc(x.lev[k])}"></label>`).join('')}</fieldset>
+  </div>`;}).join('');
+  const redraw=box=>{const i=+box.dataset.i,x=readCand(box,i);box.querySelector('.mkcld').innerHTML=cldSVG({id:x.type,nm:'',names:x.names,pr:[DR[x.type]],data:[DR[x.type]]});};
+  document.querySelectorAll('.mkcand').forEach(b=>{redraw(b);b.querySelectorAll('.mkvars input[data-k]').forEach(inp=>inp.addEventListener('input',()=>redraw(b)));});
+}
+function readCand(box,i){const x=MKS.cands[i];const names={};box.querySelectorAll('input[data-k]').forEach(inp=>names[inp.dataset.k]=inp.value.replace(/\\n/g,'\n').trim()||x.names[inp.dataset.k]);
+  const lev={};box.querySelectorAll('input[data-l]').forEach(inp=>lev[inp.dataset.l]=inp.value.trim());
+  return {type:x.type,why:x.why,prob:box.querySelector('.mkProb').value.trim()||x.prob,names,story:box.querySelector('.mkStory').value.split('\n').map(s=>s.trim()).filter(Boolean).slice(0,5),lev};}
+function makeCard(){
+  const $=id=>document.getElementById(id),m=meta();
+  const sel=[...document.querySelectorAll('.mkcand')].filter(b=>b.querySelector('.mkSel').checked).map(b=>readCand(b,+b.dataset.i));
+  if(!sel.length){$('mkMsg3').textContent=mk('need');return;}
+  const rec={ed:EDITION==='urban'?'urban':'food',uid:Date.now().toString(36)+Math.random().toString(36).slice(2,6),ttl:$('mkTtl').value.trim()||m.vname,vname:m.vname,unit:m.unit,src:m.src,srcU:m.srcU,betterLow:m.betterLow,
+    series:m.series.map(s=>({name:s.name,h:s.h})),cands:sel};
+  USER.push(rec);saveUser(USER);
+  const ix=registerUser(rec);ORDER.push(ix);ORIG_ORDER.push(ix);
+  render();renderTypes();applyFilter();document.getElementById('mkdlg').close();
+  const el=document.querySelector(`#grid .card[data-ix="${ix}"]`);if(el)el.scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+// ===== 作ったカードごと、HTMLファイルに保存する =====
+let DL=null;(async()=>{try{if(window.claude&&window.claude.use)DL=await window.claude.use('downloads');}catch(e){DL=null;}})();
+async function exportHTML(){
+  const root=document.documentElement.cloneNode(true);
+  root.querySelectorAll('script').forEach(sc=>{if(sc.id!=='app')sc.remove();});
+  const app=root.querySelector('script#app');
+  app.textContent=app.textContent.replace(/const SEED=[\s\S]*?\/\*SEED\*\//,'const SEED='+JSON.stringify(USER).replace(/</g,'\\u003c')+'/*SEED*/');
+  ['grid','tgrid','mkc','dlgc'].forEach(id=>{const e=root.querySelector('#'+id);if(e)e.innerHTML='';});
+  root.querySelectorAll('dialog').forEach(d=>d.removeAttribute('open'));
+  const dr=root.querySelector('#drawer');if(dr)dr.setAttribute('hidden','');const hp=root.querySelector('#helpPop');if(hp)hp.setAttribute('hidden','');
+  root.querySelector('body').removeAttribute('class');root.querySelectorAll('[aria-pressed="true"]').forEach(b=>b.setAttribute('aria-pressed','false'));
+  root.setAttribute('lang','ja');
+  ['mkBtn','saveBtn'].forEach(id=>{const b=root.querySelector('#'+id);if(b)b.setAttribute('hidden','');});
+  const html='<!DOCTYPE html>\n'+root.outerHTML;
+  const d=new Date(),fn=`system_behavior_cards_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}.html`;
+  if(DL){try{await DL.save({filename:fn,data:html});}catch(e){if(e&&e.code!=='declined')alert(mk('saveNg'));}return;}
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));a.download=fn;document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);
+}
+document.getElementById('saveBtn').addEventListener('click',exportHTML);
+document.getElementById('mkBtn').addEventListener('click',openMaker);
+document.getElementById('mkx').addEventListener('click',()=>document.getElementById('mkdlg').close());
+
+applyLang();
+document.getElementById('lang').addEventListener('click',()=>{LANG=LANG==='en'?'ja':'en';applyLang();});
+document.getElementById('dlgx').addEventListener('click',()=>document.getElementById('dlg').close());
+document.getElementById('dlg').addEventListener('click',e=>{if(e.target.id==='dlg')e.target.close();});
+document.getElementById('guess').addEventListener('click',e=>{const on=document.body.classList.toggle('guess');e.currentTarget.setAttribute('aria-pressed',on);renderTypes();applyFilter();});
+document.getElementById('reset').addEventListener('click',()=>{Object.keys(PICK).forEach(k=>delete PICK[k]);ORDER.splice(0,ORDER.length,...ORIG_ORDER);FILTER=null;render();renderTypes();applyFilter();});
+</script>
+</body>
+</html>
