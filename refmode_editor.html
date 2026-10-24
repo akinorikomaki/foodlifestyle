@@ -615,7 +615,8 @@ const fresh=()=>{const lanes={};VARS.forEach(v=>lanes[v.id]={points:{},notes:{}}
 const defaultCollapsed=()=>{ const c={}; const xs=VARS.filter(v=>v.role==='x'); xs.forEach((v,i)=>{ if(CONFIG.openX ? !CONFIG.openX.includes(v.id) : i>0) c[v.id]=true; }); return c; };
 const save=()=>{try{localStorage.setItem(STORE,JSON.stringify(S))}catch(e){}};
 const log=(type,d)=>{S.log.push({t:new Date().toISOString(),type,...(d||{})});save()};
-const hist=v=>(v.groups?v.groups[S.participant.group]:v.history).map(([year,value])=>({year,value}));
+// 区分が見つからないとき（以前の不具合で英語名が保存された場合など）は、最初の区分を使う
+const hist=v=>(v.groups?(v.groups[S.participant.group]||Object.values(v.groups)[0]):v.history).map(([year,value])=>({year,value}));
 const fYears=()=>{const a=[];for(let y=CONFIG.nowYear+1;y<=S.horizon;y+=S.interval)a.push(y);if(a.at(-1)!==S.horizon)a.push(S.horizon);return a};
 const nPts=id=>fYears().filter(y=>S.lanes[id].points[y]!=null).length;
 const hasFutureNote=id=>Object.keys(S.lanes[id].notes).some(y=>+y>CONFIG.nowYear&&S.lanes[id].notes[y].trim());
@@ -640,8 +641,8 @@ function header(){
   $('pid').value=S.participant.id; $('val').value=S.participant.value;
   posWidget();
   const g=VARS.find(v=>v.groups); $('grpWrap').style.display=g?'':'none';
-  if(g){$('grp').innerHTML=Object.keys(g.groups).map(k=>`<option ${k===S.participant.group?'selected':''}>${esc(k)}</option>`).join('')}
-  $('hz').innerHTML=CONFIG.horizons.map(h=>`<option ${h===S.horizon?'selected':''}>${h}</option>`).join('');
+  if(g){$('grp').innerHTML=Object.keys(g.groups).map(k=>`<option value="${esc(k)}" ${k===S.participant.group?'selected':''}>${esc(k)}</option>`).join('')}
+  $('hz').innerHTML=CONFIG.horizons.map(h=>`<option value="${h}" ${h===S.horizon?'selected':''}>${h}</option>`).join('');
   $('iv').value=String(S.interval);
   const d=VARS.filter(v=>done(v.id)).length, X=VARS.filter(v=>v.role==='x').length;
   const op=VARS.filter(v=>!isCol(v.id)), dO=op.filter(v=>done(v.id)).length;
@@ -1319,7 +1320,7 @@ function tplFields(){
   const dir0=tplDir||(tr0?tr0.dir:0)||1, mag=Math.max(tr0?Math.abs(tr0.end-L0):0, sp*.25), endS=Math.max(v.domain[0]+sp*.03,Math.min(v.domain[1]-sp*.03,L0+dir0*mag));
   const def={end:tr0&&!pv&&tr0.shape===tplShape?tr0.end:+(tplDir&&pv?L0+(tplShape==='PEAK'?-1:1)*sp*.03:endS).toFixed(1), mid:FY[Math.floor(FY.length/2)], ext:+(L0+(tplShape==='VALLEY'?-1:1)*sp*.25).toFixed(1), extYear:FY[Math.floor(FY.length/2)], amp:+(sp*.08).toFixed(1), cycles:2};
   const val=k=>pr[k]??def[k], B=L.bounds||{};
-  const yopt=sel=>FY.map(y=>`<option ${+sel===y?'selected':''}>${y}</option>`).join('');
+  const yopt=sel=>FY.map(y=>`<option value="${y}" ${+sel===y?'selected':''}>${y}</option>`).join('');
   $('tplD').innerHTML = q ? `<b>${esc(q.nm)}</b>：${esc(q.d)}（いま ${L0}）`+(tr0&&tr0.shape===tplShape&&!(L.template&&L.template.shape===tplShape)?`<br><small style="color:var(--ink-3)">過去の傾き（${tr0.from}〜${tr0.to}年）から選んでいます</small>`:'') : '形を選ぶと、線が下書きされます。後から点をドラッグして直せます。';
   const f=[];
   if(q&&q.p.includes('end')) f.push(`<label>${S.horizon}年の値（到達値）<input data-p="end" type="number" step="any" value="${val('end')}"></label>`);
